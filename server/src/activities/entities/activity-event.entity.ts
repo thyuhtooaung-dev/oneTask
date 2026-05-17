@@ -15,6 +15,8 @@ export enum EventType {
   TASK_DELETED = 'task.deleted',
   COMMENT_CREATED = 'comment.created',
   MEMBER_JOINED = 'member.joined',
+  WORKSPACE_CREATED = 'workspace.created',
+  PROJECT_CREATED = 'project.created',
 }
 
 @Entity('activity_events')

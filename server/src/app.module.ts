@@ -11,8 +11,12 @@ import { Task } from './tasks/entities/task.entity';
 import { Comment } from './comments/entities/comment.entity';
 import { ActivityEvent } from './activities/entities/activity-event.entity';
 import { Notification } from './notifications/entities/notification.entity';
+import { APP_GUARD } from '@nestjs/core';
 import { ActivitiesModule } from './activities/activities.module';
 import { SeedModule } from './seed/seed.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { AuthGuard } from './auth/auth.guard';
 
 @Module({
   imports: [
@@ -47,6 +51,14 @@ import { SeedModule } from './seed/seed.module';
     }),
     ActivitiesModule,
     SeedModule,
+    UsersModule,
+    AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}

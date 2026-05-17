@@ -1,0 +1,132 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+# Automatically cancel a running pipeline if a new commit is pushed to the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================
+  # JOB 1: CONTINUOUS INTEGRATION (CI)
+  # ==========================================
+  ci-verification:
+    name: Lint, Test, and Build Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Set up PNPM package manager
+      - name: Install PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      # Set up Node.js with caching to make runs fast
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: |
+            client/pnpm-lock.yaml
+            server/pnpm-lock.yaml
+
+      # --- Verification for NestJS Server ---
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          pnpm install --frozen-lockfile
+
+      - name: Lint Server Code
+        run: |
+          cd server
+          pnpm run lint
+
+      - name: Run Server Unit Tests
+        run: |
+          cd server
+          pnpm run test
+
+      - name: Compile Server (Build Check)
+        run: |
+          cd server
+          pnpm run build
+
+      # --- Verification for Next.js Client ---
+      - name: Install Client Dependencies
+        run: |
+          cd client
+          pnpm install --frozen-lockfile
+
+      - name: Lint Client Code
+        run: |
+          cd client
+          pnpm run lint
+
+      - name: Compile Client (Build Check)
+        run: |
+          cd client
+          pnpm run build
+
+  # ==========================================
+  # JOB 2: CONTINUOUS DEPLOYMENT (CD) - BUILD & PUSH DOCKER IMAGES
+  # ==========================================
+  docker-delivery:
+    name: Build & Push Docker Images
+    needs: ci-verification # Runs only if all CI tests and builds succeed!
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Required to push to GitHub Container Registry (GHCR)
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Set up Docker Buildx for modern, fast docker builds
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login to GitHub Container Registry using the automatic GitHub Action secrets token
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and Push NestJS Server Image
+      - name: Build and Push Server Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          # Tags the image with both 'latest' and the specific commit hash for easy rollbacks
+          tags: |
+            ghcr.io/${{ github.repository }}/server:${{ github.ref_name == 'main' && 'latest' || 'development' }}
+            ghcr.io/${{ github.repository }}/server:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Build and Push Next.js Client Image
+      - name: Build and Push Client Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/client:${{ github.ref_name == 'main' && 'latest' || 'development' }}
+            ghcr.io/${{ github.repository }}/client:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

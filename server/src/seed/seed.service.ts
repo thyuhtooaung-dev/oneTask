@@ -83,7 +83,7 @@ export class SeedService implements OnApplicationBootstrap {
       }),
     );
 
-    const task2 = await this.taskRepo.save(
+    await this.taskRepo.save(
       this.taskRepo.create({
         title: 'Build UI Components',
         workspaceId: workspace.id,

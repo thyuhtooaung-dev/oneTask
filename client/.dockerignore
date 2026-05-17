@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+.git
+.gitignore
+.dockerignore
+README.md
+LICENSE
+.env*.local
+.npm
+.pnpm-debug.log

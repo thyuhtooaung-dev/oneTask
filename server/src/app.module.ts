@@ -38,12 +38,11 @@ import { SeedModule } from './seed/seed.module';
           Notification,
         ],
         synchronize: true, // Use only for MVP/dev. Use migrations for production!
-        ssl: true,
-        extra: {
-          ssl: {
-            rejectUnauthorized: false,
-          },
-        },
+        ssl:
+          configService.get<string>('DATABASE_URL')?.includes('sslmode=') ||
+          configService.get<string>('DATABASE_URL')?.includes('neon.tech')
+            ? { rejectUnauthorized: false }
+            : false,
       }),
     }),
     ActivitiesModule,

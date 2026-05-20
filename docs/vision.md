@@ -83,16 +83,46 @@ shared/
 
 ---
 
-## 📈 Recommended MVP Implementation Order
+## 📈 MVP Feature Tracker & Current Project Status
 
-We bypass complex Kanban layouts early to build solid database mutations and realtime websocket synchronization first:
+Here is the current implementation status of the 9-step MVP roadmap:
 
-1. **App Shell & Auth Hydration**: Route guards checking token presence and loading active user profile context.
-2. **Workspace Sidebar**: Dynamic selector fetching user workspaces and active project lists.
-3. **Task List View**: Chronological task tables/lists within the active workspace/project scope.
-4. **Task CRUD Flow**: Forms and modals to create, edit, or delete tasks.
-5. **Task Detail Drawer**: Collapsible sliding pane showing selected task properties.
-6. **Comments System**: Live comments thread attached to individual tasks.
-7. **Activity Feed**: Unified workspace-wide event log proving our event logging habit.
-8. **Realtime WebSockets**: broad notifications and cache invalidations upon incoming backend socket events.
-9. **Kanban Board**: Drag-and-drop board styling layered over established sync routines.
+| Step | Feature | Backend Status | Frontend Status | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | **App Shell & Auth Hydration** | JWT sign-in / registration routes, custom global `AuthGuard`. | `AuthContext` provider, `AuthGuard` route protector, custom glassmorphism login & register views. | **Complete** |
+| **2** | **Workspace Sidebar** | Workspace & project controllers + repositories. | Sidebar with interactive Workspace/Project creators, select controls, and Zustand state synchronization. | **Complete** |
+| **3** | **Task List View** | Retrieval endpoint (`GET workspaces/:id/tasks`) fully implemented. | Modern list grid fetching tasks via TanStack Query. | **Complete** |
+| **4** | **Task CRUD Flow** | Task creation, PATCH (update title/description/status/assignee), and DELETE endpoints. | Dynamic forms inside task dialog. | **Complete** |
+| **5** | **Task Detail Drawer** | Detail retrieval endpoint (`GET /tasks/:taskId`). | Compact modal for creating, expanding to split-panel detail view on edit. | **Complete** |
+| **6** | **Comments System** | Comment creation and query endpoints (`POST` & `GET`). | Live scrollable comment thread + author avatars in Task Edit Modal. | **Complete** |
+| **7** | **Activity Feed** | Database logging logic and query endpoint (`GET workspaces/:workspaceId/activities`). | Chronological timeline feed showing member joins, task mutations, and comments with custom icons. | **Complete** |
+| **8** | **Realtime WebSockets** | WebSocket Gateway utilizing Socket.io with workspace room subscription and JWT authentication checks. | `SocketProvider` wrapping the dashboard to join workspace channels and trigger TanStack Query cache invalidations. | **Complete** |
+| **9** | **Kanban Board** | Not implemented. | Not implemented. | **Pending** |
+
+---
+
+## 🔮 What's Next (Immediate Action Items)
+
+The immediate next priority is completing **Step 9: Kanban Board**:
+*   **Grid Layout**: Build a column-based UI structure for the 4 status lanes (Todo, In Progress, Done, Canceled).
+*   **View Toggle**: Add a List vs. Board toggle button in the active project view header.
+*   **Drag-and-Drop Handling**: Implement card dragging between status lanes, triggering backend PATCH updates.
+
+---
+
+## 🚀 Future Feature Extensions (Beyond MVP)
+
+Once the Kanban Board is complete, here are the recommended next steps to elevate **oneTask** into a production-ready SaaS platform:
+
+### 1. Project Management & CRUD Dashboard
+*   **Backend**: Add endpoints to update project details, archive/delete projects, and assign project statuses or categories.
+*   **Frontend**: Add a Project details dashboard with metadata editing and progress tracking metrics.
+
+### 2. Workspace Invites & Member Management
+*   **Backend**: Add workspace invite endpoints generating single-use invite tokens. Add a member list retrieval with role updating (Owner, Admin, Member).
+*   **Frontend**: Add a Settings page for workspaces allowing names/descriptions to be updated and sending email invite tokens.
+
+### 3. Analytics & Event Metrics (Fulfilling Database Schemas)
+*   **Backend**: Add an analytics processor collecting metrics based on logged events, and expose an `/analytics` query endpoint.
+*   **Frontend**: Build a premium glassmorphic dashboard showcasing daily activity rates, member event frequencies, and task completion metrics.
+

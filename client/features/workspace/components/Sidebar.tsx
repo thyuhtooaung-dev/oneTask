@@ -89,7 +89,7 @@ export const Sidebar: React.FC = () => {
 	};
 
 	return (
-		<aside className="w-72 min-h-screen backdrop-blur-xl bg-zinc-950/80 border-r border-zinc-900/50 flex flex-col justify-between text-zinc-300 relative select-none">
+		<aside className="w-102 min-h-screen backdrop-blur-xl bg-zinc-950/80 border-r border-zinc-900/50 flex flex-col justify-between text-zinc-300 relative select-none">
 			<div className="flex flex-col flex-1 overflow-y-auto">
 				{/* Logo Section */}
 				<div className="p-6 flex items-center gap-3 border-b border-zinc-900/40">

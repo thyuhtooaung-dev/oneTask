@@ -11,6 +11,24 @@ export interface Workspace {
 	createdAt: string;
 }
 
+export interface WorkspaceUser {
+	id: string;
+	email: string;
+	name?: string;
+}
+
+export interface WorkspaceMember {
+	id: string;
+	workspaceId: string;
+	userId: string;
+	role: string;
+	user: WorkspaceUser;
+}
+
+export interface WorkspaceDetail extends Workspace {
+	members: WorkspaceMember[];
+}
+
 export interface Project {
 	id: string;
 	name: string;
@@ -22,6 +40,7 @@ export interface Project {
 // Key factory for React Query caching
 export const workspaceKeys = {
 	all: ["workspaces"] as const,
+	detail: (workspaceId: string) => ["workspaces", workspaceId] as const,
 	projects: (workspaceId: string) =>
 		["workspaces", workspaceId, "projects"] as const,
 };
@@ -36,6 +55,20 @@ export function useWorkspaces() {
 			const response = await axiosClient.get<Workspace[]>("/workspaces");
 			return response.data;
 		},
+	});
+}
+
+export function useWorkspaceDetail(workspaceId: string | null) {
+	return useQuery<WorkspaceDetail | null>({
+		queryKey: workspaceKeys.detail(workspaceId || ""),
+		queryFn: async () => {
+			if (!workspaceId) return null;
+			const response = await axiosClient.get<WorkspaceDetail>(
+				`/workspaces/${workspaceId}`,
+			);
+			return response.data;
+		},
+		enabled: !!workspaceId,
 	});
 }
 

@@ -81,4 +81,85 @@ export class TasksService {
 
     return task;
   }
+
+  async update(
+    id: string,
+    actorId: string,
+    body: {
+      title?: string;
+      description?: string | null;
+      status?: TaskStatus;
+      assigneeId?: string | null;
+    },
+  ): Promise<Task> {
+    const task = await this.findOne(id);
+    const changes: Record<string, { from: unknown; to: unknown }> = {};
+
+    if (body.title !== undefined && body.title !== task.title) {
+      changes.title = { from: task.title, to: body.title };
+      task.title = body.title;
+    }
+
+    if (
+      body.description !== undefined &&
+      (body.description || null) !== (task.description || null)
+    ) {
+      changes.description = {
+        from: task.description || null,
+        to: body.description || null,
+      };
+      task.description = body.description || null;
+    }
+
+    if (body.status !== undefined && body.status !== task.status) {
+      changes.status = { from: task.status, to: body.status };
+      task.status = body.status;
+    }
+
+    if (
+      body.assigneeId !== undefined &&
+      (body.assigneeId || null) !== (task.assigneeId || null)
+    ) {
+      changes.assigneeId = {
+        from: task.assigneeId || null,
+        to: body.assigneeId || null,
+      };
+      task.assigneeId = body.assigneeId || null;
+    }
+
+    const savedTask = await this.taskRepository.save(task);
+
+    if (Object.keys(changes).length > 0) {
+      await this.activitiesService.logEvent({
+        workspaceId: savedTask.workspaceId,
+        actorId,
+        type: EventType.TASK_UPDATED,
+        entityType: 'task',
+        entityId: savedTask.id,
+        metadata: {
+          taskTitle: savedTask.title,
+          changes,
+        },
+      });
+    }
+
+    return this.findOne(savedTask.id);
+  }
+
+  async delete(id: string, actorId: string): Promise<{ deleted: true }> {
+    const task = await this.findOne(id);
+
+    await this.taskRepository.remove(task);
+
+    await this.activitiesService.logEvent({
+      workspaceId: task.workspaceId,
+      actorId,
+      type: EventType.TASK_DELETED,
+      entityType: 'task',
+      entityId: id,
+      metadata: { taskTitle: task.title },
+    });
+
+    return { deleted: true };
+  }
 }

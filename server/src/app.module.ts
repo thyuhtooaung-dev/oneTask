@@ -21,6 +21,9 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
 import { CommentsModule } from './comments/comments.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { RealtimeModule } from './realtime/realtime.module';
 
 @Module({
   imports: [
@@ -61,8 +64,11 @@ import { CommentsModule } from './comments/comments.module';
     ProjectsModule,
     TasksModule,
     CommentsModule,
+    RealtimeModule,
   ],
+  controllers: [AppController],
   providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

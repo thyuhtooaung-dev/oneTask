@@ -43,7 +43,7 @@ export class Task {
   title: string;
 
   @Column({ nullable: true, type: 'text' })
-  description?: string;
+  description?: string | null;
 
   @Column({
     type: 'enum',
@@ -53,21 +53,21 @@ export class Task {
   status: TaskStatus;
 
   @Column({ nullable: true })
-  assigneeId?: string;
+  assigneeId?: string | null;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'assigneeId' })
   assignee?: User;
 
   @Column({ nullable: true })
-  reporterId?: string;
+  reporterId?: string | null;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'reporterId' })
   reporter: User;
 
   @Column({ nullable: true, type: 'timestamptz' })
-  dueDate?: Date;
+  dueDate?: Date | null;
 
   @OneToMany(() => Comment, (comment: Comment) => comment.task)
   comments: Comment[];

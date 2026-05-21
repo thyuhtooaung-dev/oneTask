@@ -3,6 +3,7 @@
 import { AuthGuard } from "@/features/auth/components/AuthGuard";
 import { ActivityTimeline } from "@/features/workspace/components/ActivityTimeline";
 import { DashboardLayout } from "@/features/workspace/components/DashboardLayout";
+import { KanbanBoard } from "@/features/workspace/components/KanbanBoard";
 import { TaskModal } from "@/features/workspace/components/TaskModal";
 import {
 	type Task,
@@ -19,6 +20,8 @@ import {
 	CheckCircle2,
 	Circle,
 	Clock3,
+	Kanban,
+	List,
 	Loader2,
 	Plus,
 	Sparkles,
@@ -66,10 +69,12 @@ export default function Home() {
 		selectedTaskId,
 		isTaskModalOpen,
 		isCreateTaskModalOpen,
+		viewMode,
 		openTaskModal,
 		closeTaskModal,
 		openCreateTaskModal,
 		closeCreateTaskModal,
+		setViewMode,
 	} = useUIStore();
 	const { data: workspaces = [] } = useWorkspaces();
 	const { data: projects = [] } = useProjects(activeWorkspaceId);
@@ -138,14 +143,48 @@ export default function Home() {
 									{projectTasks.length} tasks grouped by current status.
 								</p>
 							</div>
-							<button
-								type="button"
-								onClick={openCreateTaskModal}
-								className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-500/10 transition-colors hover:bg-indigo-400"
-							>
-								<Plus className="h-4 w-4" />
-								<span>New Task</span>
-							</button>
+
+							<div className="flex items-center gap-3">
+								{/* Glassmorphic View Toggle */}
+								<div className="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-950/65 border border-zinc-900/50 backdrop-blur-md">
+									<button
+										type="button"
+										onClick={() => setViewMode("list")}
+										className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+											viewMode === "list"
+												? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+												: "text-zinc-500 border border-transparent hover:text-zinc-300"
+										}`}
+										title="Switch to List View"
+									>
+										<List className="h-3.5 w-3.5" />
+										<span>List</span>
+									</button>
+									<button
+										type="button"
+										onClick={() => setViewMode("board")}
+										className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+											viewMode === "board"
+												? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+												: "text-zinc-500 border border-transparent hover:text-zinc-300"
+										}`}
+										title="Switch to Kanban Board"
+									>
+										<Kanban className="h-3.5 w-3.5" />
+										<span>Board</span>
+									</button>
+								</div>
+
+								{/* New Task Button */}
+								<button
+									type="button"
+									onClick={openCreateTaskModal}
+									className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-500/10 transition-colors hover:bg-indigo-400 cursor-pointer"
+								>
+									<Plus className="h-4 w-4" />
+									<span>New Task</span>
+								</button>
+							</div>
 						</div>
 
 						{isLoadingTasks ? (
@@ -162,12 +201,19 @@ export default function Home() {
 								<button
 									type="button"
 									onClick={openCreateTaskModal}
-									className="mt-4 inline-flex items-center gap-2 rounded-xl border border-zinc-800 px-3 py-2 text-xs font-bold text-zinc-300 transition-colors hover:bg-zinc-900"
+									className="mt-4 inline-flex items-center gap-2 rounded-xl border border-zinc-800 px-3 py-2 text-xs font-bold text-zinc-300 transition-colors hover:bg-zinc-900 cursor-pointer"
 								>
 									<Plus className="h-4 w-4" />
 									<span>Create first task</span>
 								</button>
 							</div>
+						) : viewMode === "board" ? (
+							<KanbanBoard
+								tasks={projectTasks}
+								onTaskClick={openTaskModal}
+								onStatusChange={handleStatusChange}
+								onCreateTaskClick={openCreateTaskModal}
+							/>
 						) : (
 							<div className="space-y-5">
 								{STATUS_COLUMNS.map((column) => {
@@ -185,7 +231,7 @@ export default function Home() {
 												<h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
 													{column.label}
 												</h3>
-												<span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[10px] font-bold text-zinc-500">
+												<span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[10px] font-bold text-zinc-500 border border-zinc-800/40">
 													{columnTasks.length}
 												</span>
 											</div>
@@ -204,10 +250,10 @@ export default function Home() {
 															<button
 																type="button"
 																onClick={() => openTaskModal(task.id)}
-																className="grid min-w-0 grid-cols-1 gap-3 text-left lg:col-span-2 lg:grid-cols-[minmax(0,1fr)_180px]"
+																className="grid min-w-0 grid-cols-1 gap-3 text-left lg:col-span-2 lg:grid-cols-[minmax(0,1fr)_180px] cursor-pointer"
 															>
 																<div className="min-w-0">
-																	<p className="truncate text-sm font-semibold text-white">
+																	<p className="truncate text-sm font-semibold text-white group-hover:text-indigo-400 transition-colors">
 																		{task.title}
 																	</p>
 																	<p className="mt-1 line-clamp-1 text-xs font-medium text-zinc-500">
@@ -241,7 +287,7 @@ export default function Home() {
 																					statusOption.value,
 																				)
 																			}
-																			className={`inline-flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-[10px] font-bold transition-colors ${
+																			className={`inline-flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-[10px] font-bold transition-colors cursor-pointer ${
 																				task.status === statusOption.value
 																					? statusOption.tone
 																					: "border-zinc-800 bg-zinc-950/40 text-zinc-600 hover:text-zinc-300"

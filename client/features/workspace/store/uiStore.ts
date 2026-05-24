@@ -6,12 +6,14 @@ interface UIState {
 	selectedTaskId: string | null;
 	isTaskModalOpen: boolean;
 	isCreateTaskModalOpen: boolean;
+	viewMode: "list" | "board";
 	setActiveWorkspaceId: (id: string | null) => void;
 	setActiveProjectId: (id: string | null) => void;
 	openTaskModal: (taskId: string) => void;
 	closeTaskModal: () => void;
 	openCreateTaskModal: () => void;
 	closeCreateTaskModal: () => void;
+	setViewMode: (mode: "list" | "board") => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -20,6 +22,7 @@ export const useUIStore = create<UIState>((set) => ({
 	selectedTaskId: null,
 	isTaskModalOpen: false,
 	isCreateTaskModalOpen: false,
+	viewMode: "list",
 	setActiveWorkspaceId: (id) =>
 		set({
 			activeWorkspaceId: id,
@@ -43,4 +46,5 @@ export const useUIStore = create<UIState>((set) => ({
 			isCreateTaskModalOpen: true,
 		}),
 	closeCreateTaskModal: () => set({ isCreateTaskModalOpen: false }),
+	setViewMode: (mode) => set({ viewMode: mode }),
 }));

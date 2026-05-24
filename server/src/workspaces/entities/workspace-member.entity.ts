@@ -8,10 +8,11 @@ import {
   Unique,
 } from 'typeorm';
 import { Workspace } from './workspace.entity';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 export enum WorkspaceRole {
   OWNER = 'owner',
+  ADMIN = 'admin',
   MEMBER = 'member',
 }
 

@@ -1,0 +1,56 @@
+services:
+  # ==========================================
+  # 1. LOCAL DATABASE SERVICE (PostgreSQL)
+  # ==========================================
+  db:
+    image: postgres:16-alpine
+    container_name: onetask_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: local_secure_password
+      POSTGRES_DB: onetask
+    ports:
+      - "5433:5432" # Maps port 5433 on your host to port 5432 inside the container (avoids port 5432 conflict!)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persists database data across restarts
+
+  # ==========================================
+  # 2. NESTJS BACKEND SERVER SERVICE
+  # ==========================================
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: onetask_server
+    restart: always
+    ports:
+      - "5000:3000" # Exposes NestJS on http://localhost:5000
+    depends_on:
+      - db
+    environment:
+      PORT: 3000
+      # OPTION A: Connecting to the local PostgreSQL container (db) defined above
+      DATABASE_URL: postgresql://postgres:local_secure_password@db:5432/onetask
+      
+      # OPTION B: Connecting to Neon Cloud DB (Uncomment the line below & comment Option A out if you want)
+      # DATABASE_URL: postgresql://neondb_owner:npg_i0Ox6ScbzrTV@ep-icy-sunset-aoofanfh-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+
+  # ==========================================
+  # 3. NEXT.JS FRONTEND CLIENT SERVICE
+  # ==========================================
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: onetask_client
+    restart: always
+    ports:
+      - "3000:3000" # Exposes Next.js on http://localhost:3000
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:5000 # Tells frontend where your server is
+
+# Persistent volume so your local PostgreSQL database doesn't lose its data when you stop docker compose
+volumes:
+  postgres_data:

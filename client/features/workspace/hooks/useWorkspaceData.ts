@@ -37,12 +37,27 @@ export interface Project {
 	createdAt: string;
 }
 
+export interface WorkspaceInvite {
+	id: string;
+	workspaceId: string;
+	email: string;
+	token: string;
+	role: string;
+	expiresAt: string;
+}
+
 // Key factory for React Query caching
 export const workspaceKeys = {
 	all: ["workspaces"] as const,
 	detail: (workspaceId: string) => ["workspaces", workspaceId] as const,
 	projects: (workspaceId: string) =>
 		["workspaces", workspaceId, "projects"] as const,
+	invites: (workspaceId: string) =>
+		["workspaces", workspaceId, "invites"] as const,
+};
+
+export const inviteKeys = {
+	metadata: (token: string) => ["invites", token] as const,
 };
 
 /**
@@ -130,6 +145,128 @@ export function useCreateProject(workspaceId: string | null) {
 					queryKey: workspaceKeys.projects(workspaceId),
 				});
 			}
+		},
+	});
+}
+
+export function useWorkspaceInvites(workspaceId: string | null) {
+	return useQuery<WorkspaceInvite[]>({
+		queryKey: workspaceKeys.invites(workspaceId || ""),
+		queryFn: async () => {
+			if (!workspaceId) return [];
+			const response = await axiosClient.get<WorkspaceInvite[]>(
+				`/workspaces/${workspaceId}/invites`,
+			);
+			return response.data;
+		},
+		enabled: !!workspaceId,
+	});
+}
+
+export function useCreateInvite(workspaceId: string | null) {
+	const queryClient = useQueryClient();
+	return useMutation<WorkspaceInvite, Error, { email: string; role: string }>({
+		mutationFn: async (body) => {
+			if (!workspaceId) throw new Error("Workspace ID required");
+			const response = await axiosClient.post<WorkspaceInvite>(
+				`/workspaces/${workspaceId}/invites`,
+				body,
+			);
+			return response.data;
+		},
+		onSuccess: () => {
+			if (workspaceId) {
+				queryClient.invalidateQueries({
+					queryKey: workspaceKeys.invites(workspaceId),
+				});
+			}
+		},
+	});
+}
+
+export function useRevokeInvite(workspaceId: string | null) {
+	const queryClient = useQueryClient();
+	return useMutation<void, Error, string>({
+		mutationFn: async (inviteId) => {
+			if (!workspaceId) throw new Error("Workspace ID required");
+			await axiosClient.delete(
+				`/workspaces/${workspaceId}/invites/${inviteId}`,
+			);
+		},
+		onSuccess: () => {
+			if (workspaceId) {
+				queryClient.invalidateQueries({
+					queryKey: workspaceKeys.invites(workspaceId),
+				});
+			}
+		},
+	});
+}
+
+export function useUpdateMemberRole(workspaceId: string | null) {
+	const queryClient = useQueryClient();
+	return useMutation<void, Error, { memberId: string; role: string }>({
+		mutationFn: async ({ memberId, role }) => {
+			if (!workspaceId) throw new Error("Workspace ID required");
+			await axiosClient.patch(
+				`/workspaces/${workspaceId}/members/${memberId}`,
+				{ role },
+			);
+		},
+		onSuccess: () => {
+			if (workspaceId) {
+				queryClient.invalidateQueries({
+					queryKey: workspaceKeys.detail(workspaceId),
+				});
+			}
+		},
+	});
+}
+
+export function useRemoveMember(workspaceId: string | null) {
+	const queryClient = useQueryClient();
+	return useMutation<void, Error, string>({
+		mutationFn: async (memberId) => {
+			if (!workspaceId) throw new Error("Workspace ID required");
+			await axiosClient.delete(
+				`/workspaces/${workspaceId}/members/${memberId}`,
+			);
+		},
+		onSuccess: () => {
+			if (workspaceId) {
+				queryClient.invalidateQueries({
+					queryKey: workspaceKeys.detail(workspaceId),
+				});
+			}
+		},
+	});
+}
+
+export function useGetInviteMetadata(token: string | null) {
+	return useQuery<{
+		workspaceName: string;
+		role: string;
+		email: string;
+		creatorName?: string;
+	} | null>({
+		queryKey: inviteKeys.metadata(token || ""),
+		queryFn: async () => {
+			if (!token) return null;
+			const response = await axiosClient.get(`/workspaces/invites/${token}`);
+			return response.data;
+		},
+		enabled: !!token,
+		retry: false, // Don't retry if invite is invalid
+	});
+}
+
+export function useAcceptInvite() {
+	return useMutation<{ workspaceId: string }, Error, string>({
+		mutationFn: async (token) => {
+			const response = await axiosClient.post(
+				`/workspaces/invites/${token}/accept`,
+			);
+			return response.data;
 		},
 	});
 }

@@ -24,8 +24,15 @@ export default function RegisterPage() {
 		try {
 			await register({ name, email, password });
 
-			// Redirect to home dashboard
-			router.push("/");
+			// Check if there is a pending invite token
+			const inviteToken = localStorage.getItem("onetask_invite_token");
+			if (inviteToken) {
+				localStorage.removeItem("onetask_invite_token");
+				router.push(`/invite/${inviteToken}`);
+			} else {
+				// Redirect to home dashboard
+				router.push("/");
+			}
 		} catch (err) {
 			const message =
 				err instanceof Error

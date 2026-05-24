@@ -7,6 +7,7 @@ interface UIState {
 	isTaskModalOpen: boolean;
 	isCreateTaskModalOpen: boolean;
 	viewMode: "list" | "board";
+	showSettings: boolean;
 	setActiveWorkspaceId: (id: string | null) => void;
 	setActiveProjectId: (id: string | null) => void;
 	openTaskModal: (taskId: string) => void;
@@ -14,6 +15,7 @@ interface UIState {
 	openCreateTaskModal: () => void;
 	closeCreateTaskModal: () => void;
 	setViewMode: (mode: "list" | "board") => void;
+	setShowSettings: (show: boolean) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -23,6 +25,7 @@ export const useUIStore = create<UIState>((set) => ({
 	isTaskModalOpen: false,
 	isCreateTaskModalOpen: false,
 	viewMode: "list",
+	showSettings: false,
 	setActiveWorkspaceId: (id) =>
 		set({
 			activeWorkspaceId: id,
@@ -30,8 +33,9 @@ export const useUIStore = create<UIState>((set) => ({
 			selectedTaskId: null,
 			isTaskModalOpen: false,
 			isCreateTaskModalOpen: false,
+			showSettings: false,
 		}),
-	setActiveProjectId: (id) => set({ activeProjectId: id }),
+	setActiveProjectId: (id) => set({ activeProjectId: id, showSettings: false }),
 	openTaskModal: (taskId) =>
 		set({
 			selectedTaskId: taskId,
@@ -47,4 +51,5 @@ export const useUIStore = create<UIState>((set) => ({
 		}),
 	closeCreateTaskModal: () => set({ isCreateTaskModalOpen: false }),
 	setViewMode: (mode) => set({ viewMode: mode }),
+	setShowSettings: (show) => set({ showSettings: show, activeProjectId: null }),
 }));

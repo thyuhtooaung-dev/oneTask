@@ -15,6 +15,8 @@ export enum EventType {
   TASK_DELETED = 'task.deleted',
   COMMENT_CREATED = 'comment.created',
   MEMBER_JOINED = 'member.joined',
+  MEMBER_LEFT = 'member.left',
+  MEMBER_UPDATED = 'member.updated',
   WORKSPACE_CREATED = 'workspace.created',
   PROJECT_CREATED = 'project.created',
 }

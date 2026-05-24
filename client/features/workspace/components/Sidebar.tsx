@@ -9,6 +9,7 @@ import {
 	Loader2,
 	LogOut,
 	Plus,
+	Settings,
 	Sparkles,
 	X,
 } from "lucide-react";
@@ -27,8 +28,10 @@ export const Sidebar: React.FC = () => {
 	const {
 		activeWorkspaceId,
 		activeProjectId,
+		showSettings,
 		setActiveWorkspaceId,
 		setActiveProjectId,
+		setShowSettings,
 	} = useUIStore();
 
 	// TanStack Query Hooks
@@ -211,13 +214,27 @@ export const Sidebar: React.FC = () => {
 								type="button"
 								onClick={() => setActiveProjectId(null)}
 								className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-									activeProjectId === null
+									activeProjectId === null && !showSettings
 										? "bg-indigo-500/10 text-indigo-400 border-l-2 border-indigo-500"
 										: "hover:bg-zinc-900/30 text-zinc-400 hover:text-zinc-200"
 								}`}
 							>
 								<Layers className="h-4 w-4" />
 								<span>Workspace Feed</span>
+							</button>
+
+							{/* Members & Settings Selector */}
+							<button
+								type="button"
+								onClick={() => setShowSettings(true)}
+								className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+									showSettings
+										? "bg-indigo-500/10 text-indigo-400 border-l-2 border-indigo-500"
+										: "hover:bg-zinc-900/30 text-zinc-400 hover:text-zinc-200"
+								}`}
+							>
+								<Settings className="h-4 w-4" />
+								<span>Members & Settings</span>
 							</button>
 
 							{/* Projects List */}

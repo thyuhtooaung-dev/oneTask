@@ -5,6 +5,7 @@ import { ActivityTimeline } from "@/features/workspace/components/ActivityTimeli
 import { DashboardLayout } from "@/features/workspace/components/DashboardLayout";
 import { KanbanBoard } from "@/features/workspace/components/KanbanBoard";
 import { TaskModal } from "@/features/workspace/components/TaskModal";
+import { WorkspaceSettings } from "@/features/workspace/components/WorkspaceSettings";
 import {
 	type Task,
 	type TaskStatus,
@@ -70,6 +71,7 @@ export default function Home() {
 		isTaskModalOpen,
 		isCreateTaskModalOpen,
 		viewMode,
+		showSettings,
 		openTaskModal,
 		closeTaskModal,
 		openCreateTaskModal,
@@ -127,6 +129,8 @@ export default function Home() {
 							sidebar to begin collaborating in realtime.
 						</p>
 					</div>
+				) : showSettings && activeWorkspaceId ? (
+					<WorkspaceSettings workspaceId={activeWorkspaceId} />
 				) : !activeProjectId ? (
 					<ActivityTimeline
 						workspaceId={activeWorkspaceId}

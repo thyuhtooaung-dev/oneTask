@@ -6,12 +6,15 @@ import { DailyEventMetric } from './analytics/entities/daily-event-metric.entity
 import { User } from './users/entities/user.entity';
 import { Workspace } from './workspaces/entities/workspace.entity';
 import { WorkspaceMember } from './workspaces/entities/workspace-member.entity';
+import { WorkspaceInvite } from './workspaces/entities/workspace-invite.entity';
 import { Project } from './projects/entities/project.entity';
 import { Task } from './tasks/entities/task.entity';
 import { Comment } from './comments/entities/comment.entity';
 import { ActivityEvent } from './activities/entities/activity-event.entity';
 import { Notification } from './notifications/entities/notification.entity';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { ActivitiesModule } from './activities/activities.module';
 import { SeedModule } from './seed/seed.module';
 import { UsersModule } from './users/users.module';
@@ -27,6 +30,12 @@ import { RealtimeModule } from './realtime/realtime.module';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100, // 100 requests per minute
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -42,6 +51,7 @@ import { RealtimeModule } from './realtime/realtime.module';
           User,
           Workspace,
           WorkspaceMember,
+          WorkspaceInvite,
           Project,
           Task,
           Comment,
@@ -71,7 +81,15 @@ import { RealtimeModule } from './realtime/realtime.module';
     AppService,
     {
       provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
     },
   ],
 })

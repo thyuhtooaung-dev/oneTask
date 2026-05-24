@@ -97,32 +97,21 @@ Here is the current implementation status of the 9-step MVP roadmap:
 | **6** | **Comments System** | Comment creation and query endpoints (`POST` & `GET`). | Live scrollable comment thread + author avatars in Task Edit Modal. | **Complete** |
 | **7** | **Activity Feed** | Database logging logic and query endpoint (`GET workspaces/:workspaceId/activities`). | Chronological timeline feed showing member joins, task mutations, and comments with custom icons. | **Complete** |
 | **8** | **Realtime WebSockets** | WebSocket Gateway utilizing Socket.io with workspace room subscription and JWT authentication checks. | `SocketProvider` wrapping the dashboard to join workspace channels and trigger TanStack Query cache invalidations. | **Complete** |
-| **9** | **Kanban Board** | Not implemented. | Not implemented. | **Pending** |
+| **9** | **Kanban Board** | Reused existing task `PATCH` status updates. | Drag-and-drop board view with columns, drag state visuals, & List/Board view toggling. | **Complete** |
 
 ---
 
 ## 🔮 What's Next (Immediate Action Items)
 
-The immediate next priority is completing **Step 9: Kanban Board**:
-*   **Grid Layout**: Build a column-based UI structure for the 4 status lanes (Todo, In Progress, Done, Canceled).
-*   **View Toggle**: Add a List vs. Board toggle button in the active project view header.
-*   **Drag-and-Drop Handling**: Implement card dragging between status lanes, triggering backend PATCH updates.
+Now that the core 9-step MVP is fully complete, the immediate next priorities focus on transitioning **oneTask** into a production-ready team collaboration platform:
 
----
-
-## 🚀 Future Feature Extensions (Beyond MVP)
-
-Once the Kanban Board is complete, here are the recommended next steps to elevate **oneTask** into a production-ready SaaS platform:
-
-### 1. Project Management & CRUD Dashboard
-*   **Backend**: Add endpoints to update project details, archive/delete projects, and assign project statuses or categories.
-*   **Frontend**: Add a Project details dashboard with metadata editing and progress tracking metrics.
-
-### 2. Workspace Invites & Member Management
-*   **Backend**: Add workspace invite endpoints generating single-use invite tokens. Add a member list retrieval with role updating (Owner, Admin, Member).
-*   **Frontend**: Add a Settings page for workspaces allowing names/descriptions to be updated and sending email invite tokens.
-
-### 3. Analytics & Event Metrics (Fulfilling Database Schemas)
-*   **Backend**: Add an analytics processor collecting metrics based on logged events, and expose an `/analytics` query endpoint.
-*   **Frontend**: Build a premium glassmorphic dashboard showcasing daily activity rates, member event frequencies, and task completion metrics.
+*   **Project Management & CRUD Settings**:
+    *   **Backend**: Add endpoints to edit, archive, or delete projects and track statuses.
+    *   **Frontend**: Build a project-specific dashboard to edit metadata and view completion stats.
+*   **Workspace Invites & Member Management**:
+    *   **Backend**: Implement token-based single-use workspace invites and role-based access control (`Owner`, `Admin`, `Member`).
+    *   **Frontend**: Build a settings/members screen to manage team members, change roles, and copy/send workspace invites.
+*   **Analytics & Event Metrics**:
+    *   **Backend**: Query logged event history to generate aggregated activity rates.
+    *   **Frontend**: Create glassmorphic charts highlighting team productivity trends, event frequencies, and task completion cycles.
 

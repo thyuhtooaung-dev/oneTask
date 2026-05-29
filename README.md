@@ -1,10 +1,12 @@
-# oneTask
+# oneTask ˖˚˖°·.¸ ┊ ˖˚˖°·
 
 A collaborative task management application that helps teams organize, track, and collaborate on projects in real-time.
 
-₍^. .^₎⟆ **Live Demo**: [https://one-task-sand.vercel.app](https://one-task-sand.vercel.app)
+₍^. .^₎⟆ **Live Demo**: [https://one-task-sand.vercel.app](https://one-task-sand.vercel.app) ⟆₍^. .^₎
 
-## About
+---
+
+## About ˖˚˖°·.¸┊˖˚˖°·
 
 **oneTask** is a full-stack web application designed to streamline team collaboration and project management. It combines a modern, responsive frontend built with Next.js and a robust backend powered by NestJS to provide a seamless task management experience.
 
@@ -18,18 +20,22 @@ The project demonstrates best practices in modern full-stack development, includ
 - Security-first approach with JWT authentication and bcrypt password hashing
 - Containerized deployment with Docker
 
-## Features
+---
 
-- **Task Management** - Create, update, and manage tasks with ease
-- **Team Collaboration** - Work together with real-time updates using WebSockets
-- **User Authentication** - Secure login with JWT-based authentication
-- **Real-time Updates** - Instant synchronization across all team members
-- **Real-time Communication** - Live notifications and collaborative features
-- **Responsive Design** - Works seamlessly on desktop and mobile devices
-- **Modern Stack** - Built with cutting-edge technologies
-- **Docker Ready** - Easy deployment with containerization
+## Features ✧･ﾟ: *✧･ﾟ:*
 
-## Tech Stack
+- Task Management - Create, update, and manage tasks with ease
+- Team Collaboration - Work together with real-time updates using WebSockets
+- User Authentication - Secure login with JWT-based authentication
+- Real-time Updates - Instant synchronization across all team members
+- Real-time Communication - Live notifications and collaborative features
+- Responsive Design - Works seamlessly on desktop and mobile devices
+- Modern Stack - Built with cutting-edge technologies
+- Docker Ready - Easy deployment with containerization
+
+---
+
+## Tech Stack ┆┊°˖:✧˖°┆
 
 ### Frontend
 - **Framework**: [Next.js 16](https://nextjs.org/) - React meta-framework
@@ -53,7 +59,9 @@ The project demonstrates best practices in modern full-stack development, includ
 - **Containerization**: Docker
 - **Package Manager**: npm/pnpm
 
-## Project Structure
+---
+
+## Project Structure ⟆ ₍^. .^₎ ⟆
 
 ```
 oneTask/
@@ -69,7 +77,9 @@ oneTask/
 └── README.md             # This file
 ```
 
-## Contributing
+---
+
+## Contributing ˖˚˖°·.¸ ┊ ˖˚˖°·
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -79,14 +89,18 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## Code Quality
+---
+
+## Code Quality ✧・ﾟ: *✧・ﾟ:*
 
 This project uses:
 - **Linting**: ESLint and Biome for code quality
 - **Formatting**: Biome and Prettier for consistent code style
 - **Testing**: Jest for unit and integration tests
 
-## Topics & Tags
+---
+
+## Topics & Tags ┆┊°˖:✧˖°┆
 
 - `github-integration` - GitHub-integrated development workflow
 - `tasks-manager` - Task and project management
@@ -103,18 +117,22 @@ This project uses:
 - `docker` - Containerized deployment
 - `real-time-sync` - Real-time data synchronization
 
+---
+
 ## License
 
 This project is currently unlicensed. See the LICENSE file for details.
 
-## Author
+---
+
+## Author ⟆₍^. .^₎⟆
 
 Created by [thyuhtooaung-dev](https://github.com/thyuhtooaung-dev)
 
-## Support
+## Support ˖˚˖°·.¸ ┊ ˖˚˖°·
 
 For issues and questions, please use the [GitHub Issues](https://github.com/thyuhtooaung-dev/oneTask/issues) page.
 
 ---
 
-Built with ₍^. .^₎⟆ using modern web technologies
+Built with ₍^. .^₎⟆ using modern web technologies ✧・ﾟ: *✧・ﾟ:*

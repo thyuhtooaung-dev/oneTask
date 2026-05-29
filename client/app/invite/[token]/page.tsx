@@ -8,10 +8,14 @@ import {
 import { useUIStore } from "@/features/workspace/store/uiStore";
 import { Loader2, ShieldAlert, Sparkles, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { use } from "react";
 
-export default function InvitePage({ params }: { params: { token: string } }) {
-	const token = params.token;
+export default function InvitePage({
+	params,
+}: {
+	params: Promise<{ token: string }>;
+}) {
+	const { token } = use(params);
 	const router = useRouter();
 	const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
 	const { setActiveWorkspaceId } = useUIStore();

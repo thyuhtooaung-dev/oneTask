@@ -28,7 +28,7 @@ RUN npm i -g pnpm@11
 COPY package.json pnpm-lock.yaml* ./
 
 # Install only production dependencies
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # Stage 3: Production runner
 FROM base AS runner

@@ -5,7 +5,7 @@ FROM base AS builder
 WORKDIR /app
 
 # Install pnpm globally
-RUN npm i -g pnpm
+RUN npm i -g pnpm@11
 
 # Copy package configuration files
 COPY package.json pnpm-lock.yaml* ./
@@ -23,7 +23,7 @@ RUN pnpm run build
 FROM base AS deps
 WORKDIR /app
 
-RUN npm i -g pnpm
+RUN npm i -g pnpm@11
 
 COPY package.json pnpm-lock.yaml* ./
 

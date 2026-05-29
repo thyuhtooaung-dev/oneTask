@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install pnpm globally
-RUN npm i -g pnpm
+RUN npm i -g pnpm@11
 
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
@@ -22,7 +22,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Install pnpm globally again to run the build command
-RUN npm i -g pnpm
+RUN npm i -g pnpm@11
 
 # Disable telemetry during the build
 ENV NEXT_TELEMETRY_DISABLED=1

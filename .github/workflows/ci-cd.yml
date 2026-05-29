@@ -27,7 +27,7 @@ jobs:
       - name: Install PNPM
         uses: pnpm/action-setup@v4 # Downgraded from v6
         with:
-          version: 9 # Changed from 11 to current stable 9
+          version: 11
 
       # Set up Node.js with caching to make runs fast
       - name: Set up Node.js

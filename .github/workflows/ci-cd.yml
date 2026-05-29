@@ -92,6 +92,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # Downgraded from v6
 
+      # Docker image names must be lowercase; github.repository may contain uppercase letters
+      - name: Set lowercase repository name
+        id: meta
+        run: echo "repo=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       # Set up Docker Buildx for modern, fast docker builds
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3 # Downgraded from v4
@@ -113,8 +118,8 @@ jobs:
           push: true
           # Tags the image with both 'latest' and the specific commit hash for easy rollbacks
           tags: |
-            ghcr.io/${{ github.repository }}/server:${{ github.ref_name == 'main' && 'latest' || 'development' }}
-            ghcr.io/${{ github.repository }}/server:${{ github.sha }}
+            ghcr.io/${{ steps.meta.outputs.repo }}/server:${{ github.ref_name == 'main' && 'latest' || 'development' }}
+            ghcr.io/${{ steps.meta.outputs.repo }}/server:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -126,7 +131,7 @@ jobs:
           file: ./client/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/client:${{ github.ref_name == 'main' && 'latest' || 'development' }}
-            ghcr.io/${{ github.repository }}/client:${{ github.sha }}
+            ghcr.io/${{ steps.meta.outputs.repo }}/client:${{ github.ref_name == 'main' && 'latest' || 'development' }}
+            ghcr.io/${{ steps.meta.outputs.repo }}/client:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

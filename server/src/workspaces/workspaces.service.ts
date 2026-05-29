@@ -14,6 +14,9 @@ import {
 import { WorkspaceInvite } from './entities/workspace-invite.entity';
 import { ActivitiesService } from '../activities/activities.service';
 import { EventType } from '../activities/entities/activity-event.entity';
+import { WorkspacePolicyService } from './workspace-policy.service';
+import { WorkspaceAction } from './workspace-policy';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -26,6 +29,8 @@ export class WorkspacesService {
     @InjectRepository(WorkspaceInvite)
     private readonly workspaceInviteRepository: Repository<WorkspaceInvite>,
     private readonly activitiesService: ActivitiesService,
+    private readonly policyService: WorkspacePolicyService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   /**
@@ -99,6 +104,20 @@ export class WorkspacesService {
     role: WorkspaceRole,
     createdBy: string,
   ) {
+    await this.policyService.assertAction(
+      createdBy,
+      workspaceId,
+      WorkspaceAction.MANAGE_MEMBERS,
+    );
+
+    const creator = await this.policyService.assertUserIsWorkspaceMember(
+      createdBy,
+      workspaceId,
+    );
+    if (creator.role === WorkspaceRole.ADMIN && role === WorkspaceRole.OWNER) {
+      throw new ForbiddenException('Admins cannot invite owners');
+    }
+
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 2); // 2 days expiration
 
@@ -125,7 +144,12 @@ export class WorkspacesService {
     });
   }
 
-  async revokeInvite(workspaceId: string, inviteId: string) {
+  async revokeInvite(workspaceId: string, inviteId: string, actorId: string) {
+    await this.policyService.assertAction(
+      actorId,
+      workspaceId,
+      WorkspaceAction.MANAGE_MEMBERS,
+    );
     const invite = await this.workspaceInviteRepository.findOne({
       where: { id: inviteId, workspaceId },
     });
@@ -203,6 +227,23 @@ export class WorkspacesService {
     role: WorkspaceRole,
     currentUserId: string,
   ) {
+    await this.policyService.assertAction(
+      currentUserId,
+      workspaceId,
+      WorkspaceAction.MANAGE_MEMBERS,
+    );
+
+    const currentUser = await this.policyService.assertUserIsWorkspaceMember(
+      currentUserId,
+      workspaceId,
+    );
+    if (
+      currentUser.role === WorkspaceRole.ADMIN &&
+      role === WorkspaceRole.OWNER
+    ) {
+      throw new ForbiddenException('Admins cannot grant owner role');
+    }
+
     const member = await this.workspaceMemberRepository.findOne({
       where: { id: memberId, workspaceId },
       relations: ['user'],
@@ -248,12 +289,16 @@ export class WorkspacesService {
       throw new ForbiddenException('Cannot remove the workspace owner');
     }
 
-    const currentUserMembership = await this.workspaceMemberRepository.findOne({
-      where: { workspaceId, userId: currentUserId },
-    });
-
-    if (!currentUserMembership)
-      throw new ForbiddenException('You are not a member of this workspace');
+    const currentUserMembership =
+      await this.policyService.assertUserIsWorkspaceMember(
+        currentUserId,
+        workspaceId,
+      );
+    await this.policyService.assertAction(
+      currentUserId,
+      workspaceId,
+      WorkspaceAction.MANAGE_MEMBERS,
+    );
 
     if (
       currentUserMembership.role === WorkspaceRole.ADMIN &&
@@ -275,6 +320,12 @@ export class WorkspacesService {
         userId: memberToRemove.userId,
       },
     });
+
+    // Kick the removed user from the workspace socket room immediately
+    await this.realtimeGateway.removeUserFromWorkspace(
+      memberToRemove.userId,
+      workspaceId,
+    );
 
     return { ok: true };
   }

@@ -9,9 +9,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { TaskStatus } from './entities/task.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { WorkspaceMemberGuard } from '../workspaces/guards/workspace-member.guard';
+import { CreateTaskDto } from '../common/dto/create-task.dto';
+import { UpdateTaskDto } from '../common/dto/update-task.dto';
 
 @Controller()
 export class TasksController {
@@ -21,14 +22,7 @@ export class TasksController {
   @UseGuards(WorkspaceMemberGuard)
   async create(
     @Param('workspaceId') workspaceId: string,
-    @Body()
-    body: {
-      title: string;
-      description?: string;
-      status?: TaskStatus;
-      projectId: string;
-      assigneeId?: string;
-    },
+    @Body() body: CreateTaskDto,
     @CurrentUser() user: { id: string },
   ) {
     return this.tasksService.create(
@@ -58,13 +52,7 @@ export class TasksController {
   @UseGuards(WorkspaceMemberGuard)
   async update(
     @Param('taskId') taskId: string,
-    @Body()
-    body: {
-      title?: string;
-      description?: string | null;
-      status?: TaskStatus;
-      assigneeId?: string | null;
-    },
+    @Body() body: UpdateTaskDto,
     @CurrentUser() user: { id: string },
   ) {
     return this.tasksService.update(taskId, user.id, body);

@@ -1,6 +1,7 @@
 "use client";
 
 import { axiosClient } from "@/lib/api/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import { useQuery } from "@tanstack/react-query";
 import type { WorkspaceUser } from "./useWorkspaceData";
 
@@ -10,6 +11,8 @@ export type ActivityEventType =
 	| "task.deleted"
 	| "comment.created"
 	| "member.joined"
+	| "member.left"
+	| "member.updated"
 	| "workspace.created"
 	| "project.created";
 
@@ -25,14 +28,9 @@ export interface ActivityEvent {
 	actor?: WorkspaceUser;
 }
 
-export const activityKeys = {
-	all: (workspaceId: string) =>
-		["workspaces", workspaceId, "activities"] as const,
-};
-
 export function useActivities(workspaceId: string | null) {
 	return useQuery<ActivityEvent[]>({
-		queryKey: activityKeys.all(workspaceId || ""),
+		queryKey: queryKeys.workspaces.activities(workspaceId || ""),
 		queryFn: async () => {
 			if (!workspaceId) return [];
 			const response = await axiosClient.get<ActivityEvent[]>(

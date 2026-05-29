@@ -4,13 +4,19 @@ import { Repository } from 'typeorm';
 import { Task, TaskStatus } from './entities/task.entity';
 import { ActivitiesService } from '../activities/activities.service';
 import { EventType } from '../activities/entities/activity-event.entity';
+import { Project } from '../projects/entities/project.entity';
+import { WorkspacePolicyService } from '../workspaces/workspace-policy.service';
+import { WorkspaceAction } from '../workspaces/workspace-policy';
 
 @Injectable()
 export class TasksService {
   constructor(
     @InjectRepository(Task)
     private readonly taskRepository: Repository<Task>,
+    @InjectRepository(Project)
+    private readonly projectRepository: Repository<Project>,
     private readonly activitiesService: ActivitiesService,
+    private readonly policyService: WorkspacePolicyService,
   ) {}
 
   /**
@@ -25,6 +31,26 @@ export class TasksService {
     reporterId: string,
     assigneeId?: string,
   ): Promise<Task> {
+    await this.policyService.assertAction(
+      reporterId,
+      workspaceId,
+      WorkspaceAction.MANAGE_TASKS,
+    );
+
+    const project = await this.projectRepository.findOne({
+      where: { id: projectId },
+    });
+    if (!project || project.workspaceId !== workspaceId) {
+      throw new NotFoundException('Project not found in this workspace');
+    }
+
+    if (assigneeId) {
+      await this.policyService.assertUserIsWorkspaceMember(
+        assigneeId,
+        workspaceId,
+      );
+    }
+
     const task = this.taskRepository.create({
       title,
       description,
@@ -93,6 +119,13 @@ export class TasksService {
     },
   ): Promise<Task> {
     const task = await this.findOne(id);
+
+    await this.policyService.assertAction(
+      actorId,
+      task.workspaceId,
+      WorkspaceAction.MANAGE_TASKS,
+    );
+
     const changes: Record<string, { from: unknown; to: unknown }> = {};
 
     if (body.title !== undefined && body.title !== task.title) {
@@ -120,11 +153,18 @@ export class TasksService {
       body.assigneeId !== undefined &&
       (body.assigneeId || null) !== (task.assigneeId || null)
     ) {
+      if (body.assigneeId) {
+        await this.policyService.assertUserIsWorkspaceMember(
+          body.assigneeId,
+          task.workspaceId,
+        );
+      }
       changes.assigneeId = {
         from: task.assigneeId || null,
         to: body.assigneeId || null,
       };
       task.assigneeId = body.assigneeId || null;
+      delete task.assignee;
     }
 
     const savedTask = await this.taskRepository.save(task);
@@ -148,6 +188,12 @@ export class TasksService {
 
   async delete(id: string, actorId: string): Promise<{ deleted: true }> {
     const task = await this.findOne(id);
+
+    await this.policyService.assertAction(
+      actorId,
+      task.workspaceId,
+      WorkspaceAction.MANAGE_TASKS,
+    );
 
     await this.taskRepository.remove(task);
 

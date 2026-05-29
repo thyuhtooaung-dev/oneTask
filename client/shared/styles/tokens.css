@@ -1,0 +1,73 @@
+:root {
+	--font-app-sans: "Fredoka", Inter, "SF Pro Display", "SF Pro Text",
+		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+		Arial, sans-serif;
+	--font-app-mono: "SF Mono", "Cascadia Code", "Roboto Mono", Consolas,
+		"Liberation Mono", monospace;
+
+	--ot-space-1: 0.25rem;
+	--ot-space-2: 0.5rem;
+	--ot-space-3: 0.75rem;
+	--ot-space-4: 1rem;
+	--ot-space-6: 1.5rem;
+	--ot-space-8: 2rem;
+
+	--ot-bg: #09090b;
+	--ot-bg-soft: #0d0d10;
+	--ot-surface: #111114;
+	--ot-surface-raised: #16161a;
+	--ot-surface-hover: #1b1b20;
+	--ot-line: #27272a;
+	--ot-line-soft: rgba(63, 63, 70, 0.5);
+	--ot-text: #f4f4f5;
+	--ot-text-muted: #a1a1aa;
+	--ot-text-subtle: #71717a;
+	--ot-accent: #7c3aed;
+	--ot-accent-strong: #8b5cf6;
+	--ot-accent-soft: rgba(124, 58, 237, 0.12);
+	--ot-success: #34d399;
+	--ot-warning: #fbbf24;
+	--ot-danger: #f87171;
+
+	--ot-radius-sm: 0.375rem;
+	--ot-radius-md: 0.5rem;
+	--ot-radius-lg: 0.75rem;
+	--ot-radius-xl: 1rem;
+	--ot-radius-2xl: 1.25rem;
+
+	--ot-shadow-soft: 0 1px 1px rgba(0, 0, 0, 0.28), 0 16px 40px
+		rgba(0, 0, 0, 0.24);
+	--ot-shadow-panel: 0 24px 80px rgba(0, 0, 0, 0.35);
+
+	--ot-motion-fast: 120ms;
+	--ot-motion-base: 180ms;
+	--ot-motion-panel: 240ms;
+	--ot-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@theme inline {
+	--color-background: var(--ot-bg);
+	--color-foreground: var(--ot-text);
+	--color-card: var(--ot-surface);
+	--color-card-foreground: var(--ot-text);
+	--color-popover: var(--ot-surface-raised);
+	--color-popover-foreground: var(--ot-text);
+	--color-primary: var(--ot-accent);
+	--color-primary-foreground: #ffffff;
+	--color-secondary: var(--ot-surface-raised);
+	--color-secondary-foreground: var(--ot-text);
+	--color-muted: var(--ot-surface-hover);
+	--color-muted-foreground: var(--ot-text-muted);
+	--color-accent: var(--ot-accent-soft);
+	--color-accent-foreground: var(--ot-accent-strong);
+	--color-border: var(--ot-line);
+	--color-input: var(--ot-line);
+	--color-ring: var(--ot-accent);
+	--font-sans: var(--font-app-sans), Inter, ui-sans-serif, system-ui, sans-serif;
+	--font-mono: var(--font-app-mono);
+	--radius-sm: var(--ot-radius-sm);
+	--radius-md: var(--ot-radius-md);
+	--radius-lg: var(--ot-radius-lg);
+	--radius-xl: var(--ot-radius-xl);
+	--radius-2xl: var(--ot-radius-2xl);
+}

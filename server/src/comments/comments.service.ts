@@ -5,6 +5,9 @@ import { Comment } from './entities/comment.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { ActivitiesService } from '../activities/activities.service';
 import { EventType } from '../activities/entities/activity-event.entity';
+import { WorkspacePolicyService } from '../workspaces/workspace-policy.service';
+import { WorkspaceAction } from '../workspaces/workspace-policy';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class CommentsService {
@@ -14,6 +17,7 @@ export class CommentsService {
     @InjectRepository(Task)
     private readonly taskRepository: Repository<Task>,
     private readonly activitiesService: ActivitiesService,
+    private readonly policyService: WorkspacePolicyService,
   ) {}
 
   /**
@@ -24,6 +28,19 @@ export class CommentsService {
     taskId: string,
     authorId: string,
   ): Promise<Comment> {
+    const task = await this.taskRepository.findOne({
+      where: { id: taskId },
+    });
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+
+    await this.policyService.assertAction(
+      authorId,
+      task.workspaceId,
+      WorkspaceAction.COMMENT,
+    );
+
     const comment = this.commentRepository.create({
       content,
       taskId,
@@ -31,20 +48,14 @@ export class CommentsService {
     });
     const savedComment = await this.commentRepository.save(comment);
 
-    // Look up parent task to resolve the workspace context
-    const task = await this.taskRepository.findOne({
-      where: { id: taskId },
+    await this.activitiesService.logEvent({
+      workspaceId: task.workspaceId,
+      actorId: authorId,
+      type: EventType.COMMENT_CREATED,
+      entityType: 'comment',
+      entityId: savedComment.id,
+      metadata: { taskId, commentPreview: content.substring(0, 100) },
     });
-    if (task) {
-      await this.activitiesService.logEvent({
-        workspaceId: task.workspaceId,
-        actorId: authorId,
-        type: EventType.COMMENT_CREATED,
-        entityType: 'comment',
-        entityId: savedComment.id,
-        metadata: { taskId, commentPreview: content.substring(0, 100) },
-      });
-    }
 
     // Retrieve full author details to display cleanly
     return this.commentRepository.findOne({

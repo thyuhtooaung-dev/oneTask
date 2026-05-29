@@ -15,6 +15,9 @@ import { WorkspaceRoleGuard } from './guards/workspace-role.guard';
 import { Roles } from './decorators/workspace-roles.decorator';
 import { WorkspaceRole } from './entities/workspace-member.entity';
 import { Public } from '../auth/decorators/public.decorator';
+import { CreateWorkspaceDto } from '../common/dto/create-workspace.dto';
+import { CreateInviteDto } from '../common/dto/create-invite.dto';
+import { UpdateMemberRoleDto } from '../common/dto/update-member-role.dto';
 
 @Controller('workspaces')
 export class WorkspacesController {
@@ -22,7 +25,7 @@ export class WorkspacesController {
 
   @Post()
   async create(
-    @Body() body: { name: string; description?: string },
+    @Body() body: CreateWorkspaceDto,
     @CurrentUser() user: { id: string },
   ) {
     return this.workspacesService.create(body.name, body.description, user.id);
@@ -67,7 +70,7 @@ export class WorkspacesController {
   @Roles(WorkspaceRole.OWNER, WorkspaceRole.ADMIN)
   async createInvite(
     @Param('workspaceId') workspaceId: string,
-    @Body() body: { email: string; role: WorkspaceRole },
+    @Body() body: CreateInviteDto,
     @CurrentUser() user: { id: string },
   ) {
     return this.workspacesService.createInvite(
@@ -84,8 +87,9 @@ export class WorkspacesController {
   async revokeInvite(
     @Param('workspaceId') workspaceId: string,
     @Param('inviteId') inviteId: string,
+    @CurrentUser() user: { id: string },
   ) {
-    return this.workspacesService.revokeInvite(workspaceId, inviteId);
+    return this.workspacesService.revokeInvite(workspaceId, inviteId, user.id);
   }
 
   @Patch(':workspaceId/members/:memberId')
@@ -94,7 +98,7 @@ export class WorkspacesController {
   async updateMemberRole(
     @Param('workspaceId') workspaceId: string,
     @Param('memberId') memberId: string,
-    @Body() body: { role: WorkspaceRole },
+    @Body() body: UpdateMemberRoleDto,
     @CurrentUser() user: { id: string },
   ) {
     return this.workspacesService.updateMemberRole(

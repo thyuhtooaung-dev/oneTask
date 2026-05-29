@@ -1,6 +1,7 @@
 "use client";
 
 import { axiosClient } from "@/lib/api/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Project, WorkspaceUser } from "./useWorkspaceData";
 
@@ -39,13 +40,9 @@ interface UpdateTaskPayload {
 	assigneeId?: string | null;
 }
 
-export const taskKeys = {
-	all: (workspaceId: string) => ["workspaces", workspaceId, "tasks"] as const,
-};
-
 export function useTasks(workspaceId: string | null) {
 	return useQuery<Task[]>({
-		queryKey: taskKeys.all(workspaceId || ""),
+		queryKey: queryKeys.workspaces.tasks(workspaceId || ""),
 		queryFn: async () => {
 			if (!workspaceId) return [];
 			const response = await axiosClient.get<Task[]>(
@@ -71,9 +68,11 @@ export function useCreateTask(workspaceId: string | null) {
 		},
 		onSuccess: () => {
 			if (!workspaceId) return;
-			queryClient.invalidateQueries({ queryKey: taskKeys.all(workspaceId) });
 			queryClient.invalidateQueries({
-				queryKey: ["workspaces", workspaceId, "activities"],
+				queryKey: queryKeys.workspaces.tasks(workspaceId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.workspaces.activities(workspaceId),
 			});
 		},
 	});
@@ -89,9 +88,11 @@ export function useUpdateTask(workspaceId: string | null) {
 		},
 		onSuccess: () => {
 			if (!workspaceId) return;
-			queryClient.invalidateQueries({ queryKey: taskKeys.all(workspaceId) });
 			queryClient.invalidateQueries({
-				queryKey: ["workspaces", workspaceId, "activities"],
+				queryKey: queryKeys.workspaces.tasks(workspaceId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.workspaces.activities(workspaceId),
 			});
 		},
 	});
@@ -109,9 +110,11 @@ export function useDeleteTask(workspaceId: string | null) {
 		},
 		onSuccess: () => {
 			if (!workspaceId) return;
-			queryClient.invalidateQueries({ queryKey: taskKeys.all(workspaceId) });
 			queryClient.invalidateQueries({
-				queryKey: ["workspaces", workspaceId, "activities"],
+				queryKey: queryKeys.workspaces.tasks(workspaceId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.workspaces.activities(workspaceId),
 			});
 		},
 	});

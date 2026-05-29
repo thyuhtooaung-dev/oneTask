@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { WorkspaceMemberGuard } from '../workspaces/guards/workspace-member.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CreateProjectDto } from '../common/dto/create-project.dto';
 
 @Controller()
 export class ProjectsController {
@@ -11,7 +12,7 @@ export class ProjectsController {
   @UseGuards(WorkspaceMemberGuard)
   async create(
     @Param('workspaceId') workspaceId: string,
-    @Body() body: { name: string; description?: string },
+    @Body() body: CreateProjectDto,
     @CurrentUser() user: { id: string },
   ) {
     return this.projectsService.create(

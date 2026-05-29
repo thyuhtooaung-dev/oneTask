@@ -8,6 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Server, Socket } from 'socket.io';
@@ -27,7 +28,7 @@ interface AuthenticatedSocket extends Socket {
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: ['http://localhost:3000', 'https://one-task-sand.vercel.app'],
   },
 })
 export class RealtimeGateway
@@ -38,6 +39,7 @@ export class RealtimeGateway
 
   constructor(
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
     @InjectRepository(WorkspaceMember)
     private readonly workspaceMemberRepository: Repository<WorkspaceMember>,
   ) {}
@@ -115,6 +117,23 @@ export class RealtimeGateway
     payload: TPayload,
   ) {
     this.server.to(this.workspaceRoom(workspaceId)).emit(eventName, payload);
+  }
+
+  /**
+   * Removes a specific user from a workspace room.
+   * Called when a member is removed from the workspace so they
+   * stop receiving real-time events immediately.
+   */
+  async removeUserFromWorkspace(userId: string, workspaceId: string) {
+    const room = this.workspaceRoom(workspaceId);
+    const sockets = await this.server.in(room).fetchSockets();
+    for (const socket of sockets) {
+      const socketUser = (socket as unknown as AuthenticatedSocket).data?.user;
+      if (socketUser?.id === userId) {
+        socket.leave(room);
+        socket.emit('workspace_removed', { workspaceId });
+      }
+    }
   }
 
   private workspaceRoom(workspaceId: string) {

@@ -5,12 +5,14 @@ import { TasksController } from './tasks.controller';
 import { Task } from './entities/task.entity';
 import { WorkspacesModule } from '../workspaces/workspaces.module';
 import { ActivitiesModule } from '../activities/activities.module';
+import { ProjectsModule } from '../projects/projects.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Task]),
     WorkspacesModule,
     ActivitiesModule,
+    ProjectsModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],

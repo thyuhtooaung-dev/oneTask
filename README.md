@@ -2,16 +2,32 @@
 
 A collaborative task management application that helps teams organize, track, and collaborate on projects in real-time.
 
-🌐 **Live Demo**: [https://one-task-sand.vercel.app](https://one-task-sand.vercel.app)
+₍^. .^₎⟆ **Live Demo**: [https://one-task-sand.vercel.app](https://one-task-sand.vercel.app)
+
+## About
+
+**oneTask** is a full-stack web application designed to streamline team collaboration and project management. It combines a modern, responsive frontend built with Next.js and a robust backend powered by NestJS to provide a seamless task management experience.
+
+Whether you're managing personal projects or coordinating with a large team, oneTask offers real-time synchronization, secure authentication, and an intuitive interface to keep everyone on the same page. With WebSocket-based real-time communication, changes are instantly reflected across all connected users, making team collaboration effortless.
+
+The project demonstrates best practices in modern full-stack development, including:
+- Type-safe development with TypeScript across the stack
+- Real-time communication using Socket.io
+- Scalable architecture with NestJS microservices
+- Responsive UI with Tailwind CSS and modern React patterns
+- Security-first approach with JWT authentication and bcrypt password hashing
+- Containerized deployment with Docker
 
 ## Features
 
-- ✅ **Task Management** - Create, update, and manage tasks with ease
-- 👥 **Team Collaboration** - Work together with real-time updates using WebSockets
-- 🔐 **User Authentication** - Secure login with JWT-based authentication
-- 📊 **GitHub Integration** - Built with modern development practices
-- 💬 **Real-time Communication** - Instant updates across all team members
-- 🎨 **Responsive Design** - Works seamlessly on desktop and mobile devices
+- **Task Management** - Create, update, and manage tasks with ease
+- **Team Collaboration** - Work together with real-time updates using WebSockets
+- **User Authentication** - Secure login with JWT-based authentication
+- **Real-time Updates** - Instant synchronization across all team members
+- **Real-time Communication** - Live notifications and collaborative features
+- **Responsive Design** - Works seamlessly on desktop and mobile devices
+- **Modern Stack** - Built with cutting-edge technologies
+- **Docker Ready** - Easy deployment with containerization
 
 ## Tech Stack
 
@@ -53,98 +69,6 @@ oneTask/
 └── README.md             # This file
 ```
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or higher)
-- PostgreSQL
-- Docker (optional)
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/thyuhtooaung-dev/oneTask.git
-cd oneTask
-```
-
-2. **Setup Backend**
-```bash
-cd server
-npm install
-npm run build
-```
-
-3. **Setup Frontend**
-```bash
-cd ../client
-npm install
-npm run build
-```
-
-### Running Locally
-
-#### Backend
-```bash
-cd server
-npm run start:dev
-```
-The server will run on `http://localhost:3000` (or configured port)
-
-#### Frontend
-```bash
-cd client
-npm run dev
-```
-The client will run on `http://localhost:3000`
-
-### Environment Variables
-
-Create `.env` files in both client and server directories with necessary configurations:
-
-**Server (.env)**
-```
-DATABASE_URL=postgresql://user:password@localhost:5432/onetask
-JWT_SECRET=your_jwt_secret
-JWT_EXPIRATION=7d
-```
-
-**Client (.env.local)**
-```
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PUBLIC_WS_URL=http://localhost:3000
-```
-
-## Development
-
-### Available Scripts
-
-**Frontend**
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Check code quality with Biome
-- `npm run format` - Format code with Biome
-
-**Backend**
-- `npm run start:dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run start:prod` - Start production server
-- `npm run lint` - Lint and fix code
-- `npm run test` - Run unit tests
-- `npm run test:e2e` - Run end-to-end tests
-- `npm run test:cov` - Run tests with coverage
-
-## Docker Deployment
-
-Build and run the application with Docker:
-
-```bash
-docker build -t onetask .
-docker run -p 3000:3000 -p 3001:3001 onetask
-```
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -162,11 +86,22 @@ This project uses:
 - **Formatting**: Biome and Prettier for consistent code style
 - **Testing**: Jest for unit and integration tests
 
-## Topics
+## Topics & Tags
 
 - `github-integration` - GitHub-integrated development workflow
 - `tasks-manager` - Task and project management
 - `team-collaboration` - Real-time team collaboration features
+- `full-stack` - Full-stack web application
+- `typescript` - TypeScript implementation
+- `nextjs` - Next.js frontend framework
+- `nestjs` - NestJS backend framework
+- `websocket` - Real-time WebSocket communication
+- `react` - React-based frontend
+- `postgresql` - PostgreSQL database
+- `jwt-authentication` - JWT-based secure authentication
+- `tailwindcss` - Tailwind CSS styling
+- `docker` - Containerized deployment
+- `real-time-sync` - Real-time data synchronization
 
 ## License
 
@@ -182,4 +117,4 @@ For issues and questions, please use the [GitHub Issues](https://github.com/thyu
 
 ---
 
-**Built with ❤️ using modern web technologies**
+Built with ₍^. .^₎⟆ using modern web technologies

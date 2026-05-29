@@ -21,17 +21,17 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # Downgraded from v6
+        uses: actions/checkout@v4
 
       # Set up PNPM package manager
       - name: Install PNPM
-        uses: pnpm/action-setup@v4 # Downgraded from v6
+        uses: pnpm/action-setup@v6
         with:
           version: 11
 
       # Set up Node.js with caching to make runs fast
       - name: Set up Node.js
-        uses: actions/setup-node@v4 # Downgraded from v6
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "pnpm"

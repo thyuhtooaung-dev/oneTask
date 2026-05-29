@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 
 # Stage 1: Install dependencies only when needed
 FROM base AS deps
@@ -13,7 +13,7 @@ RUN npm i -g pnpm@11
 COPY package.json pnpm-lock.yaml* ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Stage 2: Rebuild the source code only when needed
 FROM base AS builder

@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 
 # Stage 1: Install dev dependencies and build NestJS code
 FROM base AS builder
@@ -11,7 +11,7 @@ RUN npm i -g pnpm@11
 COPY package.json pnpm-lock.yaml* ./
 
 # Install all dependencies (including devDependencies) for the build step
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Copy all source files
 COPY . .
@@ -28,7 +28,7 @@ RUN npm i -g pnpm@11
 COPY package.json pnpm-lock.yaml* ./
 
 # Install only production dependencies
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # Stage 3: Production runner
 FROM base AS runner

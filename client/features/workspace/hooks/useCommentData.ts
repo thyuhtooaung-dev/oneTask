@@ -1,6 +1,7 @@
 "use client";
 
 import { axiosClient } from "@/lib/api/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { WorkspaceUser } from "./useWorkspaceData";
 
@@ -14,13 +15,9 @@ export interface TaskComment {
 	author?: WorkspaceUser;
 }
 
-export const commentKeys = {
-	all: (taskId: string) => ["tasks", taskId, "comments"] as const,
-};
-
 export function useComments(taskId?: string | null) {
 	return useQuery<TaskComment[]>({
-		queryKey: commentKeys.all(taskId || ""),
+		queryKey: queryKeys.tasks.comments(taskId || ""),
 		queryFn: async () => {
 			if (!taskId) return [];
 			const response = await axiosClient.get<TaskComment[]>(
@@ -49,12 +46,14 @@ export function useCreateComment(
 		},
 		onSuccess: () => {
 			if (taskId) {
-				queryClient.invalidateQueries({ queryKey: commentKeys.all(taskId) });
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.tasks.comments(taskId),
+				});
 			}
 
 			if (workspaceId) {
 				queryClient.invalidateQueries({
-					queryKey: ["workspaces", workspaceId, "activities"],
+					queryKey: queryKeys.workspaces.activities(workspaceId),
 				});
 			}
 		},

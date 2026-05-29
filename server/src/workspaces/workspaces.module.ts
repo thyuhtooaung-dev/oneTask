@@ -9,6 +9,8 @@ import { Project } from '../projects/entities/project.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { WorkspaceMemberGuard } from './guards/workspace-member.guard';
 import { ActivitiesModule } from '../activities/activities.module';
+import { WorkspacePolicyService } from './workspace-policy.service';
+import { RealtimeModule } from '../realtime/realtime.module';
 
 @Module({
   imports: [
@@ -20,9 +22,15 @@ import { ActivitiesModule } from '../activities/activities.module';
       Task,
     ]),
     ActivitiesModule,
+    RealtimeModule,
   ],
   controllers: [WorkspacesController],
-  providers: [WorkspacesService, WorkspaceMemberGuard],
-  exports: [WorkspacesService, WorkspaceMemberGuard, TypeOrmModule],
+  providers: [WorkspacesService, WorkspaceMemberGuard, WorkspacePolicyService],
+  exports: [
+    WorkspacesService,
+    WorkspaceMemberGuard,
+    WorkspacePolicyService,
+    TypeOrmModule,
+  ],
 })
 export class WorkspacesModule {}

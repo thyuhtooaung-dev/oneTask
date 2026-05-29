@@ -1,17 +1,22 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Avatar } from "@/shared/ui/avatar/Avatar";
+import { Button } from "@/shared/ui/button/Button";
+import { cn } from "@/shared/ui/cn";
+import { Dialog } from "@/shared/ui/dialog/Dialog";
 import {
 	Briefcase,
 	ChevronDown,
 	Folder,
-	Layers,
+	Inbox,
 	Loader2,
 	LogOut,
+	PanelLeftClose,
+	PanelLeftOpen,
 	Plus,
 	Settings,
-	Sparkles,
-	X,
+	Workflow,
 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
@@ -22,6 +27,38 @@ import {
 	useWorkspaces,
 } from "../hooks/useWorkspaceData";
 import { useUIStore } from "../store/uiStore";
+
+function NavItem({
+	active,
+	icon: Icon,
+	label,
+	onClick,
+	collapsed = false,
+}: {
+	active?: boolean;
+	icon: React.ElementType;
+	label: string;
+	onClick: () => void;
+	collapsed?: boolean;
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			title={collapsed ? label : undefined}
+			className={cn(
+				"flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+				collapsed && "justify-center px-0",
+				active
+					? "bg-violet-500/10 text-violet-200 shadow-[inset_2px_0_0_var(--ot-accent)]"
+					: "text-zinc-400 hover:bg-zinc-900/70 hover:text-zinc-100",
+			)}
+		>
+			<Icon className="h-4 w-4 shrink-0" />
+			{!collapsed && <span className="truncate">{label}</span>}
+		</button>
+	);
+}
 
 export const Sidebar: React.FC = () => {
 	const { user, logout } = useAuth();
@@ -34,7 +71,6 @@ export const Sidebar: React.FC = () => {
 		setShowSettings,
 	} = useUIStore();
 
-	// TanStack Query Hooks
 	const { data: workspaces = [], isLoading: isLoadingWorkspaces } =
 		useWorkspaces();
 	const { data: projects = [], isLoading: isLoadingProjects } =
@@ -42,382 +78,426 @@ export const Sidebar: React.FC = () => {
 	const createWorkspaceMutation = useCreateWorkspace();
 	const createProjectMutation = useCreateProject(activeWorkspaceId);
 
-	// UI State for custom glass modals
 	const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
 	const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-
-	// Form states
+	const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 	const [workspaceName, setWorkspaceName] = useState("");
 	const [workspaceDesc, setWorkspaceDesc] = useState("");
 	const [projectName, setProjectName] = useState("");
 	const [projectDesc, setProjectDesc] = useState("");
 
-	// Selected workspace object
 	const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
 
-	const handleCreateWorkspace = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const handleCreateWorkspace = async (event: React.FormEvent) => {
+		event.preventDefault();
 		if (!workspaceName.trim()) return;
 
-		try {
-			const newWs = await createWorkspaceMutation.mutateAsync({
-				name: workspaceName,
-				description: workspaceDesc || undefined,
-			});
-			setActiveWorkspaceId(newWs.id);
-			setWorkspaceName("");
-			setWorkspaceDesc("");
-			setIsWorkspaceModalOpen(false);
-		} catch (err) {
-			console.error("Failed to create workspace:", err);
-		}
+		const workspace = await createWorkspaceMutation.mutateAsync({
+			name: workspaceName.trim(),
+			description: workspaceDesc.trim() || undefined,
+		});
+		setActiveWorkspaceId(workspace.id);
+		setWorkspaceName("");
+		setWorkspaceDesc("");
+		setIsWorkspaceModalOpen(false);
 	};
 
-	const handleCreateProject = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const handleCreateProject = async (event: React.FormEvent) => {
+		event.preventDefault();
 		if (!projectName.trim() || !activeWorkspaceId) return;
 
-		try {
-			const newProj = await createProjectMutation.mutateAsync({
-				name: projectName,
-				description: projectDesc || undefined,
-			});
-			setActiveProjectId(newProj.id);
-			setProjectName("");
-			setProjectDesc("");
-			setIsProjectModalOpen(false);
-		} catch (err) {
-			console.error("Failed to create project:", err);
-		}
+		const project = await createProjectMutation.mutateAsync({
+			name: projectName.trim(),
+			description: projectDesc.trim() || undefined,
+		});
+		setActiveProjectId(project.id);
+		setProjectName("");
+		setProjectDesc("");
+		setIsProjectModalOpen(false);
 	};
 
 	return (
-		<aside className="w-102 min-h-screen backdrop-blur-xl bg-zinc-950/80 border-r border-zinc-900/50 flex flex-col justify-between text-zinc-300 relative select-none">
-			<div className="flex flex-col flex-1 overflow-y-auto">
-				{/* Logo Section */}
-				<div className="p-6 flex items-center gap-3 border-b border-zinc-900/40">
-					<div className="h-9 w-9 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-						<Sparkles className="h-5 w-5 text-white animate-pulse" />
-					</div>
-					<div>
-						<h1 className="text-lg font-bold text-white tracking-wide">
-							oneTask
-						</h1>
-						<span className="text-[10px] text-zinc-500 font-semibold tracking-wider uppercase">
-							Event-Driven MVP
-						</span>
-					</div>
-				</div>
-
-				{/* Workspace Dropdown Panel */}
-				<div className="p-4 border-b border-zinc-900/20">
-					<label
-						htmlFor="active-workspace-select"
-						className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider px-2 block mb-1"
+		<aside
+			className={cn(
+				"flex h-screen shrink-0 flex-col border-r border-zinc-900 bg-zinc-950/82 text-zinc-300 transition-[width] duration-200 ease-out",
+				isSidebarCollapsed ? "w-16" : "w-80",
+			)}
+		>
+			<div
+				className={cn(
+					"flex h-14 shrink-0 items-center border-b border-zinc-900 px-3",
+					isSidebarCollapsed ? "justify-center" : "gap-3",
+				)}
+			>
+				{isSidebarCollapsed ? (
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setIsSidebarCollapsed(false)}
+						title="Expand sidebar"
 					>
-						Active Workspace
-					</label>
-					<div className="relative group">
-						{isLoadingWorkspaces ? (
-							<div className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl bg-zinc-900/20 text-zinc-400 text-sm">
-								<Loader2 className="h-4 w-4 animate-spin text-zinc-500" />
-								<span>Loading workspaces...</span>
-							</div>
-						) : (
-							<div className="w-full">
-								<select
-									id="active-workspace-select"
-									value={activeWorkspaceId || ""}
-									onChange={(e) => {
-										const val = e.target.value;
-										setActiveWorkspaceId(val || null);
-									}}
-									className="w-full px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/40 focus:border-indigo-500/50 text-white font-medium text-sm focus:outline-none appearance-none cursor-pointer pr-10"
-								>
-									<option value="" className="bg-zinc-900 text-zinc-400">
-										Select a workspace...
-									</option>
-									{workspaces.map((ws) => (
-										<option
-											key={ws.id}
-											value={ws.id}
-											className="bg-zinc-900 text-white"
-										>
-											{ws.name}
-										</option>
-									))}
-								</select>
-								<div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-zinc-500">
-									<ChevronDown className="h-4 w-4" />
-								</div>
-							</div>
-						)}
-					</div>
-
-					<button
-						type="button"
-						onClick={() => setIsWorkspaceModalOpen(true)}
-						className="w-full mt-2.5 flex items-center justify-center gap-1.5 px-3 py-2 border border-dashed border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/30 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-all duration-300"
-					>
-						<Plus className="h-3.5 w-3.5" />
-						<span>Create Workspace</span>
-					</button>
-				</div>
-
-				{/* Projects Navigator Section */}
-				<div className="flex-1 p-4">
-					<div className="flex items-center justify-between px-2 mb-2">
-						<span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-							Projects
-						</span>
-						{activeWorkspaceId && (
-							<button
-								type="button"
-								onClick={() => setIsProjectModalOpen(true)}
-								className="text-zinc-500 hover:text-white transition-colors duration-200"
-							>
-								<Plus className="h-4 w-4" />
-							</button>
-						)}
-					</div>
-
-					{!activeWorkspaceId ? (
-						<div className="px-3 py-6 text-center border border-dashed border-zinc-900 rounded-2xl bg-zinc-950/20">
-							<Briefcase className="h-5 w-5 mx-auto text-zinc-700 mb-2" />
-							<p className="text-xs text-zinc-600 font-medium">
-								Select a workspace to view projects
+						<PanelLeftOpen className="h-4 w-4" />
+					</Button>
+				) : (
+					<>
+						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 text-white shadow-[0_10px_30px_rgba(124,58,237,0.28)]">
+							<Workflow className="h-4 w-4" />
+						</div>
+						<div className="min-w-0 flex-1">
+							<h1 className="text-sm font-semibold tracking-tight text-zinc-100">
+								oneTask
+							</h1>
+							<p className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+								Event OS
 							</p>
 						</div>
-					) : isLoadingProjects ? (
-						<div className="flex items-center gap-2 px-3 py-3 text-sm text-zinc-500">
-							<Loader2 className="h-4 w-4 animate-spin" />
-							<span>Loading projects...</span>
-						</div>
-					) : projects.length === 0 ? (
-						<div className="px-3 py-6 text-center border border-dashed border-zinc-900 rounded-2xl bg-zinc-950/20">
-							<Folder className="h-5 w-5 mx-auto text-zinc-700 mb-2" />
-							<p className="text-xs text-zinc-600 font-medium">
-								No projects yet
-							</p>
-							<button
-								type="button"
-								onClick={() => setIsProjectModalOpen(true)}
-								className="mt-2 text-[10px] font-bold text-indigo-400 hover:text-indigo-300"
-							>
-								Create one now
-							</button>
-						</div>
-					) : (
-						<div className="space-y-1">
-							{/* Workspace General Feed Selector */}
-							<button
-								type="button"
-								onClick={() => setActiveProjectId(null)}
-								className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-									activeProjectId === null && !showSettings
-										? "bg-indigo-500/10 text-indigo-400 border-l-2 border-indigo-500"
-										: "hover:bg-zinc-900/30 text-zinc-400 hover:text-zinc-200"
-								}`}
-							>
-								<Layers className="h-4 w-4" />
-								<span>Workspace Feed</span>
-							</button>
-
-							{/* Members & Settings Selector */}
-							<button
-								type="button"
-								onClick={() => setShowSettings(true)}
-								className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-									showSettings
-										? "bg-indigo-500/10 text-indigo-400 border-l-2 border-indigo-500"
-										: "hover:bg-zinc-900/30 text-zinc-400 hover:text-zinc-200"
-								}`}
-							>
-								<Settings className="h-4 w-4" />
-								<span>Members & Settings</span>
-							</button>
-
-							{/* Projects List */}
-							{projects.map((proj) => (
-								<button
-									type="button"
-									key={proj.id}
-									onClick={() => setActiveProjectId(proj.id)}
-									className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-										activeProjectId === proj.id
-											? "bg-indigo-500/10 text-indigo-400 border-l-2 border-indigo-500"
-											: "hover:bg-zinc-900/30 text-zinc-400 hover:text-zinc-200"
-									}`}
-								>
-									<Folder className="h-4 w-4" />
-									<span className="truncate">{proj.name}</span>
-								</button>
-							))}
-						</div>
-					)}
-				</div>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => setIsSidebarCollapsed(true)}
+							title="Collapse sidebar"
+						>
+							<PanelLeftClose className="h-4 w-4" />
+						</Button>
+					</>
+				)}
 			</div>
 
-			{/* User Information & Settings Section */}
+			<div
+				className={cn(
+					"min-h-0 flex-1 overflow-y-auto py-4",
+					isSidebarCollapsed ? "px-2" : "px-3",
+				)}
+			>
+				{isSidebarCollapsed ? (
+					<section className="space-y-2">
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => setIsWorkspaceModalOpen(true)}
+							title="Create workspace"
+							className="w-full"
+						>
+							<Plus className="h-4 w-4" />
+						</Button>
+						{activeWorkspaceId ? (
+							<>
+								<NavItem
+									active={!activeProjectId && !showSettings}
+									icon={Inbox}
+									label="Workspace activity"
+									onClick={() => setActiveProjectId(null)}
+									collapsed
+								/>
+								<NavItem
+									active={showSettings}
+									icon={Settings}
+									label="Members & settings"
+									onClick={() => setShowSettings(true)}
+									collapsed
+								/>
+								<div className="my-3 h-px bg-zinc-900" />
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => setIsProjectModalOpen(true)}
+									title="Create project"
+									className="w-full"
+								>
+									<Plus className="h-4 w-4" />
+								</Button>
+								{projects.map((project) => (
+									<NavItem
+										key={project.id}
+										active={activeProjectId === project.id}
+										icon={Folder}
+										label={project.name}
+										onClick={() => setActiveProjectId(project.id)}
+										collapsed
+									/>
+								))}
+							</>
+						) : (
+							<div className="flex h-9 items-center justify-center text-zinc-700">
+								<Briefcase className="h-4 w-4" />
+							</div>
+						)}
+					</section>
+				) : (
+					<>
+						<section className="space-y-2">
+							<div className="flex items-center justify-between px-2">
+								<label htmlFor="active-workspace-select" className="ot-label">
+									Workspace
+								</label>
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => setIsWorkspaceModalOpen(true)}
+									title="Create workspace"
+								>
+									<Plus className="h-4 w-4" />
+								</Button>
+							</div>
+
+							{isLoadingWorkspaces ? (
+								<div className="flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-950 px-3 py-2 text-sm text-zinc-500">
+									<Loader2 className="h-4 w-4 animate-spin" />
+									Loading
+								</div>
+							) : (
+								<div className="relative">
+									<select
+										id="active-workspace-select"
+										value={activeWorkspaceId || ""}
+										onChange={(event) =>
+											setActiveWorkspaceId(event.target.value || null)
+										}
+										className="ot-input h-10 appearance-none px-3 pr-9 text-sm font-medium"
+									>
+										<option value="" className="bg-zinc-950">
+											Select workspace
+										</option>
+										{workspaces.map((workspace) => (
+											<option
+												key={workspace.id}
+												value={workspace.id}
+												className="bg-zinc-950"
+											>
+												{workspace.name}
+											</option>
+										))}
+									</select>
+									<ChevronDown className="pointer-events-none absolute right-3 top-3 h-4 w-4 text-zinc-600" />
+								</div>
+							)}
+						</section>
+
+						<section className="mt-6 space-y-2">
+							<div className="flex items-center justify-between px-2">
+								<span className="ot-label">Context</span>
+								{activeWorkspaceId && (
+									<Button
+										variant="ghost"
+										size="icon"
+										onClick={() => setIsProjectModalOpen(true)}
+										title="Create project"
+									>
+										<Plus className="h-4 w-4" />
+									</Button>
+								)}
+							</div>
+
+							{!activeWorkspaceId ? (
+								<div className="rounded-xl border border-dashed border-zinc-900 bg-zinc-950/60 px-4 py-8 text-center">
+									<Briefcase className="mx-auto mb-2 h-5 w-5 text-zinc-700" />
+									<p className="text-xs font-medium leading-5 text-zinc-600">
+										Choose a workspace to load projects and activity.
+									</p>
+								</div>
+							) : (
+								<div className="space-y-1">
+									<NavItem
+										active={!activeProjectId && !showSettings}
+										icon={Inbox}
+										label="Workspace activity"
+										onClick={() => setActiveProjectId(null)}
+									/>
+									<NavItem
+										active={showSettings}
+										icon={Settings}
+										label="Members & settings"
+										onClick={() => setShowSettings(true)}
+									/>
+									<div className="my-3 h-px bg-zinc-900" />
+									{isLoadingProjects ? (
+										<div className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-500">
+											<Loader2 className="h-4 w-4 animate-spin" />
+											Loading projects
+										</div>
+									) : projects.length === 0 ? (
+										<div className="rounded-xl border border-dashed border-zinc-900 bg-zinc-950/50 px-4 py-6 text-center">
+											<Folder className="mx-auto mb-2 h-5 w-5 text-zinc-700" />
+											<p className="text-xs text-zinc-600">No projects yet.</p>
+											<button
+												type="button"
+												onClick={() => setIsProjectModalOpen(true)}
+												className="mt-2 text-xs font-semibold text-violet-300 hover:text-violet-200"
+											>
+												Create project
+											</button>
+										</div>
+									) : (
+										projects.map((project) => (
+											<NavItem
+												key={project.id}
+												active={activeProjectId === project.id}
+												icon={Folder}
+												label={project.name}
+												onClick={() => setActiveProjectId(project.id)}
+											/>
+										))
+									)}
+								</div>
+							)}
+						</section>
+					</>
+				)}
+			</div>
+
 			{user && (
-				<div className="p-4 border-t border-zinc-900/40 bg-zinc-950/40 backdrop-blur-md">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-3">
-							<div className="h-9 w-9 bg-zinc-900 rounded-xl flex items-center justify-center border border-zinc-800 text-indigo-400 font-bold uppercase shadow-inner">
-								{user.name ? user.name[0] : user.email[0]}
-							</div>
-							<div className="min-w-0">
-								<h3 className="text-xs font-bold text-white truncate">
-									{user.name || "Anonymous User"}
-								</h3>
-								<span className="text-[10px] text-zinc-500 truncate block">
-									{user.email}
-								</span>
-							</div>
+				<div
+					className={cn(
+						"border-t border-zinc-900",
+						isSidebarCollapsed ? "p-2" : "p-3",
+					)}
+				>
+					<div
+						className={cn(
+							"flex items-center rounded-xl border border-zinc-900 bg-zinc-950/80 p-2",
+							isSidebarCollapsed ? "flex-col gap-2" : "justify-between",
+						)}
+					>
+						<div className="flex min-w-0 items-center gap-3">
+							<Avatar name={user.name} email={user.email} size="md" />
+							{!isSidebarCollapsed && (
+								<div className="min-w-0">
+									<p className="truncate text-xs font-semibold text-zinc-100">
+										{user.name || "Anonymous User"}
+									</p>
+									<p className="truncate text-[10px] text-zinc-600">
+										{user.email}
+									</p>
+								</div>
+							)}
 						</div>
-						<button
-							type="button"
-							onClick={logout}
-							className="p-2 hover:bg-zinc-900/60 rounded-xl text-zinc-500 hover:text-red-400 transition-all duration-200"
-							title="Logout"
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => setIsLogoutDialogOpen(true)}
+							title="Log out"
 						>
 							<LogOut className="h-4 w-4" />
-						</button>
+						</Button>
 					</div>
 				</div>
 			)}
 
-			{/* CUSTOM GLASS WORKSPACE CREATION MODAL */}
-			{isWorkspaceModalOpen && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-					<div className="bg-zinc-900/90 border border-zinc-800/60 rounded-2xl p-6 w-full max-w-md shadow-2xl backdrop-blur-md relative transform scale-100 transition-all duration-300">
-						<button
-							type="button"
-							onClick={() => setIsWorkspaceModalOpen(false)}
-							className="absolute top-4 right-4 text-zinc-500 hover:text-white p-1 hover:bg-zinc-800 rounded-lg transition-colors"
-						>
-							<X className="h-4 w-4" />
-						</button>
-						<h2 className="text-base font-bold text-white flex items-center gap-2 mb-4">
-							<Sparkles className="h-5 w-5 text-indigo-400 animate-spin" />
-							<span>Create Workspace</span>
-						</h2>
-						<form onSubmit={handleCreateWorkspace} className="space-y-4">
-							<div>
-								<label
-									htmlFor="workspace-name-input"
-									className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block"
-								>
-									Workspace Name
-								</label>
-								<input
-									id="workspace-name-input"
-									type="text"
-									required
-									placeholder="e.g. Acme Corporation, Marketing"
-									value={workspaceName}
-									onChange={(e) => setWorkspaceName(e.target.value)}
-									className="w-full px-3 py-2 bg-zinc-950/60 border border-zinc-800 focus:border-indigo-500/50 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50 text-white"
-								/>
-							</div>
-							<div>
-								<label
-									htmlFor="workspace-desc-textarea"
-									className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block"
-								>
-									Description (Optional)
-								</label>
-								<textarea
-									id="workspace-desc-textarea"
-									placeholder="Tell us about this workspace..."
-									value={workspaceDesc}
-									onChange={(e) => setWorkspaceDesc(e.target.value)}
-									className="w-full px-3 py-2 bg-zinc-950/60 border border-zinc-800 focus:border-indigo-500/50 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50 text-white h-20 resize-none"
-								/>
-							</div>
-							<button
-								type="submit"
-								disabled={createWorkspaceMutation.isPending}
-								className="w-full py-2.5 bg-linear-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-semibold text-xs tracking-wider transition-all duration-300 shadow-lg shadow-indigo-500/10 flex items-center justify-center gap-2"
-							>
-								{createWorkspaceMutation.isPending ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									<span>Launch Workspace</span>
-								)}
-							</button>
-						</form>
-					</div>
+			<Dialog
+				open={isLogoutDialogOpen}
+				title="Log out?"
+				description="Are you sure you want to log out of oneTask?"
+				onClose={() => setIsLogoutDialogOpen(false)}
+			>
+				<div className="flex items-center justify-end gap-3 p-5">
+					<Button variant="ghost" onClick={() => setIsLogoutDialogOpen(false)}>
+						Cancel
+					</Button>
+					<Button
+						variant="danger"
+						onClick={() => {
+							setIsLogoutDialogOpen(false);
+							logout();
+						}}
+					>
+						<LogOut className="h-4 w-4" />
+						Log out
+					</Button>
 				</div>
-			)}
+			</Dialog>
 
-			{/* CUSTOM GLASS PROJECT CREATION MODAL */}
-			{isProjectModalOpen && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-					<div className="bg-zinc-900/90 border border-zinc-800/60 rounded-2xl p-6 w-full max-w-md shadow-2xl backdrop-blur-md relative transform scale-100 transition-all duration-300">
-						<button
-							type="button"
-							onClick={() => setIsProjectModalOpen(false)}
-							className="absolute top-4 right-4 text-zinc-500 hover:text-white p-1 hover:bg-zinc-800 rounded-lg transition-colors"
-						>
-							<X className="h-4 w-4" />
-						</button>
-						<h2 className="text-base font-bold text-white flex items-center gap-2 mb-4">
-							<Folder className="h-5 w-5 text-indigo-400" />
-							<span>Create Project</span>
-						</h2>
-						<p className="text-xs text-zinc-500 mb-4">
-							Adding project to workspace{" "}
-							<strong className="text-zinc-300">{activeWorkspace?.name}</strong>
-						</p>
-						<form onSubmit={handleCreateProject} className="space-y-4">
-							<div>
-								<label
-									htmlFor="project-name-input"
-									className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block"
-								>
-									Project Name
-								</label>
-								<input
-									id="project-name-input"
-									type="text"
-									required
-									placeholder="e.g. Website Redesign, Q2 Planning"
-									value={projectName}
-									onChange={(e) => setProjectName(e.target.value)}
-									className="w-full px-3 py-2 bg-zinc-950/60 border border-zinc-800 focus:border-indigo-500/50 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50 text-white"
-								/>
-							</div>
-							<div>
-								<label
-									htmlFor="project-desc-textarea"
-									className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block"
-								>
-									Description (Optional)
-								</label>
-								<textarea
-									id="project-desc-textarea"
-									placeholder="What is this project focused on?"
-									value={projectDesc}
-									onChange={(e) => setProjectDesc(e.target.value)}
-									className="w-full px-3 py-2 bg-zinc-950/60 border border-zinc-800 focus:border-indigo-500/50 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50 text-white h-20 resize-none"
-								/>
-							</div>
-							<button
-								type="submit"
-								disabled={createProjectMutation.isPending}
-								className="w-full py-2.5 bg-linear-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-semibold text-xs tracking-wider transition-all duration-300 shadow-lg shadow-indigo-500/10 flex items-center justify-center gap-2"
-							>
-								{createProjectMutation.isPending ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									<span>Launch Project</span>
-								)}
-							</button>
-						</form>
+			<Dialog
+				open={isWorkspaceModalOpen}
+				title="Create workspace"
+				description="Workspaces preserve context for teams, projects, events, and members."
+				onClose={() => setIsWorkspaceModalOpen(false)}
+			>
+				<form onSubmit={handleCreateWorkspace} className="space-y-4 p-5">
+					<div className="space-y-2">
+						<label htmlFor="workspace-name-input" className="ot-label">
+							Name
+						</label>
+						<input
+							id="workspace-name-input"
+							required
+							value={workspaceName}
+							onChange={(event) => setWorkspaceName(event.target.value)}
+							className="ot-input h-10 px-3 text-sm"
+							placeholder="Acme Product"
+						/>
 					</div>
-				</div>
-			)}
+					<div className="space-y-2">
+						<label htmlFor="workspace-desc-textarea" className="ot-label">
+							Description
+						</label>
+						<textarea
+							id="workspace-desc-textarea"
+							value={workspaceDesc}
+							onChange={(event) => setWorkspaceDesc(event.target.value)}
+							className="ot-input h-24 resize-none px-3 py-2 text-sm"
+							placeholder="What does this team collaborate on?"
+						/>
+					</div>
+					<Button
+						type="submit"
+						variant="primary"
+						className="w-full"
+						disabled={createWorkspaceMutation.isPending}
+					>
+						{createWorkspaceMutation.isPending && (
+							<Loader2 className="h-4 w-4 animate-spin" />
+						)}
+						Create workspace
+					</Button>
+				</form>
+			</Dialog>
+
+			<Dialog
+				open={isProjectModalOpen}
+				title="Create project"
+				description={`Add a focused collaboration surface${activeWorkspace ? ` inside ${activeWorkspace.name}` : ""}.`}
+				onClose={() => setIsProjectModalOpen(false)}
+			>
+				<form onSubmit={handleCreateProject} className="space-y-4 p-5">
+					<div className="space-y-2">
+						<label htmlFor="project-name-input" className="ot-label">
+							Name
+						</label>
+						<input
+							id="project-name-input"
+							required
+							value={projectName}
+							onChange={(event) => setProjectName(event.target.value)}
+							className="ot-input h-10 px-3 text-sm"
+							placeholder="Launch plan"
+						/>
+					</div>
+					<div className="space-y-2">
+						<label htmlFor="project-desc-textarea" className="ot-label">
+							Description
+						</label>
+						<textarea
+							id="project-desc-textarea"
+							value={projectDesc}
+							onChange={(event) => setProjectDesc(event.target.value)}
+							className="ot-input h-24 resize-none px-3 py-2 text-sm"
+							placeholder="What work belongs here?"
+						/>
+					</div>
+					<Button
+						type="submit"
+						variant="primary"
+						className="w-full"
+						disabled={createProjectMutation.isPending || !activeWorkspaceId}
+					>
+						{createProjectMutation.isPending && (
+							<Loader2 className="h-4 w-4 animate-spin" />
+						)}
+						Create project
+					</Button>
+				</form>
+			</Dialog>
 		</aside>
 	);
 };

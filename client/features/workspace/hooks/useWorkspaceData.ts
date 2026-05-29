@@ -1,6 +1,7 @@
 "use client";
 
 import { axiosClient } from "@/lib/api/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface Workspace {
@@ -47,25 +48,9 @@ export interface WorkspaceInvite {
 }
 
 // Key factory for React Query caching
-export const workspaceKeys = {
-	all: ["workspaces"] as const,
-	detail: (workspaceId: string) => ["workspaces", workspaceId] as const,
-	projects: (workspaceId: string) =>
-		["workspaces", workspaceId, "projects"] as const,
-	invites: (workspaceId: string) =>
-		["workspaces", workspaceId, "invites"] as const,
-};
-
-export const inviteKeys = {
-	metadata: (token: string) => ["invites", token] as const,
-};
-
-/**
- * Fetches all workspaces for the authenticated user
- */
 export function useWorkspaces() {
 	return useQuery<Workspace[]>({
-		queryKey: workspaceKeys.all,
+		queryKey: queryKeys.workspaces.all(),
 		queryFn: async () => {
 			const response = await axiosClient.get<Workspace[]>("/workspaces");
 			return response.data;
@@ -75,7 +60,7 @@ export function useWorkspaces() {
 
 export function useWorkspaceDetail(workspaceId: string | null) {
 	return useQuery<WorkspaceDetail | null>({
-		queryKey: workspaceKeys.detail(workspaceId || ""),
+		queryKey: queryKeys.workspaces.detail(workspaceId || ""),
 		queryFn: async () => {
 			if (!workspaceId) return null;
 			const response = await axiosClient.get<WorkspaceDetail>(
@@ -100,7 +85,7 @@ export function useCreateWorkspace() {
 		},
 		onSuccess: () => {
 			// Invalidate workspace cache to trigger instant refresh
-			queryClient.invalidateQueries({ queryKey: workspaceKeys.all });
+			queryClient.invalidateQueries({ queryKey: queryKeys.workspaces.all() });
 		},
 	});
 }
@@ -110,7 +95,7 @@ export function useCreateWorkspace() {
  */
 export function useProjects(workspaceId: string | null) {
 	return useQuery<Project[]>({
-		queryKey: workspaceKeys.projects(workspaceId || ""),
+		queryKey: queryKeys.workspaces.projects(workspaceId || ""),
 		queryFn: async () => {
 			if (!workspaceId) return [];
 			const response = await axiosClient.get<Project[]>(
@@ -142,7 +127,7 @@ export function useCreateProject(workspaceId: string | null) {
 			// Invalidate project list cache under this workspace
 			if (workspaceId) {
 				queryClient.invalidateQueries({
-					queryKey: workspaceKeys.projects(workspaceId),
+					queryKey: queryKeys.workspaces.projects(workspaceId),
 				});
 			}
 		},
@@ -151,7 +136,7 @@ export function useCreateProject(workspaceId: string | null) {
 
 export function useWorkspaceInvites(workspaceId: string | null) {
 	return useQuery<WorkspaceInvite[]>({
-		queryKey: workspaceKeys.invites(workspaceId || ""),
+		queryKey: queryKeys.workspaces.invites(workspaceId || ""),
 		queryFn: async () => {
 			if (!workspaceId) return [];
 			const response = await axiosClient.get<WorkspaceInvite[]>(
@@ -177,7 +162,7 @@ export function useCreateInvite(workspaceId: string | null) {
 		onSuccess: () => {
 			if (workspaceId) {
 				queryClient.invalidateQueries({
-					queryKey: workspaceKeys.invites(workspaceId),
+					queryKey: queryKeys.workspaces.invites(workspaceId),
 				});
 			}
 		},
@@ -196,7 +181,7 @@ export function useRevokeInvite(workspaceId: string | null) {
 		onSuccess: () => {
 			if (workspaceId) {
 				queryClient.invalidateQueries({
-					queryKey: workspaceKeys.invites(workspaceId),
+					queryKey: queryKeys.workspaces.invites(workspaceId),
 				});
 			}
 		},
@@ -216,7 +201,7 @@ export function useUpdateMemberRole(workspaceId: string | null) {
 		onSuccess: () => {
 			if (workspaceId) {
 				queryClient.invalidateQueries({
-					queryKey: workspaceKeys.detail(workspaceId),
+					queryKey: queryKeys.workspaces.detail(workspaceId),
 				});
 			}
 		},
@@ -235,7 +220,7 @@ export function useRemoveMember(workspaceId: string | null) {
 		onSuccess: () => {
 			if (workspaceId) {
 				queryClient.invalidateQueries({
-					queryKey: workspaceKeys.detail(workspaceId),
+					queryKey: queryKeys.workspaces.detail(workspaceId),
 				});
 			}
 		},
@@ -249,7 +234,7 @@ export function useGetInviteMetadata(token: string | null) {
 		email: string;
 		creatorName?: string;
 	} | null>({
-		queryKey: inviteKeys.metadata(token || ""),
+		queryKey: ["invites", token || ""],
 		queryFn: async () => {
 			if (!token) return null;
 			const response = await axiosClient.get(`/workspaces/invites/${token}`);

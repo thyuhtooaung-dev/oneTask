@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Project } from './entities/project.entity';
 import { ActivitiesService } from '../activities/activities.service';
 import { EventType } from '../activities/entities/activity-event.entity';
+import { WorkspacePolicyService } from '../workspaces/workspace-policy.service';
+import { WorkspaceAction } from '../workspaces/workspace-policy';
 
 @Injectable()
 export class ProjectsService {
@@ -11,6 +13,7 @@ export class ProjectsService {
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
     private readonly activitiesService: ActivitiesService,
+    private readonly policyService: WorkspacePolicyService,
   ) {}
 
   /**
@@ -22,6 +25,12 @@ export class ProjectsService {
     workspaceId: string,
     actorId: string,
   ): Promise<Project> {
+    await this.policyService.assertAction(
+      actorId,
+      workspaceId,
+      WorkspaceAction.MANAGE_PROJECTS,
+    );
+
     const project = this.projectRepository.create({
       name,
       description,

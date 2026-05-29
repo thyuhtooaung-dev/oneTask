@@ -1,7 +1,11 @@
 "use client";
 
-import { ChevronRight, Home } from "lucide-react";
+import { SocketContext } from "@/features/realtime/context/SocketContext";
+import { Badge } from "@/shared/ui/badge/Badge";
+import { cn } from "@/shared/ui/cn";
+import { ChevronRight, Home, Radio } from "lucide-react";
 import type React from "react";
+import { useContext } from "react";
 import { useProjects, useWorkspaces } from "../hooks/useWorkspaceData";
 import { useUIStore } from "../store/uiStore";
 import { Sidebar } from "./Sidebar";
@@ -13,66 +17,61 @@ interface DashboardLayoutProps {
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 	children,
 }) => {
-	const { activeWorkspaceId, activeProjectId } = useUIStore();
+	const { activeWorkspaceId, activeProjectId, showSettings } = useUIStore();
+	const { isConnected } = useContext(SocketContext);
 	const { data: workspaces = [] } = useWorkspaces();
 	const { data: projects = [] } = useProjects(activeWorkspaceId);
 
 	const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
 	const activeProject = projects.find((p) => p.id === activeProjectId);
+	const surfaceLabel = showSettings
+		? "Members"
+		: activeProject
+			? activeProject.name
+			: activeWorkspace
+				? "Activity"
+				: "Start";
 
 	return (
-		<div className="flex h-screen w-screen overflow-hidden bg-linear-to-br from-zinc-950 via-zinc-900 to-black text-zinc-100 font-sans">
-			{/* Sidebar Panel */}
+		<div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
 			<Sidebar />
 
-			{/* Main Page Panel */}
-			<div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative">
-				{/* Top Header & Breadcrumbs Panel */}
-				<header className="h-16 border-b border-zinc-900/40 bg-zinc-950/20 backdrop-blur-md flex items-center justify-between px-8 z-10 select-none">
-					<div className="flex items-center gap-2.5 text-sm text-zinc-500 font-medium">
+			<div className="flex min-w-0 flex-1 flex-col">
+				<header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-900 bg-zinc-950/72 px-6">
+					<nav
+						aria-label="Workspace context"
+						className="flex min-w-0 items-center gap-2 text-xs font-medium text-zinc-500"
+					>
 						<Home className="h-4 w-4 text-zinc-600" />
 						<ChevronRight className="h-3.5 w-3.5 text-zinc-700" />
-
-						{activeWorkspace ? (
-							<span className="text-zinc-400 hover:text-white transition-colors duration-200 cursor-pointer">
-								{activeWorkspace.name}
-							</span>
-						) : (
-							<span className="text-zinc-600 italic">No Active Workspace</span>
-						)}
-
-						{activeWorkspace && activeProject && (
-							<>
-								<ChevronRight className="h-3.5 w-3.5 text-zinc-700" />
-								<span className="text-indigo-400 font-semibold truncate max-w-[150px]">
-									{activeProject.name}
-								</span>
-							</>
-						)}
-
-						{activeWorkspace && !activeProject && (
-							<>
-								<ChevronRight className="h-3.5 w-3.5 text-zinc-700" />
-								<span className="text-zinc-400 font-semibold">
-									Workspace Feed
-								</span>
-							</>
-						)}
-					</div>
+						<span
+							className={cn(
+								"truncate",
+								activeWorkspace ? "text-zinc-300" : "text-zinc-600",
+							)}
+						>
+							{activeWorkspace?.name || "No workspace"}
+						</span>
+						<ChevronRight className="h-3.5 w-3.5 text-zinc-700" />
+						<span className="truncate font-semibold text-violet-300">
+							{surfaceLabel}
+						</span>
+					</nav>
 
 					<div className="flex items-center gap-3">
-						<div
-							className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"
-							title="System Status: Operational"
-						/>
-						<span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">
-							Sync Active
+						<Badge tone={isConnected ? "success" : "neutral"}>
+							<Radio className="h-3 w-3" />
+							{isConnected ? "Realtime" : "Offline"}
+						</Badge>
+						<span className="hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+							Mutation → Event → Refresh
 						</span>
 					</div>
 				</header>
 
-				{/* Scrollable Contents Area */}
-				<main className="flex-1 overflow-y-auto relative p-8">{children}</main>
+				<main className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+					{children}
+				</main>
 			</div>
 		</div>
 	);

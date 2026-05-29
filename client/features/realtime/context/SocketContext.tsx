@@ -3,9 +3,10 @@
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { ActivityEvent } from "@/features/workspace/hooks/useActivityData";
 import { useUIStore } from "@/features/workspace/store/uiStore";
+import { queryKeys } from "@/lib/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
 import type React from "react";
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useRef, useState } from "react";
 import { type Socket, io } from "socket.io-client";
 
 interface SocketContextType {
@@ -54,23 +55,52 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 			transports: ["websocket", "polling"],
 		});
 
-		nextSocket.on("connect", () => setIsConnected(true));
+		const processedEvents = new Set<string>();
+
+		nextSocket.on("connect", () => {
+			setIsConnected(true);
+			// On reconnect, refetch current workspace data to recover missed events
+			const currentWorkspaceId = useUIStore.getState().activeWorkspaceId;
+			if (currentWorkspaceId) {
+				nextSocket.emit("joinWorkspace", { workspaceId: currentWorkspaceId });
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.workspaces.tasks(currentWorkspaceId),
+				});
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.workspaces.projects(currentWorkspaceId),
+				});
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.workspaces.activities(currentWorkspaceId),
+				});
+			}
+		});
 		nextSocket.on("disconnect", () => setIsConnected(false));
 		nextSocket.on("activity_logged", (event: ActivityEvent) => {
+			if (event.id && processedEvents.has(event.id)) {
+				return;
+			}
+			if (event.id) {
+				processedEvents.add(event.id);
+				if (processedEvents.size > 50) {
+					const first = processedEvents.values().next().value;
+					if (first) processedEvents.delete(first);
+				}
+			}
+
 			const workspaceId = event.workspaceId;
 			queryClient.invalidateQueries({
-				queryKey: ["workspaces", workspaceId, "activities"],
+				queryKey: queryKeys.workspaces.activities(workspaceId),
 			});
 
 			if (event.type.startsWith("task.")) {
 				queryClient.invalidateQueries({
-					queryKey: ["workspaces", workspaceId, "tasks"],
+					queryKey: queryKeys.workspaces.tasks(workspaceId),
 				});
 			}
 
 			if (event.type === "project.created") {
 				queryClient.invalidateQueries({
-					queryKey: ["workspaces", workspaceId, "projects"],
+					queryKey: queryKeys.workspaces.projects(workspaceId),
 				});
 			}
 
@@ -78,10 +108,29 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 				const taskId = event.metadata?.taskId;
 				if (typeof taskId === "string") {
 					queryClient.invalidateQueries({
-						queryKey: ["tasks", taskId, "comments"],
+						queryKey: queryKeys.tasks.comments(taskId),
 					});
 				}
 			}
+
+			if (
+				event.type === "member.left" ||
+				event.type === "member.updated" ||
+				event.type === "member.joined"
+			) {
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.workspaces.detail(workspaceId),
+				});
+			}
+		});
+
+		// Handle being removed from a workspace
+		nextSocket.on("workspace_removed", (data: { workspaceId: string }) => {
+			const currentWorkspaceId = useUIStore.getState().activeWorkspaceId;
+			if (currentWorkspaceId === data.workspaceId) {
+				useUIStore.getState().setActiveWorkspaceId(null);
+			}
+			queryClient.invalidateQueries({ queryKey: queryKeys.workspaces.all() });
 		});
 
 		setSocket(nextSocket);

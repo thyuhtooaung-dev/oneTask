@@ -58,7 +58,7 @@ import { RealtimeModule } from './realtime/realtime.module';
           ActivityEvent,
           Notification,
         ],
-        synchronize: true, // Use only for MVP/dev. Use migrations for production!
+        synchronize: configService.get<string>('NODE_ENV') !== 'production', // Disabled in production; use migrations instead
         ssl:
           configService.get<string>('DATABASE_URL')?.includes('sslmode=') ||
           configService.get<string>('DATABASE_URL')?.includes('neon.tech')

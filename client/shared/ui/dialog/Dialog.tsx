@@ -1,5 +1,8 @@
+"use client";
+
 import { X } from "lucide-react";
 import type React from "react";
+import { createPortal } from "react-dom";
 import { Button } from "../button/Button";
 import { cn } from "../cn";
 
@@ -21,17 +24,18 @@ export function Dialog({
 	className,
 }: DialogProps) {
 	if (!open) return null;
+	if (typeof document === "undefined" || !document.body) return null;
 
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+	return createPortal(
+		<div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-3 sm:items-center sm:p-4">
 			<div
 				className={cn(
-					"w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-(--ot-shadow-panel) animate-scale-in",
+					"max-h-[calc(100dvh-1.5rem)] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-(--ot-shadow-panel) animate-scale-in sm:max-h-[calc(100dvh-2rem)]",
 					className || "max-w-md",
 				)}
 			>
-				<div className="flex items-start justify-between border-b border-zinc-900 px-5 py-4">
-					<div>
+				<div className="flex items-start justify-between gap-4 border-b border-zinc-900 px-4 py-4 sm:px-5">
+					<div className="min-w-0">
 						<h2 className="text-sm font-semibold text-zinc-100">{title}</h2>
 						{description && (
 							<p className="mt-1 text-xs leading-5 text-zinc-500">
@@ -45,6 +49,7 @@ export function Dialog({
 				</div>
 				{children}
 			</div>
-		</div>
+		</div>,
+		document.body,
 	);
 }

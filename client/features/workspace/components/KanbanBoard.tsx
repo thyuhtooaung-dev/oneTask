@@ -3,8 +3,16 @@
 import { Badge } from "@/shared/ui/badge/Badge";
 import { Button } from "@/shared/ui/button/Button";
 import { cn } from "@/shared/ui/cn";
+import { DropdownMenu } from "@/shared/ui/dropdown-menu/DropdownMenu";
 import { TaskCard } from "@/shared/ui/task-card/TaskCard";
-import { CheckCircle2, Circle, Clock3, Plus, XCircle } from "lucide-react";
+import {
+	CheckCircle2,
+	ChevronDown,
+	Circle,
+	Clock3,
+	Plus,
+	XCircle,
+} from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import type { Task, TaskStatus } from "../hooks/useTaskData";
@@ -95,80 +103,176 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	};
 
 	return (
-		<div className="grid min-w-[920px] grid-cols-4 gap-4 pb-4 xl:min-w-0">
-			{STATUS_COLUMNS.map((column) => {
-				const columnTasks = groupedTasks[column.value] || [];
-				const Icon = column.icon;
-				const isActiveDrop = activeDragOverColumn === column.value;
+		<>
+			<div className="space-y-4 md:hidden">
+				{STATUS_COLUMNS.map((column) => {
+					const columnTasks = groupedTasks[column.value] || [];
+					const Icon = column.icon;
 
-				return (
-					<section
-						key={column.value}
-						onDragOver={(event) => {
-							event.preventDefault();
-							setActiveDragOverColumn(column.value);
-						}}
-						onDragLeave={() => setActiveDragOverColumn(null)}
-						onDrop={(event) => handleDrop(event, column.value)}
-						className={cn(
-							"flex min-h-[520px] flex-col rounded-2xl border bg-zinc-950/35 p-3 transition-all duration-150",
-							isActiveDrop
-								? "border-violet-500/35 bg-violet-500/5"
-								: "border-zinc-900",
-						)}
-					>
-						<div className="mb-3 flex items-center justify-between px-1">
-							<div className="flex items-center gap-2">
-								<Badge tone={column.tone}>
-									<Icon className="h-3 w-3" />
-									{column.label}
-								</Badge>
-								<span className="text-[11px] font-bold text-zinc-600">
-									{columnTasks.length}
-								</span>
-							</div>
-							{column.value === "todo" && (
-								<Button
-									variant="ghost"
-									size="icon"
-									onClick={onCreateTaskClick}
-									title="Create task"
-								>
-									<Plus className="h-4 w-4" />
-								</Button>
-							)}
-						</div>
-
-						<div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
-							{columnTasks.length === 0 ? (
-								<div className="flex h-28 items-center justify-center rounded-xl border border-dashed border-zinc-900 bg-zinc-950/30 text-xs font-medium text-zinc-600">
-									Drop tasks here
+					return (
+						<section
+							key={column.value}
+							className="rounded-2xl border border-zinc-900 bg-zinc-950/35 p-3"
+						>
+							<div className="mb-3 flex items-center justify-between gap-3">
+								<div className="flex items-center gap-2">
+									<Badge tone={column.tone}>
+										<Icon className="h-3 w-3" />
+										{column.label}
+									</Badge>
+									<span className="text-[11px] font-bold text-zinc-600">
+										{columnTasks.length}
+									</span>
 								</div>
-							) : (
-								columnTasks.map((task) => (
-									<TaskCard
-										key={task.id}
-										title={task.title}
-										description={task.description}
-										assigneeName={task.assignee?.name}
-										assigneeEmail={task.assignee?.email}
-										createdAt={task.createdAt}
-										onClick={() => onTaskClick(task.id)}
-										draggable
-										onDragStart={(event) => handleDragStart(event, task.id)}
-										onDragEnd={() => {
-											setDraggedTaskId(null);
-											setActiveDragOverColumn(null);
-										}}
-										isDragging={draggedTaskId === task.id}
-										accentClassName={column.accentClassName}
-									/>
-								))
-							)}
-						</div>
-					</section>
-				);
-			})}
-		</div>
+								{column.value === "todo" && (
+									<Button
+										variant="ghost"
+										size="icon"
+										onClick={onCreateTaskClick}
+										title="Create task"
+									>
+										<Plus className="h-4 w-4" />
+									</Button>
+								)}
+							</div>
+
+							<div className="space-y-3">
+								{columnTasks.length === 0 ? (
+									<div className="flex min-h-24 items-center justify-center rounded-xl border border-dashed border-zinc-900 bg-zinc-950/30 px-4 text-center text-xs font-medium text-zinc-600">
+										No tasks
+									</div>
+								) : (
+									columnTasks.map((task) => (
+										<div key={task.id} className="space-y-2">
+											<TaskCard
+												title={task.title}
+												description={task.description}
+												assigneeName={task.assignee?.name}
+												assigneeEmail={task.assignee?.email}
+												createdAt={task.createdAt}
+												onClick={() => onTaskClick(task.id)}
+												accentClassName={column.accentClassName}
+											/>
+											<DropdownMenu.Root>
+												<DropdownMenu.Trigger asChild>
+													<button
+														type="button"
+														className="ot-input flex min-h-10 items-center justify-between gap-3 px-3 text-left text-xs font-semibold"
+													>
+														<span className="truncate">
+															Move to {column.label}
+														</span>
+														<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+													</button>
+												</DropdownMenu.Trigger>
+												<DropdownMenu.Content
+													align="start"
+													className="w-[var(--radix-dropdown-menu-trigger-width)] max-w-[calc(100vw-2rem)]"
+												>
+													<DropdownMenu.Label>Move task</DropdownMenu.Label>
+													<DropdownMenu.RadioGroup
+														value={task.status}
+														onValueChange={(value) =>
+															onStatusChange(task, value as TaskStatus)
+														}
+													>
+														{STATUS_COLUMNS.map((statusOption) => (
+															<DropdownMenu.RadioItem
+																key={statusOption.value}
+																value={statusOption.value}
+															>
+																{statusOption.label}
+															</DropdownMenu.RadioItem>
+														))}
+													</DropdownMenu.RadioGroup>
+												</DropdownMenu.Content>
+											</DropdownMenu.Root>
+										</div>
+									))
+								)}
+							</div>
+						</section>
+					);
+				})}
+			</div>
+
+			<div className="hidden overflow-x-auto pb-4 md:block">
+				<div className="grid min-w-[1120px] grid-cols-4 gap-4 xl:min-w-0">
+					{STATUS_COLUMNS.map((column) => {
+						const columnTasks = groupedTasks[column.value] || [];
+						const Icon = column.icon;
+						const isActiveDrop = activeDragOverColumn === column.value;
+
+						return (
+							<section
+								key={column.value}
+								onDragOver={(event) => {
+									event.preventDefault();
+									setActiveDragOverColumn(column.value);
+								}}
+								onDragLeave={() => setActiveDragOverColumn(null)}
+								onDrop={(event) => handleDrop(event, column.value)}
+								className={cn(
+									"flex min-h-[520px] flex-col rounded-2xl border bg-zinc-950/35 p-3 transition-all duration-150",
+									isActiveDrop
+										? "border-violet-500/35 bg-violet-500/5"
+										: "border-zinc-900",
+								)}
+							>
+								<div className="sticky top-0 z-10 mb-3 flex items-center justify-between gap-3 bg-zinc-950/95 px-1 py-1">
+									<div className="flex items-center gap-2">
+										<Badge tone={column.tone}>
+											<Icon className="h-3 w-3" />
+											{column.label}
+										</Badge>
+										<span className="text-[11px] font-bold text-zinc-600">
+											{columnTasks.length}
+										</span>
+									</div>
+									{column.value === "todo" && (
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={onCreateTaskClick}
+											title="Create task"
+										>
+											<Plus className="h-4 w-4" />
+										</Button>
+									)}
+								</div>
+
+								<div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+									{columnTasks.length === 0 ? (
+										<div className="flex h-28 items-center justify-center rounded-xl border border-dashed border-zinc-900 bg-zinc-950/30 text-xs font-medium text-zinc-600">
+											Drop tasks here
+										</div>
+									) : (
+										columnTasks.map((task) => (
+											<TaskCard
+												key={task.id}
+												title={task.title}
+												description={task.description}
+												assigneeName={task.assignee?.name}
+												assigneeEmail={task.assignee?.email}
+												createdAt={task.createdAt}
+												onClick={() => onTaskClick(task.id)}
+												draggable
+												onDragStart={(event) => handleDragStart(event, task.id)}
+												onDragEnd={() => {
+													setDraggedTaskId(null);
+													setActiveDragOverColumn(null);
+												}}
+												isDragging={draggedTaskId === task.id}
+												accentClassName={column.accentClassName}
+											/>
+										))
+									)}
+								</div>
+							</section>
+						);
+					})}
+				</div>
+			</div>
+		</>
 	);
 };

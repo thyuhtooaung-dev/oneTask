@@ -1,7 +1,8 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { AlertCircle, ClipboardCheck, Loader2, Lock, Mail } from "lucide-react";
+import { AlertCircle, Loader2, Lock, Mail } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -44,17 +45,17 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="relative min-h-screen flex items-center justify-center bg-background px-4 overflow-hidden font-sans">
-			{/* Decorative Blur Blobs for Premium Aesthetic */}
-			<div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-			<div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[100px] pointer-events-none" />
-
-			{/* Main Glassmorphism Card (Transparent Background as Customized) */}
-			<div className="w-full max-w-md backdrop-blur-xl border border-border/40 p-8 rounded-2xl shadow-2xl relative z-10 transition-all duration-300">
+		<div className="relative flex min-h-dvh items-start justify-center overflow-y-auto bg-background px-3 py-6 font-sans sm:items-center sm:px-4">
+			<div className="relative z-10 w-full max-w-md rounded-2xl border border-border/40 p-5 shadow-2xl backdrop-blur-xl transition-all duration-300 sm:p-8">
 				{/* Header / Brand */}
 				<div className="flex flex-col items-center mb-8">
-					<div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-primary/20">
-						<ClipboardCheck className="w-6 h-6 text-primary-foreground" />
+					<div className="relative w-16 h-16 rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-primary/20 overflow-hidden">
+						<Image
+							src="/logo.jpg"
+							alt="oneTask Logo"
+							fill
+							className="object-cover"
+						/>
 					</div>
 					<h1 className="text-2xl font-bold text-foreground tracking-tight">
 						Welcome Back
@@ -91,6 +92,8 @@ export default function LoginPage() {
 							<input
 								id="email-input"
 								type="email"
+								autoComplete="email"
+								inputMode="email"
 								required
 								disabled={isLoading}
 								value={email}
@@ -118,6 +121,7 @@ export default function LoginPage() {
 							<input
 								id="password-input"
 								type="password"
+								autoComplete="current-password"
 								required
 								disabled={isLoading}
 								value={password}

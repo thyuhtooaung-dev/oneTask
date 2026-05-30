@@ -79,11 +79,11 @@ function WorkspaceHome({
 	const activeTasks = tasks.filter((task) => task.status === "in_progress");
 
 	return (
-		<div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+		<div className="mx-auto grid max-w-[1600px] gap-5 lg:gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
 			<div className="space-y-6">
-				<section className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-5 shadow-(--ot-shadow-soft)">
+				<section className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 shadow-(--ot-shadow-soft) sm:p-5">
 					<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-						<div>
+						<div className="min-w-0">
 							<p className="ot-label">Workspace command center</p>
 							<h2 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-100">
 								{workspaceName || "Workspace"}
@@ -98,6 +98,7 @@ function WorkspaceHome({
 							onClick={onCreateTaskClick}
 							disabled={!canCreateTask}
 							title={canCreateTask ? "Create task" : "Create a project first"}
+							className="w-full sm:w-auto"
 						>
 							<Plus className="h-4 w-4" />
 							New task
@@ -292,10 +293,10 @@ export default function Home() {
 					/>
 				) : (
 					<div className="space-y-5 animate-fade-in">
-						<div className="flex flex-col gap-4 rounded-2xl border border-zinc-900 bg-zinc-950/45 p-5 md:flex-row md:items-center md:justify-between">
-							<div>
+						<div className="flex flex-col gap-4 rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 md:flex-row md:items-center md:justify-between lg:p-5">
+							<div className="min-w-0">
 								<p className="ot-label">Project surface</p>
-								<h2 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-100">
+								<h2 className="mt-1 break-words text-2xl font-semibold tracking-tight text-zinc-100">
 									{activeProject?.name || "Project tasks"}
 								</h2>
 								<p className="mt-1 text-sm leading-6 text-zinc-500">
@@ -303,13 +304,13 @@ export default function Home() {
 								</p>
 							</div>
 
-							<div className="flex items-center gap-3">
-								<div className="flex items-center rounded-lg border border-zinc-800 bg-zinc-950 p-1">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+								<div className="grid grid-cols-2 rounded-lg border border-zinc-800 bg-zinc-950 p-1 sm:flex sm:items-center">
 									<button
 										type="button"
 										onClick={() => setViewMode("list")}
 										className={cn(
-											"flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors",
+											"flex min-h-10 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors",
 											viewMode === "list"
 												? "bg-zinc-800 text-zinc-100"
 												: "text-zinc-500 hover:text-zinc-200",
@@ -322,7 +323,7 @@ export default function Home() {
 										type="button"
 										onClick={() => setViewMode("board")}
 										className={cn(
-											"flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors",
+											"flex min-h-10 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors",
 											viewMode === "board"
 												? "bg-zinc-800 text-zinc-100"
 												: "text-zinc-500 hover:text-zinc-200",
@@ -333,7 +334,11 @@ export default function Home() {
 									</button>
 								</div>
 
-								<Button variant="primary" onClick={openCreateTaskModal}>
+								<Button
+									variant="primary"
+									onClick={openCreateTaskModal}
+									className="w-full sm:w-auto"
+								>
 									<Plus className="h-4 w-4" />
 									New task
 								</Button>
@@ -394,14 +399,14 @@ export default function Home() {
 													columnTasks.map((task) => (
 														<div
 															key={task.id}
-															className="grid gap-3 border-b border-zinc-900 px-4 py-3 last:border-b-0 hover:bg-zinc-900/45 md:grid-cols-[minmax(0,1fr)_180px_220px]"
+															className="grid gap-3 border-b border-zinc-900 px-3 py-3 last:border-b-0 hover:bg-zinc-900/45 sm:px-4 md:grid-cols-[minmax(0,1fr)_160px] lg:grid-cols-[minmax(0,1fr)_180px_220px]"
 														>
 															<button
 																type="button"
 																onClick={() => openTaskModal(task.id)}
-																className="min-w-0 text-left"
+																className="min-h-10 min-w-0 text-left"
 															>
-																<p className="truncate text-sm font-semibold text-zinc-100">
+																<p className="line-clamp-2 text-sm font-semibold text-zinc-100">
 																	{task.title}
 																</p>
 																<p className="mt-1 line-clamp-1 text-xs text-zinc-500">
@@ -409,13 +414,15 @@ export default function Home() {
 																</p>
 															</button>
 
-															<div className="flex items-center text-xs font-medium text-zinc-500">
-																{task.assignee?.name ||
-																	task.assignee?.email ||
-																	"Unassigned"}
+															<div className="flex min-w-0 items-center text-xs font-medium text-zinc-500">
+																<span className="truncate">
+																	{task.assignee?.name ||
+																		task.assignee?.email ||
+																		"Unassigned"}
+																</span>
 															</div>
 
-															<div className="flex flex-wrap items-center gap-1.5">
+															<div className="flex flex-wrap items-center gap-1.5 md:col-span-2 lg:col-span-1">
 																{STATUS_COLUMNS.map((statusOption) => {
 																	const StatusIcon = statusOption.icon;
 

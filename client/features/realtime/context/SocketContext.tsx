@@ -6,7 +6,7 @@ import { useUIStore } from "@/features/workspace/store/uiStore";
 import { queryKeys } from "@/lib/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
 import type React from "react";
-import { createContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { type Socket, io } from "socket.io-client";
 
 interface SocketContextType {
@@ -32,11 +32,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	useEffect(() => {
 		if (!isAuthenticated || !user) {
-			setSocket((currentSocket) => {
-				currentSocket?.disconnect();
-				return null;
-			});
-			setIsConnected(false);
 			return;
 		}
 
@@ -133,9 +128,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 			queryClient.invalidateQueries({ queryKey: queryKeys.workspaces.all() });
 		});
 
-		setSocket(nextSocket);
+		let active = true;
+		queueMicrotask(() => {
+			if (active) {
+				setSocket(nextSocket);
+			}
+		});
 
 		return () => {
+			active = false;
 			nextSocket.disconnect();
 			setSocket(null);
 			setIsConnected(false);

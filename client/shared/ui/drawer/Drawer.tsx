@@ -26,13 +26,15 @@ export function Drawer({
 		<div className="fixed inset-0 z-50 bg-black/50">
 			<div
 				className={cn(
-					"ml-auto flex h-full w-full max-w-5xl flex-col border-l border-zinc-800 bg-zinc-950 shadow-[var(--ot-shadow-panel)] animate-slide-in",
+					"ml-auto flex h-full w-full flex-col border-zinc-800 bg-zinc-950 shadow-[var(--ot-shadow-panel)] animate-slide-in md:max-w-[min(760px,calc(100vw-4rem))] md:border-l xl:max-w-5xl",
 					className,
 				)}
 			>
-				<div className="flex items-start justify-between border-b border-zinc-900 px-6 py-4">
-					<div>
-						<h2 className="text-sm font-semibold text-zinc-100">{title}</h2>
+				<div className="flex items-start justify-between gap-4 border-b border-zinc-900 px-4 py-4 sm:px-6">
+					<div className="min-w-0">
+						<h2 className="truncate text-sm font-semibold text-zinc-100">
+							{title}
+						</h2>
 						{description && (
 							<p className="mt-1 text-xs leading-5 text-zinc-500">
 								{description}

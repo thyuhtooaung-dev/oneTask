@@ -29,7 +29,7 @@ export function TimelineEvent({
 	tone = "accent",
 }: TimelineEventProps) {
 	return (
-		<div className="group relative grid grid-cols-[28px_minmax(0,1fr)] gap-2 sm:grid-cols-[32px_minmax(0,1fr)] sm:gap-3">
+		<div className="group relative grid min-w-0 grid-cols-[28px_minmax(0,1fr)] gap-2 sm:grid-cols-[32px_minmax(0,1fr)] sm:gap-3">
 			<div className="relative flex justify-center">
 				<div className="absolute bottom-[-16px] top-8 w-px bg-zinc-900 group-last:hidden" />
 				<div
@@ -41,7 +41,7 @@ export function TimelineEvent({
 					<Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
 				</div>
 			</div>
-			<div className="rounded-xl border border-zinc-900/90 bg-zinc-950/55 p-3 transition-colors duration-150 group-hover:border-zinc-800 group-hover:bg-zinc-900/40">
+			<div className="min-w-0 overflow-hidden rounded-xl border border-zinc-900/90 bg-zinc-950/55 p-3 transition-colors duration-150 group-hover:border-zinc-800 group-hover:bg-zinc-900/40">
 				<div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
 					<div className="flex min-w-0 items-start gap-3">
 						<Avatar name={actorName} email={actorEmail} size="sm" />

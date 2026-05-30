@@ -1,14 +1,13 @@
 "use client";
 
-import { Avatar } from "@/shared/ui/avatar/Avatar";
 import { Badge } from "@/shared/ui/badge/Badge";
 import { Button } from "@/shared/ui/button/Button";
+import { ConfirmDialog } from "@/shared/ui/dialog/ConfirmDialog";
 import { Dialog } from "@/shared/ui/dialog/Dialog";
 import { Drawer } from "@/shared/ui/drawer/Drawer";
-import { Loader2, MessageSquare, Save, Send, Trash2 } from "lucide-react";
+import { Loader2, Save, Trash2 } from "lucide-react";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { useComments, useCreateComment } from "../hooks/useCommentData";
 import {
 	type Task,
 	type TaskStatus,
@@ -17,6 +16,7 @@ import {
 	useUpdateTask,
 } from "../hooks/useTaskData";
 import { useWorkspaceDetail } from "../hooks/useWorkspaceData";
+import { TaskComments } from "./TaskComments";
 
 const STATUS_OPTIONS: Array<{
 	value: TaskStatus;
@@ -47,19 +47,15 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	onClose,
 }) => {
 	const { data: workspace } = useWorkspaceDetail(workspaceId);
-	const { data: comments = [], isLoading: isLoadingComments } = useComments(
-		mode === "edit" ? task?.id : null,
-	);
 	const createTask = useCreateTask(workspaceId);
 	const updateTask = useUpdateTask(workspaceId);
 	const deleteTask = useDeleteTask(workspaceId);
-	const createComment = useCreateComment(task?.id, workspaceId);
 
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
 	const [status, setStatus] = useState<TaskStatus>("todo");
 	const [assigneeId, setAssigneeId] = useState("");
-	const [commentContent, setCommentContent] = useState("");
+	const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -67,7 +63,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 		setDescription(task?.description || "");
 		setStatus(task?.status || "todo");
 		setAssigneeId(task?.assigneeId || "");
-		setCommentContent("");
+		setIsDeleteConfirmOpen(false);
 	}, [isOpen, task]);
 
 	const members = useMemo(() => workspace?.members || [], [workspace]);
@@ -110,14 +106,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 		onClose();
 	};
 
-	const handleCreateComment = async () => {
-		const content = commentContent.trim();
-		if (!content || !task) return;
-
-		await createComment.mutateAsync({ content });
-		setCommentContent("");
-	};
-
 	const form = (
 		<form
 			onSubmit={handleSubmit}
@@ -152,83 +140,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 				</div>
 
 				{mode === "edit" && task && (
-					<section className="space-y-3 border-t border-zinc-900 pt-4">
-						<div className="flex items-center justify-between">
-							<div>
-								<p className="ot-label">Conversation</p>
-								<h3 className="mt-1 flex items-center gap-2 text-sm font-semibold text-zinc-100">
-									<MessageSquare className="h-4 w-4 text-violet-300" />
-									Task comments
-								</h3>
-							</div>
-							<Badge>{comments.length}</Badge>
-						</div>
-
-						<div className="max-h-[42dvh] space-y-4 overflow-y-auto rounded-xl border border-zinc-900 bg-zinc-950/55 p-3 md:max-h-72">
-							{isLoadingComments ? (
-								<div className="flex items-center gap-2 py-5 text-xs font-medium text-zinc-500">
-									<Loader2 className="h-4 w-4 animate-spin" />
-									Loading comments
-								</div>
-							) : comments.length === 0 ? (
-								<p className="py-6 text-center text-xs font-medium text-zinc-600">
-									No comments yet. Start the thread without leaving context.
-								</p>
-							) : (
-								comments.map((comment) => {
-									const author =
-										comment.author?.name || comment.author?.email || "Unknown";
-
-									return (
-										<div key={comment.id} className="flex min-w-0 gap-3">
-											<Avatar
-												name={comment.author?.name}
-												email={comment.author?.email}
-												size="md"
-											/>
-											<div className="min-w-0 flex-1">
-												<div className="flex flex-wrap items-center gap-2">
-													<span className="text-xs font-semibold text-zinc-200">
-														{author}
-													</span>
-													<span className="text-[10px] font-medium text-zinc-600">
-														{new Date(comment.createdAt).toLocaleString()}
-													</span>
-												</div>
-												<p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-400">
-													{comment.content}
-												</p>
-											</div>
-										</div>
-									);
-								})
-							)}
-						</div>
-
-						<div className="space-y-2">
-							<textarea
-								value={commentContent}
-								onChange={(event) => setCommentContent(event.target.value)}
-								className="ot-input min-h-24 resize-y px-3 py-2 text-sm"
-								placeholder="Write a comment"
-							/>
-							<div className="flex justify-end">
-								<Button
-									type="button"
-									onClick={handleCreateComment}
-									disabled={createComment.isPending || !commentContent.trim()}
-									className="w-full sm:w-auto"
-								>
-									{createComment.isPending ? (
-										<Loader2 className="h-4 w-4 animate-spin" />
-									) : (
-										<Send className="h-4 w-4" />
-									)}
-									Comment
-								</Button>
-							</div>
-						</div>
-					</section>
+					<TaskComments taskId={task.id} workspaceId={workspaceId} />
 				)}
 			</div>
 
@@ -288,7 +200,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						<Button
 							type="button"
 							variant="danger"
-							onClick={handleDelete}
+							onClick={() => setIsDeleteConfirmOpen(true)}
 							disabled={isPending}
 							className="w-full sm:w-auto"
 						>
@@ -334,13 +246,26 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	}
 
 	return (
-		<Drawer
-			open={isOpen}
-			title={task?.title || "Task"}
-			description="Edit details and continue the conversation without losing workspace context."
-			onClose={onClose}
-		>
-			{form}
-		</Drawer>
+		<>
+			<Drawer
+				open={isOpen}
+				title={task?.title || "Task"}
+				description="Edit details and continue the conversation without losing workspace context."
+				onClose={onClose}
+			>
+				{form}
+			</Drawer>
+			<ConfirmDialog
+				open={isDeleteConfirmOpen}
+				title="Delete task"
+				description="This removes the task and its comments from the workspace."
+				confirmLabel="Delete"
+				isDanger
+				isLoading={deleteTask.isPending}
+				confirmIcon={<Trash2 className="h-4 w-4" />}
+				onConfirm={handleDelete}
+				onClose={() => setIsDeleteConfirmOpen(false)}
+			/>
+		</>
 	);
 };

@@ -79,13 +79,13 @@ function WorkspaceHome({
 	const activeTasks = tasks.filter((task) => task.status === "in_progress");
 
 	return (
-		<div className="mx-auto grid max-w-[1600px] gap-5 lg:gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-			<div className="space-y-6">
+		<div className="mx-auto grid w-full max-w-[1600px] min-w-0 gap-5 lg:gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
+			<div className="min-w-0 space-y-6">
 				<section className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 shadow-(--ot-shadow-soft) sm:p-5">
 					<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 						<div className="min-w-0">
 							<p className="ot-label">Workspace command center</p>
-							<h2 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-100">
+							<h2 className="mt-1 break-words text-2xl font-semibold tracking-tight text-zinc-100">
 								{workspaceName || "Workspace"}
 							</h2>
 							<p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-500">
@@ -134,7 +134,7 @@ function WorkspaceHome({
 				/>
 			</div>
 
-			<aside className="space-y-4">
+			<aside className="min-w-0 space-y-4">
 				<section className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4">
 					<div className="mb-3 flex items-center justify-between">
 						<div>
@@ -179,12 +179,13 @@ function WorkspaceHome({
 								key={task.id}
 								type="button"
 								onClick={() => onTaskClick(task.id)}
-								className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-900/70"
+								className="flex w-full min-w-0 items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-900/70"
 							>
 								<span className="truncate text-sm font-medium text-zinc-300">
 									{task.title}
 								</span>
 								<Badge
+									className="shrink-0"
 									tone={
 										STATUS_COLUMNS.find((item) => item.value === task.status)
 											?.tone || "neutral"

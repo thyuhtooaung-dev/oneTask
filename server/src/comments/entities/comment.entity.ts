@@ -10,6 +10,13 @@ import {
 import { Task } from '../../tasks/entities/task.entity';
 import { User } from '../../users/entities/user.entity';
 
+export interface CommentAttachment {
+  name: string;
+  type: string;
+  size: number;
+  dataUrl: string;
+}
+
 @Entity('comments')
 export class Comment {
   @PrimaryGeneratedColumn('uuid')
@@ -31,6 +38,9 @@ export class Comment {
 
   @Column('text')
   content: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  attachments?: CommentAttachment[] | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

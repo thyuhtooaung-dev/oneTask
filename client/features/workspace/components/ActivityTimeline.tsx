@@ -126,7 +126,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
 	const { data: activities = [], isLoading } = useActivities(workspaceId);
 
 	return (
-		<section className="animate-fade-in">
+		<section className="min-w-0 animate-fade-in">
 			<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
 				<div className="min-w-0">
 					<p className="ot-label">Live event stream</p>
@@ -137,7 +137,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
 						Every mutation becomes shared context for the team.
 					</p>
 				</div>
-				<Badge tone="accent">
+				<Badge tone="accent" className="shrink-0 self-start">
 					<CircleDot className="h-3 w-3" />
 					{activities.length} events
 				</Badge>
@@ -159,7 +159,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
 					</p>
 				</div>
 			) : (
-				<div className={compact ? "space-y-3" : "space-y-4"}>
+				<div className={compact ? "min-w-0 space-y-3" : "min-w-0 space-y-4"}>
 					{activities.slice(0, compact ? 8 : undefined).map((event) => (
 						<TimelineEvent
 							key={event.id}

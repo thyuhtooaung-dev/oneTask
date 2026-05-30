@@ -121,9 +121,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	const form = (
 		<form
 			onSubmit={handleSubmit}
-			className="grid gap-6 p-6 lg:grid-cols-[1fr_320px]"
+			className="grid min-h-full gap-4 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px]"
 		>
-			<div className="space-y-4">
+			<div className="min-w-0 space-y-4">
 				<div className="space-y-2">
 					<label htmlFor={`${mode}-task-title`} className="ot-label">
 						Title
@@ -133,7 +133,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						required
 						value={title}
 						onChange={(event) => setTitle(event.target.value)}
-						className="ot-input h-11 px-3 text-sm font-medium"
+						className="ot-input min-h-11 px-3 text-sm font-medium"
 						placeholder="Write a clear task title"
 					/>
 				</div>
@@ -146,7 +146,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						id={`${mode}-task-description`}
 						value={description}
 						onChange={(event) => setDescription(event.target.value)}
-						className="ot-input h-36 resize-none px-3 py-2.5 text-sm leading-6"
+						className="ot-input min-h-36 resize-y px-3 py-2.5 text-sm leading-6"
 						placeholder="Add context, constraints, acceptance notes, or links."
 					/>
 				</div>
@@ -164,7 +164,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 							<Badge>{comments.length}</Badge>
 						</div>
 
-						<div className="max-h-72 space-y-4 overflow-y-auto rounded-xl border border-zinc-900 bg-zinc-950/55 p-3">
+						<div className="max-h-[42dvh] space-y-4 overflow-y-auto rounded-xl border border-zinc-900 bg-zinc-950/55 p-3 md:max-h-72">
 							{isLoadingComments ? (
 								<div className="flex items-center gap-2 py-5 text-xs font-medium text-zinc-500">
 									<Loader2 className="h-4 w-4 animate-spin" />
@@ -180,7 +180,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 										comment.author?.name || comment.author?.email || "Unknown";
 
 									return (
-										<div key={comment.id} className="flex gap-3">
+										<div key={comment.id} className="flex min-w-0 gap-3">
 											<Avatar
 												name={comment.author?.name}
 												email={comment.author?.email}
@@ -195,7 +195,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 														{new Date(comment.createdAt).toLocaleString()}
 													</span>
 												</div>
-												<p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-zinc-400">
+												<p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-400">
 													{comment.content}
 												</p>
 											</div>
@@ -209,7 +209,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 							<textarea
 								value={commentContent}
 								onChange={(event) => setCommentContent(event.target.value)}
-								className="ot-input h-20 resize-none px-3 py-2 text-sm"
+								className="ot-input min-h-24 resize-y px-3 py-2 text-sm"
 								placeholder="Write a comment"
 							/>
 							<div className="flex justify-end">
@@ -217,6 +217,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 									type="button"
 									onClick={handleCreateComment}
 									disabled={createComment.isPending || !commentContent.trim()}
+									className="w-full sm:w-auto"
 								>
 									{createComment.isPending ? (
 										<Loader2 className="h-4 w-4 animate-spin" />
@@ -231,7 +232,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 				)}
 			</div>
 
-			<aside className="space-y-4 rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4">
+			<aside className="space-y-4 rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 lg:sticky lg:top-0 lg:self-start">
 				<div className="space-y-2">
 					<label htmlFor={`${mode}-task-status`} className="ot-label">
 						Status
@@ -240,7 +241,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						id={`${mode}-task-status`}
 						value={status}
 						onChange={(event) => setStatus(event.target.value as TaskStatus)}
-						className="ot-input h-10 px-3 text-sm"
+						className="ot-input min-h-10 px-3 text-sm"
 					>
 						{STATUS_OPTIONS.map((option) => (
 							<option
@@ -265,7 +266,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						id={`${mode}-task-assignee`}
 						value={assigneeId}
 						onChange={(event) => setAssigneeId(event.target.value)}
-						className="ot-input h-10 px-3 text-sm"
+						className="ot-input min-h-10 px-3 text-sm"
 					>
 						<option value="" className="bg-zinc-950 text-zinc-400">
 							Unassigned
@@ -282,13 +283,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 					</select>
 				</div>
 
-				<div className="flex items-center justify-between gap-3 border-t border-zinc-900 pt-4">
+				<div className="flex flex-col-reverse gap-3 border-t border-zinc-900 pt-4 sm:flex-row sm:items-center sm:justify-between">
 					{mode === "edit" ? (
 						<Button
 							type="button"
 							variant="danger"
 							onClick={handleDelete}
 							disabled={isPending}
+							className="w-full sm:w-auto"
 						>
 							<Trash2 className="h-4 w-4" />
 							Delete
@@ -303,6 +305,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						disabled={
 							isPending || !title.trim() || (mode === "create" && !projectId)
 						}
+						className="w-full sm:w-auto"
 					>
 						{isPending ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
@@ -323,7 +326,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 				title="Create task"
 				description="The task will be created, logged as an event, and reflected across the workspace."
 				onClose={onClose}
-				className="max-h-[92vh] max-w-[min(1280px,calc(100vw-32px))] overflow-y-auto"
+				className="max-w-[min(1280px,calc(100vw-1.5rem))] overflow-y-auto"
 			>
 				{form}
 			</Dialog>

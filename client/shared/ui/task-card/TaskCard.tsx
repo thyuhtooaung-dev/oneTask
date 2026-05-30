@@ -45,7 +45,7 @@ export function TaskCard({
 			onDragEnd={onDragEnd}
 			onClick={onClick}
 			className={cn(
-				"group relative w-full overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/70 p-3 text-left shadow-[var(--ot-shadow-soft)] transition-all duration-150 hover:border-zinc-700 hover:bg-zinc-900/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+				"group relative min-h-28 w-full overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/70 p-3 text-left shadow-[var(--ot-shadow-soft)] transition-all duration-150 hover:border-zinc-700 hover:bg-zinc-900/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
 				draggable && "cursor-grab active:cursor-grabbing",
 				isDragging && "scale-[0.98] border-violet-500/40 opacity-45",
 			)}
@@ -62,7 +62,7 @@ export function TaskCard({
 			<p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-500">
 				{description || "No description"}
 			</p>
-			<div className="mt-3 flex items-center justify-between border-t border-zinc-900 pt-3">
+			<div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-2 border-t border-zinc-900 pt-3">
 				<div className="flex min-w-0 items-center gap-2">
 					<Avatar name={assigneeName} email={assigneeEmail} size="sm" />
 					<span className="truncate text-[11px] font-medium text-zinc-500">

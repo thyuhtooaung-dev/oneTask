@@ -5,6 +5,7 @@ import { Avatar } from "@/shared/ui/avatar/Avatar";
 import { Button } from "@/shared/ui/button/Button";
 import { cn } from "@/shared/ui/cn";
 import { Dialog } from "@/shared/ui/dialog/Dialog";
+import { DropdownMenu } from "@/shared/ui/dropdown-menu/DropdownMenu";
 import {
 	Briefcase,
 	ChevronDown,
@@ -16,10 +17,10 @@ import {
 	PanelLeftOpen,
 	Plus,
 	Settings,
-	Workflow,
 } from "lucide-react";
+import Image from "next/image";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	useCreateProject,
 	useCreateWorkspace,
@@ -47,7 +48,7 @@ function NavItem({
 			onClick={onClick}
 			title={collapsed ? label : undefined}
 			className={cn(
-				"flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+				"flex min-h-10 w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
 				collapsed && "justify-center px-0",
 				active
 					? "bg-violet-500/10 text-violet-200 shadow-[inset_2px_0_0_var(--ot-accent)]"
@@ -60,7 +61,35 @@ function NavItem({
 	);
 }
 
-export const Sidebar: React.FC = () => {
+function useViewportMode() {
+	const [viewport, setViewport] = useState<"mobile" | "tablet" | "desktop">(
+		"desktop",
+	);
+
+	useEffect(() => {
+		const update = () => {
+			if (window.innerWidth < 768) setViewport("mobile");
+			else if (window.innerWidth < 1024) setViewport("tablet");
+			else setViewport("desktop");
+		};
+
+		update();
+		window.addEventListener("resize", update);
+		return () => window.removeEventListener("resize", update);
+	}, []);
+
+	return viewport;
+}
+
+interface SidebarProps {
+	isMobileOpen?: boolean;
+	onMobileClose?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
+	isMobileOpen = false,
+	onMobileClose,
+}) => {
 	const { user, logout } = useAuth();
 	const {
 		activeWorkspaceId,
@@ -88,6 +117,15 @@ export const Sidebar: React.FC = () => {
 	const [projectDesc, setProjectDesc] = useState("");
 
 	const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
+	const viewport = useViewportMode();
+	const isMobile = viewport === "mobile";
+	const isSidebarCompact =
+		!isMobile && (isSidebarCollapsed || viewport === "tablet");
+
+	const handleNavigate = (callback: () => void) => {
+		callback();
+		onMobileClose?.();
+	};
 
 	const handleCreateWorkspace = async (event: React.FormEvent) => {
 		event.preventDefault();
@@ -101,6 +139,7 @@ export const Sidebar: React.FC = () => {
 		setWorkspaceName("");
 		setWorkspaceDesc("");
 		setIsWorkspaceModalOpen(false);
+		onMobileClose?.();
 	};
 
 	const handleCreateProject = async (event: React.FormEvent) => {
@@ -115,34 +154,52 @@ export const Sidebar: React.FC = () => {
 		setProjectName("");
 		setProjectDesc("");
 		setIsProjectModalOpen(false);
+		onMobileClose?.();
 	};
 
 	return (
 		<aside
 			className={cn(
-				"flex h-screen shrink-0 flex-col border-r border-zinc-900 bg-zinc-950/82 text-zinc-300 transition-[width] duration-200 ease-out",
-				isSidebarCollapsed ? "w-16" : "w-80",
+				"fixed inset-y-0 left-0 z-50 flex h-dvh shrink-0 flex-col border-r border-zinc-900 bg-zinc-950 text-zinc-300 shadow-(--ot-shadow-panel) transition-[transform,width] duration-200 ease-out md:static md:z-auto md:translate-x-0 md:bg-zinc-950/82 md:shadow-none",
+				isMobileOpen ? "translate-x-0" : "-translate-x-full",
+				isSidebarCompact ? "w-16" : "w-[min(20rem,calc(100vw-1rem))]",
 			)}
 		>
 			<div
 				className={cn(
 					"flex h-14 shrink-0 items-center border-b border-zinc-900 px-3",
-					isSidebarCollapsed ? "justify-center" : "gap-3",
+					isSidebarCompact ? "justify-center" : "gap-3",
 				)}
 			>
-				{isSidebarCollapsed ? (
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={() => setIsSidebarCollapsed(false)}
-						title="Expand sidebar"
-					>
-						<PanelLeftOpen className="h-4 w-4" />
-					</Button>
+				{isSidebarCompact ? (
+					<>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => setIsSidebarCollapsed(false)}
+							title="Expand sidebar"
+							className="hidden lg:inline-flex"
+						>
+							<PanelLeftOpen className="h-4 w-4" />
+						</Button>
+						<div className="relative flex h-8 w-8 overflow-hidden rounded-lg shadow-[0_10px_30px_rgba(124,58,237,0.24)] lg:hidden">
+							<Image
+								src="/logo.jpg"
+								alt="oneTask Logo"
+								fill
+								className="object-cover"
+							/>
+						</div>
+					</>
 				) : (
 					<>
-						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 text-white shadow-[0_10px_30px_rgba(124,58,237,0.28)]">
-							<Workflow className="h-4 w-4" />
+						<div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-[0_10px_30px_rgba(124,58,237,0.28)]">
+							<Image
+								src="/logo.jpg"
+								alt="oneTask Logo"
+								fill
+								className="object-cover"
+							/>
 						</div>
 						<div className="min-w-0 flex-1">
 							<h1 className="text-sm font-semibold tracking-tight text-zinc-100">
@@ -157,6 +214,7 @@ export const Sidebar: React.FC = () => {
 							size="icon"
 							onClick={() => setIsSidebarCollapsed(true)}
 							title="Collapse sidebar"
+							className="hidden lg:inline-flex"
 						>
 							<PanelLeftClose className="h-4 w-4" />
 						</Button>
@@ -167,10 +225,10 @@ export const Sidebar: React.FC = () => {
 			<div
 				className={cn(
 					"min-h-0 flex-1 overflow-y-auto py-4",
-					isSidebarCollapsed ? "px-2" : "px-3",
+					isSidebarCompact ? "px-2" : "px-3",
 				)}
 			>
-				{isSidebarCollapsed ? (
+				{isSidebarCompact ? (
 					<section className="space-y-2">
 						<Button
 							variant="ghost"
@@ -187,14 +245,14 @@ export const Sidebar: React.FC = () => {
 									active={!activeProjectId && !showSettings}
 									icon={Inbox}
 									label="Workspace activity"
-									onClick={() => setActiveProjectId(null)}
+									onClick={() => handleNavigate(() => setActiveProjectId(null))}
 									collapsed
 								/>
 								<NavItem
 									active={showSettings}
 									icon={Settings}
 									label="Members & settings"
-									onClick={() => setShowSettings(true)}
+									onClick={() => handleNavigate(() => setShowSettings(true))}
 									collapsed
 								/>
 								<div className="my-3 h-px bg-zinc-900" />
@@ -213,7 +271,9 @@ export const Sidebar: React.FC = () => {
 										active={activeProjectId === project.id}
 										icon={Folder}
 										label={project.name}
-										onClick={() => setActiveProjectId(project.id)}
+										onClick={() =>
+											handleNavigate(() => setActiveProjectId(project.id))
+										}
 										collapsed
 									/>
 								))}
@@ -247,30 +307,53 @@ export const Sidebar: React.FC = () => {
 									Loading
 								</div>
 							) : (
-								<div className="relative">
-									<select
-										id="active-workspace-select"
-										value={activeWorkspaceId || ""}
-										onChange={(event) =>
-											setActiveWorkspaceId(event.target.value || null)
-										}
-										className="ot-input h-10 appearance-none px-3 pr-9 text-sm font-medium"
-									>
-										<option value="" className="bg-zinc-950">
-											Select workspace
-										</option>
-										{workspaces.map((workspace) => (
-											<option
-												key={workspace.id}
-												value={workspace.id}
-												className="bg-zinc-950"
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger asChild>
+										<button
+											id="active-workspace-select"
+											type="button"
+											className="ot-input flex min-h-10 items-center justify-between gap-3 px-3 text-left text-sm font-medium"
+										>
+											<span
+												className={cn(
+													"truncate",
+													activeWorkspace ? "text-zinc-100" : "text-zinc-500",
+												)}
 											>
-												{workspace.name}
-											</option>
-										))}
-									</select>
-									<ChevronDown className="pointer-events-none absolute right-3 top-3 h-4 w-4 text-zinc-600" />
-								</div>
+												{activeWorkspace?.name || "Select workspace"}
+											</span>
+											<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+										</button>
+									</DropdownMenu.Trigger>
+									<DropdownMenu.Content
+										align="start"
+										className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)]"
+									>
+										<DropdownMenu.Label>Workspace</DropdownMenu.Label>
+										<DropdownMenu.RadioGroup
+											value={activeWorkspaceId || ""}
+											onValueChange={(value) => {
+												if (!value) return;
+												setActiveWorkspaceId(value);
+												onMobileClose?.();
+											}}
+										>
+											{workspaces.length === 0 && (
+												<DropdownMenu.Item disabled>
+													No workspaces yet
+												</DropdownMenu.Item>
+											)}
+											{workspaces.map((workspace) => (
+												<DropdownMenu.RadioItem
+													key={workspace.id}
+													value={workspace.id}
+												>
+													<span className="truncate">{workspace.name}</span>
+												</DropdownMenu.RadioItem>
+											))}
+										</DropdownMenu.RadioGroup>
+									</DropdownMenu.Content>
+								</DropdownMenu.Root>
 							)}
 						</section>
 
@@ -302,13 +385,15 @@ export const Sidebar: React.FC = () => {
 										active={!activeProjectId && !showSettings}
 										icon={Inbox}
 										label="Workspace activity"
-										onClick={() => setActiveProjectId(null)}
+										onClick={() =>
+											handleNavigate(() => setActiveProjectId(null))
+										}
 									/>
 									<NavItem
 										active={showSettings}
 										icon={Settings}
 										label="Members & settings"
-										onClick={() => setShowSettings(true)}
+										onClick={() => handleNavigate(() => setShowSettings(true))}
 									/>
 									<div className="my-3 h-px bg-zinc-900" />
 									{isLoadingProjects ? (
@@ -335,7 +420,9 @@ export const Sidebar: React.FC = () => {
 												active={activeProjectId === project.id}
 												icon={Folder}
 												label={project.name}
-												onClick={() => setActiveProjectId(project.id)}
+												onClick={() =>
+													handleNavigate(() => setActiveProjectId(project.id))
+												}
 											/>
 										))
 									)}
@@ -350,18 +437,18 @@ export const Sidebar: React.FC = () => {
 				<div
 					className={cn(
 						"border-t border-zinc-900",
-						isSidebarCollapsed ? "p-2" : "p-3",
+						isSidebarCompact ? "p-2" : "p-3",
 					)}
 				>
 					<div
 						className={cn(
 							"flex items-center rounded-xl border border-zinc-900 bg-zinc-950/80 p-2",
-							isSidebarCollapsed ? "flex-col gap-2" : "justify-between",
+							isSidebarCompact ? "flex-col gap-2" : "justify-between",
 						)}
 					>
 						<div className="flex min-w-0 items-center gap-3">
 							<Avatar name={user.name} email={user.email} size="md" />
-							{!isSidebarCollapsed && (
+							{!isSidebarCompact && (
 								<div className="min-w-0">
 									<p className="truncate text-xs font-semibold text-zinc-100">
 										{user.name || "Anonymous User"}

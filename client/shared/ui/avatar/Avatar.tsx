@@ -4,7 +4,7 @@ import { cn } from "../cn";
 interface AvatarProps {
 	name?: string | null;
 	email?: string | null;
-	size?: "sm" | "md" | "lg";
+	size?: "sm" | "md" | "lg" | "xl";
 	className?: string;
 }
 
@@ -12,6 +12,7 @@ const sizeClasses = {
 	sm: "h-6 w-6 text-[10px]",
 	md: "h-8 w-8 text-xs",
 	lg: "h-10 w-10 text-sm",
+	xl: "h-12 w-12 text-base",
 };
 
 export function Avatar({ name, email, size = "md", className }: AvatarProps) {

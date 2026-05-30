@@ -7,7 +7,7 @@ import { Dialog } from "@/shared/ui/dialog/Dialog";
 import { Drawer } from "@/shared/ui/drawer/Drawer";
 import { Loader2, Save, Trash2 } from "lucide-react";
 import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
 	type Task,
 	type TaskStatus,
@@ -57,14 +57,20 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	const [assigneeId, setAssigneeId] = useState("");
 	const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
-	useEffect(() => {
-		if (!isOpen) return;
-		setTitle(task?.title || "");
-		setDescription(task?.description || "");
-		setStatus(task?.status || "todo");
-		setAssigneeId(task?.assigneeId || "");
-		setIsDeleteConfirmOpen(false);
-	}, [isOpen, task]);
+	const [prevTask, setPrevTask] = useState<Task | undefined>(undefined);
+	const [prevIsOpen, setPrevIsOpen] = useState(false);
+
+	if (task?.id !== prevTask?.id || isOpen !== prevIsOpen) {
+		setPrevTask(task);
+		setPrevIsOpen(isOpen);
+		if (isOpen) {
+			setTitle(task?.title || "");
+			setDescription(task?.description || "");
+			setStatus(task?.status || "todo");
+			setAssigneeId(task?.assigneeId || "");
+			setIsDeleteConfirmOpen(false);
+		}
+	}
 
 	const members = useMemo(() => workspace?.members || [], [workspace]);
 	const isPending =

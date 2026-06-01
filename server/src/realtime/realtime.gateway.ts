@@ -37,6 +37,9 @@ export class RealtimeGateway
   @WebSocketServer()
   private readonly server: Server;
 
+  // Track which workspaces each socket is connected to
+  private socketWorkspaces = new Map<string, Set<string>>();
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -68,7 +71,15 @@ export class RealtimeGateway
     }
   }
 
-  handleDisconnect(client: AuthenticatedSocket) {
+  async handleDisconnect(client: AuthenticatedSocket) {
+    const workspaces = this.socketWorkspaces.get(client.id) || new Set();
+    this.socketWorkspaces.delete(client.id);
+
+    // Broadcast presence update to all workspaces this socket was in
+    for (const workspaceId of workspaces) {
+      await this.broadcastPresence(workspaceId);
+    }
+
     client.removeAllListeners();
   }
 
@@ -96,6 +107,13 @@ export class RealtimeGateway
     }
 
     await client.join(this.workspaceRoom(workspaceId));
+
+    if (!this.socketWorkspaces.has(client.id)) {
+      this.socketWorkspaces.set(client.id, new Set());
+    }
+    this.socketWorkspaces.get(client.id)!.add(workspaceId);
+
+    await this.broadcastPresence(workspaceId);
     return { ok: true };
   }
 
@@ -106,6 +124,8 @@ export class RealtimeGateway
   ) {
     if (body?.workspaceId) {
       await client.leave(this.workspaceRoom(body.workspaceId));
+      this.socketWorkspaces.get(client.id)?.delete(body.workspaceId);
+      await this.broadcastPresence(body.workspaceId);
     }
 
     return { ok: true };
@@ -138,6 +158,24 @@ export class RealtimeGateway
 
   private workspaceRoom(workspaceId: string) {
     return `workspace:${workspaceId}`;
+  }
+
+  private async broadcastPresence(workspaceId: string) {
+    const room = this.workspaceRoom(workspaceId);
+    const sockets = await this.server.in(room).fetchSockets();
+
+    const onlineUserIds = Array.from(
+      new Set(
+        sockets
+          .map((s) => (s as unknown as AuthenticatedSocket).data?.user?.id)
+          .filter(Boolean) as string[],
+      ),
+    );
+
+    this.broadcastToWorkspace(workspaceId, 'presence_sync', {
+      workspaceId,
+      onlineUserIds,
+    });
   }
 
   private extractToken(client: Socket): string | undefined {

@@ -28,13 +28,17 @@ export interface ActivityEvent {
 	actor?: WorkspaceUser;
 }
 
-export function useActivities(workspaceId: string | null) {
+export function useActivities(
+	workspaceId: string | null,
+	filters?: { type?: string; actorId?: string; limit?: number },
+) {
 	return useQuery<ActivityEvent[]>({
-		queryKey: queryKeys.workspaces.activities(workspaceId || ""),
+		queryKey: queryKeys.workspaces.activities(workspaceId || "", filters),
 		queryFn: async () => {
 			if (!workspaceId) return [];
 			const response = await axiosClient.get<ActivityEvent[]>(
 				`/workspaces/${workspaceId}/activities`,
+				{ params: filters },
 			);
 			return response.data;
 		},

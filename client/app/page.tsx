@@ -2,6 +2,7 @@
 
 import { AuthGuard } from "@/features/auth/components/AuthGuard";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { usePresenceStore } from "@/features/realtime/store/presenceStore";
 import { ActivityTimeline } from "@/features/workspace/components/ActivityTimeline";
 import { DashboardLayout } from "@/features/workspace/components/DashboardLayout";
 import { KanbanBoard } from "@/features/workspace/components/KanbanBoard";
@@ -19,6 +20,7 @@ import {
 	useWorkspaceDetail,
 	useWorkspaces,
 } from "@/features/workspace/hooks/useWorkspaceData";
+import { WorkspaceEventExplorer } from "@/features/workspace/pages/WorkspaceEventExplorer";
 import { useUIStore } from "@/features/workspace/store/uiStore";
 import { Avatar } from "@/shared/ui/avatar/Avatar";
 import { AvatarWithRing } from "@/shared/ui/avatar/AvatarWithRing";
@@ -82,6 +84,7 @@ function WorkspaceHome({
 		)
 		.slice(0, 4);
 	const activeTasks = tasks.filter((task) => task.status === "in_progress");
+	const isOnline = usePresenceStore((state) => state.onlineUserIds);
 
 	return (
 		<div className="mx-auto grid w-full max-w-[1600px] min-w-0 gap-5 lg:gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
@@ -253,14 +256,12 @@ function WorkspaceHome({
 					<div className="space-y-3">
 						{members.slice(0, 5).map((member) => (
 							<div key={member.id} className="flex items-center gap-3">
-								<div className="relative">
-									<Avatar
-										name={member.user.name}
-										email={member.user.email}
-										size="sm"
-									/>
-									<div className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-[1.5px] border-zinc-950 bg-emerald-500" />
-								</div>
+								<Avatar
+									name={member.user.name}
+									email={member.user.email}
+									size="sm"
+									isOnline={isOnline.has(member.user.id)}
+								/>
 								<div className="min-w-0 flex-1">
 									<p className="truncate text-xs font-medium text-zinc-200">
 										{member.user.name || member.user.email}
@@ -322,6 +323,7 @@ export default function Home() {
 		isCreateTaskModalOpen,
 		viewMode,
 		showSettings,
+		showActivityExplorer,
 		openTaskModal,
 		closeTaskModal,
 		openCreateTaskModal,
@@ -388,6 +390,8 @@ export default function Home() {
 					</div>
 				) : showSettings ? (
 					<WorkspaceSettings workspaceId={activeWorkspaceId} />
+				) : showActivityExplorer ? (
+					<WorkspaceEventExplorer workspaceId={activeWorkspaceId} />
 				) : !activeProjectId ? (
 					<WorkspaceHome
 						workspaceId={activeWorkspaceId}

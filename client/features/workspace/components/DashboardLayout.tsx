@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { SocketContext } from "@/features/realtime/context/SocketContext";
 import { Badge } from "@/shared/ui/badge/Badge";
 import { cn } from "@/shared/ui/cn";
@@ -79,6 +80,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 					</nav>
 
 					<div className="flex shrink-0 items-center gap-2 sm:gap-3">
+						<NotificationBell />
 						<Badge tone={isConnected ? "success" : "neutral"}>
 							<Radio className="h-3 w-3" />
 							<span className="hidden sm:inline">

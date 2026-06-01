@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { usePresenceStore } from "@/features/realtime/store/presenceStore";
 import type { ActivityEvent } from "@/features/workspace/hooks/useActivityData";
 import { useUIStore } from "@/features/workspace/store/uiStore";
 import { queryKeys } from "@/lib/queryKeys";
@@ -8,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { createContext, useEffect, useMemo, useState } from "react";
 import { type Socket, io } from "socket.io-client";
+import { toast } from "sonner";
 
 interface SocketContextType {
 	socket: Socket | null;
@@ -118,6 +120,60 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 				});
 			}
 		});
+
+		nextSocket.on(
+			"notification_created",
+			(notification: {
+				userId: string;
+				type: string;
+				payload?: Record<string, string>;
+			}) => {
+				if (notification.userId === user.id) {
+					queryClient.invalidateQueries({
+						queryKey: queryKeys.notifications.all(),
+					});
+
+					// Dynamic notification toast
+					let title = "New Notification";
+					let description = "";
+
+					switch (notification.type) {
+						case "task.assigned":
+							title = "Task Assigned";
+							description = `You were assigned to ${notification.payload?.taskTitle || "a task"}`;
+							break;
+						case "task.commented":
+							title = "New Comment";
+							description = `Someone commented on ${notification.payload?.taskTitle || "your task"}`;
+							break;
+						case "task.status_changed":
+							title = "Status Changed";
+							description = `${notification.payload?.taskTitle || "Your task"} changed to ${String(notification.payload?.status || "unknown").replace("_", " ")}`;
+							break;
+						case "workspace.member_joined":
+							title = "New Member";
+							description = `${notification.payload?.memberEmail || "A member"} joined the workspace`;
+							break;
+						case "workspace.member_left":
+							title = "Member Left";
+							description = `${notification.payload?.memberEmail || "A member"} left the workspace`;
+							break;
+					}
+
+					toast(title, { description });
+				}
+			},
+		);
+
+		nextSocket.on(
+			"presence_sync",
+			(data: { workspaceId: string; onlineUserIds: string[] }) => {
+				const currentWorkspaceId = useUIStore.getState().activeWorkspaceId;
+				if (data.workspaceId === currentWorkspaceId) {
+					usePresenceStore.getState().setOnlineUsers(data.onlineUserIds);
+				}
+			},
+		);
 
 		// Handle being removed from a workspace
 		nextSocket.on("workspace_removed", (data: { workspaceId: string }) => {

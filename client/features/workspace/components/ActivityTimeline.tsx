@@ -144,6 +144,15 @@ function detailForEvent(event: ActivityEvent) {
 	return undefined;
 }
 
+export function getActivityIcon(event: ActivityEvent) {
+	return {
+		icon: activityIcon[event.type] || CircleDot,
+		tone: activityTone[event.type] || "neutral",
+		title: titleForEvent(event),
+		detail: detailForEvent(event),
+	};
+}
+
 function getActorTasks(actorId?: string, tasks: Task[] = []) {
 	if (!actorId) return undefined;
 	const actorTasks = tasks.filter((t) => t.assigneeId === actorId);

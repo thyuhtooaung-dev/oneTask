@@ -11,6 +11,8 @@ import { WorkspaceMemberGuard } from './guards/workspace-member.guard';
 import { ActivitiesModule } from '../activities/activities.module';
 import { WorkspacePolicyService } from './workspace-policy.service';
 import { RealtimeModule } from '../realtime/realtime.module';
+import { MailModule } from '../mail/mail.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { RealtimeModule } from '../realtime/realtime.module';
     ]),
     ActivitiesModule,
     RealtimeModule,
+    MailModule,
+    NotificationsModule,
   ],
   controllers: [WorkspacesController],
   providers: [WorkspacesService, WorkspaceMemberGuard, WorkspacePolicyService],

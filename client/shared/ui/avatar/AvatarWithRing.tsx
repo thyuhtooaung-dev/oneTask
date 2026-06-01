@@ -11,6 +11,7 @@ interface AvatarWithRingProps {
 		inProgress: number;
 		done: number;
 	};
+	isOnline?: boolean;
 }
 
 export function AvatarWithRing({
@@ -19,6 +20,7 @@ export function AvatarWithRing({
 	size = "md",
 	className,
 	tasks,
+	isOnline,
 }: AvatarWithRingProps) {
 	const total = tasks ? tasks.todo + tasks.inProgress + tasks.done : 0;
 
@@ -111,6 +113,7 @@ export function AvatarWithRing({
 					name={name}
 					email={email}
 					size={size}
+					isOnline={isOnline}
 					className="border-0 bg-zinc-950"
 				/>
 			</div>

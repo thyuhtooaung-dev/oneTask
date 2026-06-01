@@ -2,6 +2,7 @@
 
 import { loginUser, registerUser } from "@/lib/api/auth";
 import { axiosClient } from "@/lib/api/axiosClient";
+import { useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { createContext, useCallback, useEffect, useState } from "react";
 
@@ -101,10 +102,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 		[refreshProfile],
 	);
 
+	const queryClient = useQueryClient();
 	const logout = useCallback(() => {
 		localStorage.removeItem("onetask_token");
+		queryClient.clear();
 		setUser(null);
-	}, []);
+	}, [queryClient]);
 
 	return (
 		<AuthContext.Provider

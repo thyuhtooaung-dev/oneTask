@@ -12,6 +12,7 @@ import { ActivitiesService } from '../activities/activities.service';
 import { EventType } from '../activities/entities/activity-event.entity';
 import { WorkspacePolicyService } from '../workspaces/workspace-policy.service';
 import { WorkspaceAction } from '../workspaces/workspace-policy';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const MAX_COMMENT_ATTACHMENTS = 4;
 const MAX_ATTACHMENT_DATA_URL_BYTES = 2 * 1024 * 1024;
@@ -26,6 +27,7 @@ export class CommentsService {
     private readonly taskRepository: Repository<Task>,
     private readonly activitiesService: ActivitiesService,
     private readonly policyService: WorkspacePolicyService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -79,6 +81,19 @@ export class CommentsService {
           }`,
       },
     });
+
+    if (task.assigneeId && task.assigneeId !== authorId) {
+      await this.notificationsService.create({
+        userId: task.assigneeId,
+        workspaceId: task.workspaceId,
+        type: 'task.commented',
+        payload: {
+          taskId: task.id,
+          taskTitle: task.title,
+          commentAuthorId: authorId,
+        },
+      });
+    }
 
     // Retrieve full author details to display cleanly
     return this.commentRepository.findOne({

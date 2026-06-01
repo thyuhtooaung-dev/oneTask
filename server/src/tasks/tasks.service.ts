@@ -7,6 +7,7 @@ import { EventType } from '../activities/entities/activity-event.entity';
 import { Project } from '../projects/entities/project.entity';
 import { WorkspacePolicyService } from '../workspaces/workspace-policy.service';
 import { WorkspaceAction } from '../workspaces/workspace-policy';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class TasksService {
@@ -17,6 +18,7 @@ export class TasksService {
     private readonly projectRepository: Repository<Project>,
     private readonly activitiesService: ActivitiesService,
     private readonly policyService: WorkspacePolicyService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -71,6 +73,19 @@ export class TasksService {
       entityId: savedTask.id,
       metadata: { taskTitle: savedTask.title },
     });
+
+    if (assigneeId && assigneeId !== reporterId) {
+      await this.notificationsService.create({
+        userId: assigneeId,
+        workspaceId,
+        type: 'task.assigned',
+        payload: {
+          taskId: savedTask.id,
+          taskTitle: savedTask.title,
+          assignerId: reporterId,
+        },
+      });
+    }
 
     return savedTask;
   }
@@ -179,6 +194,38 @@ export class TasksService {
         metadata: {
           taskTitle: savedTask.title,
           changes,
+        },
+      });
+    }
+
+    if (
+      changes.assigneeId &&
+      changes.assigneeId.to &&
+      changes.assigneeId.to !== changes.assigneeId.from &&
+      changes.assigneeId.to !== actorId
+    ) {
+      await this.notificationsService.create({
+        userId: changes.assigneeId.to as string,
+        workspaceId: savedTask.workspaceId,
+        type: 'task.assigned',
+        payload: {
+          taskId: savedTask.id,
+          taskTitle: savedTask.title,
+          assignerId: actorId,
+        },
+      });
+    }
+
+    if (changes.status && task.assigneeId && task.assigneeId !== actorId) {
+      await this.notificationsService.create({
+        userId: task.assigneeId,
+        workspaceId: savedTask.workspaceId,
+        type: 'task.status_changed',
+        payload: {
+          taskId: savedTask.id,
+          taskTitle: savedTask.title,
+          status: changes.status.to,
+          changerId: actorId,
         },
       });
     }

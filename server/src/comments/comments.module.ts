@@ -7,12 +7,15 @@ import { WorkspacesModule } from '../workspaces/workspaces.module';
 import { ActivitiesModule } from '../activities/activities.module';
 import { TasksModule } from '../tasks/tasks.module';
 
+import { NotificationsModule } from '../notifications/notifications.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Comment]),
     WorkspacesModule,
     ActivitiesModule,
     TasksModule,
+    NotificationsModule,
   ],
   controllers: [CommentsController],
   providers: [CommentsService],

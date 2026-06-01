@@ -7,6 +7,7 @@ import { cn } from "@/shared/ui/cn";
 import { Dialog } from "@/shared/ui/dialog/Dialog";
 import { DropdownMenu } from "@/shared/ui/dropdown-menu/DropdownMenu";
 import {
+	Activity,
 	Briefcase,
 	ChevronDown,
 	Folder,
@@ -95,9 +96,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		activeWorkspaceId,
 		activeProjectId,
 		showSettings,
+		showActivityExplorer,
 		setActiveWorkspaceId,
 		setActiveProjectId,
 		setShowSettings,
+		setShowActivityExplorer,
 	} = useUIStore();
 
 	const { data: workspaces = [], isLoading: isLoadingWorkspaces } =
@@ -110,7 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
 	const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 	const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
-	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+	const [userCollapsed, setUserCollapsed] = useState<boolean | null>(null);
 	const [workspaceName, setWorkspaceName] = useState("");
 	const [workspaceDesc, setWorkspaceDesc] = useState("");
 	const [projectName, setProjectName] = useState("");
@@ -120,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	const viewport = useViewportMode();
 	const isMobile = viewport === "mobile";
 	const isSidebarCompact =
-		!isMobile && (isSidebarCollapsed || viewport === "tablet");
+		!isMobile && (userCollapsed ?? viewport === "tablet");
 
 	const handleNavigate = (callback: () => void) => {
 		callback();
@@ -173,15 +176,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			>
 				{isSidebarCompact ? (
 					<>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={() => setIsSidebarCollapsed(false)}
-							title="Expand sidebar"
-							className="hidden lg:inline-flex"
-						>
-							<PanelLeftOpen className="h-4 w-4" />
-						</Button>
+						{!isMobile && (
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setUserCollapsed(false)}
+								title="Expand sidebar"
+								className="hidden md:inline-flex"
+							>
+								<PanelLeftOpen className="h-4 w-4" />
+							</Button>
+						)}
 						<div className="relative flex h-8 w-8 overflow-hidden rounded-lg shadow-[0_10px_30px_rgba(124,58,237,0.24)] lg:hidden">
 							<Image
 								src="/logo.jpg"
@@ -209,15 +214,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
 								Event OS
 							</p>
 						</div>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={() => setIsSidebarCollapsed(true)}
-							title="Collapse sidebar"
-							className="hidden lg:inline-flex"
-						>
-							<PanelLeftClose className="h-4 w-4" />
-						</Button>
+						{!isMobile && (
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setUserCollapsed(true)}
+								title="Collapse sidebar"
+								className="hidden md:inline-flex"
+							>
+								<PanelLeftClose className="h-4 w-4" />
+							</Button>
+						)}
 					</>
 				)}
 			</div>
@@ -242,10 +249,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
 						{activeWorkspaceId ? (
 							<>
 								<NavItem
-									active={!activeProjectId && !showSettings}
+									active={
+										!activeProjectId && !showSettings && !showActivityExplorer
+									}
 									icon={Inbox}
-									label="Workspace activity"
+									label="Workspace overview"
 									onClick={() => handleNavigate(() => setActiveProjectId(null))}
+									collapsed
+								/>
+								<NavItem
+									active={showActivityExplorer}
+									icon={Activity}
+									label="Event Explorer"
+									onClick={() =>
+										handleNavigate(() => setShowActivityExplorer(true))
+									}
 									collapsed
 								/>
 								<NavItem
@@ -382,11 +400,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
 							) : (
 								<div className="space-y-1">
 									<NavItem
-										active={!activeProjectId && !showSettings}
+										active={
+											!activeProjectId && !showSettings && !showActivityExplorer
+										}
 										icon={Inbox}
-										label="Workspace activity"
+										label="Workspace overview"
 										onClick={() =>
 											handleNavigate(() => setActiveProjectId(null))
+										}
+									/>
+									<NavItem
+										active={showActivityExplorer}
+										icon={Activity}
+										label="Event Explorer"
+										onClick={() =>
+											handleNavigate(() => setShowActivityExplorer(true))
 										}
 									/>
 									<NavItem

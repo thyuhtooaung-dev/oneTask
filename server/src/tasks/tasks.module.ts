@@ -6,6 +6,7 @@ import { Task } from './entities/task.entity';
 import { WorkspacesModule } from '../workspaces/workspaces.module';
 import { ActivitiesModule } from '../activities/activities.module';
 import { ProjectsModule } from '../projects/projects.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ProjectsModule } from '../projects/projects.module';
     WorkspacesModule,
     ActivitiesModule,
     ProjectsModule,
+    NotificationsModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],

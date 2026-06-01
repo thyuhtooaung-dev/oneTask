@@ -17,6 +17,8 @@ import { EventType } from '../activities/entities/activity-event.entity';
 import { WorkspacePolicyService } from './workspace-policy.service';
 import { WorkspaceAction } from './workspace-policy';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
+import { MailService } from '../mail/mail.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -31,6 +33,8 @@ export class WorkspacesService {
     private readonly activitiesService: ActivitiesService,
     private readonly policyService: WorkspacePolicyService,
     private readonly realtimeGateway: RealtimeGateway,
+    private readonly mailService: MailService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -130,7 +134,27 @@ export class WorkspacesService {
       expiresAt,
     });
 
-    return this.workspaceInviteRepository.save(invite);
+    const savedInvite = await this.workspaceInviteRepository.save(invite);
+
+    // Get workspace for email
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId },
+    });
+    const inviterName = creator.user?.name || creator.user?.email || 'A member';
+
+    // The invite link would point to the client app route for accepting invitations
+    // Typically this would use an env variable for the frontend URL
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const inviteLink = `${clientUrl}/invite/${savedInvite.token}`;
+
+    await this.mailService.sendWorkspaceInviteEmail(
+      email,
+      workspace?.name || 'a workspace',
+      inviterName,
+      inviteLink,
+    );
+
+    return savedInvite;
   }
 
   async getInvites(workspaceId: string) {
@@ -217,6 +241,20 @@ export class WorkspacesService {
       entityId: membership.id,
       metadata: { role: invite.role, email: user.email },
     });
+
+    const otherMembers = await this.workspaceMemberRepository.find({
+      where: { workspaceId: invite.workspaceId },
+    });
+    for (const member of otherMembers) {
+      if (member.userId !== user.id) {
+        await this.notificationsService.create({
+          userId: member.userId,
+          workspaceId: invite.workspaceId,
+          type: 'workspace.member_joined',
+          payload: { memberEmail: user.email },
+        });
+      }
+    }
 
     return { workspaceId: invite.workspaceId };
   }
@@ -320,6 +358,24 @@ export class WorkspacesService {
         userId: memberToRemove.userId,
       },
     });
+
+    const remainingMembers = await this.workspaceMemberRepository.find({
+      where: { workspaceId },
+      relations: ['user'],
+    });
+    for (const member of remainingMembers) {
+      if (
+        member.userId !== memberToRemove.userId &&
+        member.userId !== currentUserId
+      ) {
+        await this.notificationsService.create({
+          userId: member.userId,
+          workspaceId,
+          type: 'workspace.member_left',
+          payload: { memberEmail: memberToRemove.user?.email || 'A member' },
+        });
+      }
+    }
 
     // Kick the removed user from the workspace socket room immediately
     await this.realtimeGateway.removeUserFromWorkspace(

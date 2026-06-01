@@ -5,7 +5,8 @@ import { Button } from "@/shared/ui/button/Button";
 import { ConfirmDialog } from "@/shared/ui/dialog/ConfirmDialog";
 import { Dialog } from "@/shared/ui/dialog/Dialog";
 import { Drawer } from "@/shared/ui/drawer/Drawer";
-import { Loader2, Save, Trash2 } from "lucide-react";
+import { DropdownMenu } from "@/shared/ui/dropdown-menu/DropdownMenu";
+import { ChevronDown, Loader2, Save, Trash2 } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import {
@@ -155,22 +156,40 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 					<label htmlFor={`${mode}-task-status`} className="ot-label">
 						Status
 					</label>
-					<select
-						id={`${mode}-task-status`}
-						value={status}
-						onChange={(event) => setStatus(event.target.value as TaskStatus)}
-						className="ot-input min-h-10 px-3 text-sm"
-					>
-						{STATUS_OPTIONS.map((option) => (
-							<option
-								key={option.value}
-								value={option.value}
-								className="bg-zinc-950 text-white"
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger asChild>
+							<button
+								id={`${mode}-task-status`}
+								type="button"
+								className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
 							>
-								{option.label}
-							</option>
-						))}
-					</select>
+								<span className="truncate text-zinc-100">
+									{STATUS_OPTIONS.find((opt) => opt.value === status)?.label ||
+										"Select status"}
+								</span>
+								<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+							</button>
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content
+							align="start"
+							className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)]"
+						>
+							<DropdownMenu.Label>Status</DropdownMenu.Label>
+							<DropdownMenu.RadioGroup
+								value={status}
+								onValueChange={(val) => setStatus(val as TaskStatus)}
+							>
+								{STATUS_OPTIONS.map((option) => (
+									<DropdownMenu.RadioItem
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</DropdownMenu.RadioItem>
+								))}
+							</DropdownMenu.RadioGroup>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
 					{activeStatus && (
 						<Badge tone={activeStatus.tone}>{activeStatus.label}</Badge>
 					)}
@@ -180,25 +199,50 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 					<label htmlFor={`${mode}-task-assignee`} className="ot-label">
 						Assignee
 					</label>
-					<select
-						id={`${mode}-task-assignee`}
-						value={assigneeId}
-						onChange={(event) => setAssigneeId(event.target.value)}
-						className="ot-input min-h-10 px-3 text-sm"
-					>
-						<option value="" className="bg-zinc-950 text-zinc-400">
-							Unassigned
-						</option>
-						{members.map((member) => (
-							<option
-								key={member.userId}
-								value={member.userId}
-								className="bg-zinc-950 text-white"
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger asChild>
+							<button
+								id={`${mode}-task-assignee`}
+								type="button"
+								className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
 							>
-								{member.user?.name || member.user?.email || member.userId}
-							</option>
-						))}
-					</select>
+								<span className="truncate text-zinc-100">
+									{assigneeId === ""
+										? "Unassigned"
+										: members.find((m) => m.userId === assigneeId)?.user
+												?.name ||
+											members.find((m) => m.userId === assigneeId)?.user
+												?.email ||
+											assigneeId}
+								</span>
+								<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+							</button>
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content
+							align="start"
+							className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)] max-h-[300px]"
+						>
+							<DropdownMenu.Label>Assignee</DropdownMenu.Label>
+							<DropdownMenu.RadioGroup
+								value={assigneeId}
+								onValueChange={setAssigneeId}
+							>
+								<DropdownMenu.RadioItem value="">
+									Unassigned
+								</DropdownMenu.RadioItem>
+								{members.map((member) => (
+									<DropdownMenu.RadioItem
+										key={member.userId}
+										value={member.userId}
+									>
+										<span className="truncate">
+											{member.user?.name || member.user?.email || member.userId}
+										</span>
+									</DropdownMenu.RadioItem>
+								))}
+							</DropdownMenu.RadioGroup>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
 				</div>
 
 				<div className="flex flex-col-reverse gap-3 border-t border-zinc-900 pt-4 sm:flex-row sm:items-center sm:justify-between">

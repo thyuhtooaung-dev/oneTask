@@ -17,6 +17,7 @@ export class WorkspacePolicyService {
   ): Promise<WorkspaceMember> {
     const member = await this.workspaceMemberRepository.findOne({
       where: { userId, workspaceId },
+      relations: ['user'],
     });
     if (!member) {
       throw new ForbiddenException('User is not a member of this workspace');

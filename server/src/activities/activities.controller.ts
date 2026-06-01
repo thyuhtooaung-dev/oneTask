@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { WorkspaceMemberGuard } from '../workspaces/guards/workspace-member.guard';
 
@@ -8,7 +8,16 @@ export class ActivitiesController {
 
   @Get('workspaces/:workspaceId/activities')
   @UseGuards(WorkspaceMemberGuard)
-  async findAll(@Param('workspaceId') workspaceId: string) {
-    return this.activitiesService.getTimeline(workspaceId);
+  async findAll(
+    @Param('workspaceId') workspaceId: string,
+    @Query('type') type?: string,
+    @Query('actorId') actorId?: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.activitiesService.getTimeline(workspaceId, {
+      type,
+      actorId,
+      limit,
+    });
   }
 }

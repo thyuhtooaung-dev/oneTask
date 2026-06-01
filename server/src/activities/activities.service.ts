@@ -37,12 +37,29 @@ export class ActivitiesService {
     return payload;
   }
 
-  async getTimeline(workspaceId: string) {
-    return this.activityRepository.find({
-      where: { workspaceId },
-      order: { createdAt: 'DESC' },
-      relations: ['actor'],
-      take: 50,
-    });
+  async getTimeline(
+    workspaceId: string,
+    filters?: { type?: string; actorId?: string; limit?: number },
+  ) {
+    const query = this.activityRepository
+      .createQueryBuilder('activity')
+      .leftJoinAndSelect('activity.actor', 'actor')
+      .where('activity.workspaceId = :workspaceId', { workspaceId });
+
+    if (filters?.type) {
+      query.andWhere('activity.type::text LIKE :type', {
+        type: `${filters.type}%`,
+      });
+    }
+    if (filters?.actorId) {
+      query.andWhere('activity.actorId = :actorId', {
+        actorId: filters.actorId,
+      });
+    }
+
+    return query
+      .orderBy('activity.createdAt', 'DESC')
+      .take(filters?.limit || 50)
+      .getMany();
   }
 }

@@ -14,6 +14,8 @@ export const metadata: Metadata = {
 	description: "Collaborative Event-Driven Management System",
 };
 
+import { Toaster } from "@/shared/ui/sonner/Sonner";
+
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -23,6 +25,7 @@ export default function RootLayout({
 		<html lang="en" className={`${fredoka.variable} h-full antialiased`}>
 			<body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
 				<Providers>{children}</Providers>
+				<Toaster position="bottom-right" duration={5000} />
 			</body>
 		</html>
 	);

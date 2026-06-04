@@ -8,6 +8,7 @@ import { Dialog } from "@/shared/ui/dialog/Dialog";
 import { DropdownMenu } from "@/shared/ui/dropdown-menu/DropdownMenu";
 import {
 	Activity,
+	BarChart3,
 	Briefcase,
 	ChevronDown,
 	Folder,
@@ -97,10 +98,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		activeProjectId,
 		showSettings,
 		showActivityExplorer,
+		showAnalytics,
+		isCreateProjectModalOpen,
 		setActiveWorkspaceId,
 		setActiveProjectId,
 		setShowSettings,
 		setShowActivityExplorer,
+		setShowAnalytics,
+		openCreateProjectModal,
+		closeCreateProjectModal,
 	} = useUIStore();
 
 	const { data: workspaces = [], isLoading: isLoadingWorkspaces } =
@@ -111,7 +117,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	const createProjectMutation = useCreateProject(activeWorkspaceId);
 
 	const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
-	const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 	const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 	const [userCollapsed, setUserCollapsed] = useState<boolean | null>(null);
 	const [workspaceName, setWorkspaceName] = useState("");
@@ -156,7 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		setActiveProjectId(project.id);
 		setProjectName("");
 		setProjectDesc("");
-		setIsProjectModalOpen(false);
+		closeCreateProjectModal();
 		onMobileClose?.();
 	};
 
@@ -192,6 +197,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 								src="/logo.jpg"
 								alt="oneTask Logo"
 								fill
+								sizes="32px"
 								className="object-cover"
 							/>
 						</div>
@@ -250,11 +256,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
 							<>
 								<NavItem
 									active={
-										!activeProjectId && !showSettings && !showActivityExplorer
+										!activeProjectId &&
+										!showSettings &&
+										!showActivityExplorer &&
+										!showAnalytics
 									}
 									icon={Inbox}
 									label="Workspace overview"
 									onClick={() => handleNavigate(() => setActiveProjectId(null))}
+									collapsed
+								/>
+								<NavItem
+									active={showAnalytics}
+									icon={BarChart3}
+									label="Insights"
+									onClick={() => handleNavigate(() => setShowAnalytics(true))}
 									collapsed
 								/>
 								<NavItem
@@ -277,7 +293,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 								<Button
 									variant="ghost"
 									size="icon"
-									onClick={() => setIsProjectModalOpen(true)}
+									onClick={openCreateProjectModal}
 									title="Create project"
 									className="w-full"
 								>
@@ -382,7 +398,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 									<Button
 										variant="ghost"
 										size="icon"
-										onClick={() => setIsProjectModalOpen(true)}
+										onClick={openCreateProjectModal}
 										title="Create project"
 									>
 										<Plus className="h-4 w-4" />
@@ -401,13 +417,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
 								<div className="space-y-1">
 									<NavItem
 										active={
-											!activeProjectId && !showSettings && !showActivityExplorer
+											!activeProjectId &&
+											!showSettings &&
+											!showActivityExplorer &&
+											!showAnalytics
 										}
 										icon={Inbox}
 										label="Workspace overview"
 										onClick={() =>
 											handleNavigate(() => setActiveProjectId(null))
 										}
+									/>
+									<NavItem
+										active={showAnalytics}
+										icon={BarChart3}
+										label="Insights"
+										onClick={() => handleNavigate(() => setShowAnalytics(true))}
 									/>
 									<NavItem
 										active={showActivityExplorer}
@@ -435,7 +460,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 											<p className="text-xs text-zinc-600">No projects yet.</p>
 											<button
 												type="button"
-												onClick={() => setIsProjectModalOpen(true)}
+												onClick={openCreateProjectModal}
 												className="mt-2 text-xs font-semibold text-violet-300 hover:text-violet-200"
 											>
 												Create project
@@ -569,10 +594,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			</Dialog>
 
 			<Dialog
-				open={isProjectModalOpen}
+				open={isCreateProjectModalOpen}
 				title="Create project"
 				description={`Add a focused collaboration surface${activeWorkspace ? ` inside ${activeWorkspace.name}` : ""}.`}
-				onClose={() => setIsProjectModalOpen(false)}
+				onClose={closeCreateProjectModal}
 			>
 				<form onSubmit={handleCreateProject} className="space-y-4 p-5">
 					<div className="space-y-2">

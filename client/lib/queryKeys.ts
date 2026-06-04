@@ -10,6 +10,8 @@ export const queryKeys = {
 			["workspaces", workspaceId, "projects"] as const,
 		tasks: (workspaceId: string) =>
 			["workspaces", workspaceId, "tasks"] as const,
+		search: (workspaceId: string, query: string) =>
+			["workspaces", workspaceId, "search", query] as const,
 	},
 	tasks: {
 		detail: (taskId: string) => ["tasks", taskId] as const,

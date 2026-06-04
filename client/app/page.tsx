@@ -1,13 +1,23 @@
 "use client";
 
+import { WorkspaceAnalytics } from "@/features/analytics/pages/WorkspaceAnalytics";
 import { AuthGuard } from "@/features/auth/components/AuthGuard";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import {
+	type Notification,
+	useMarkNotificationAsRead,
+	useNotifications,
+} from "@/features/notifications/hooks/useNotifications";
 import { usePresenceStore } from "@/features/realtime/store/presenceStore";
 import { ActivityTimeline } from "@/features/workspace/components/ActivityTimeline";
 import { DashboardLayout } from "@/features/workspace/components/DashboardLayout";
 import { KanbanBoard } from "@/features/workspace/components/KanbanBoard";
 import { TaskModal } from "@/features/workspace/components/TaskModal";
 import { WorkspaceSettings } from "@/features/workspace/components/WorkspaceSettings";
+import {
+	type ActivityEvent,
+	useActivities,
+} from "@/features/workspace/hooks/useActivityData";
 import {
 	type Task,
 	type TaskStatus,
@@ -23,11 +33,15 @@ import {
 import { WorkspaceEventExplorer } from "@/features/workspace/pages/WorkspaceEventExplorer";
 import { useUIStore } from "@/features/workspace/store/uiStore";
 import { Avatar } from "@/shared/ui/avatar/Avatar";
-import { AvatarWithRing } from "@/shared/ui/avatar/AvatarWithRing";
 import { Badge } from "@/shared/ui/badge/Badge";
 import { Button } from "@/shared/ui/button/Button";
 import { cn } from "@/shared/ui/cn";
 import {
+	Activity,
+	AlertCircle,
+	Bell,
+	Briefcase,
+	CalendarClock,
 	CheckCircle2,
 	Circle,
 	Clock3,
@@ -35,7 +49,6 @@ import {
 	Kanban,
 	List,
 	Loader2,
-	MessageSquare,
 	Plus,
 	Sparkles,
 	XCircle,
@@ -54,6 +67,84 @@ const STATUS_COLUMNS: Array<{
 	{ value: "done", label: "Done", icon: CheckCircle2, tone: "success" },
 	{ value: "canceled", label: "Canceled", icon: XCircle, tone: "danger" },
 ];
+
+function getGreeting(name?: string) {
+	const hour = new Date().getHours();
+	const daypart =
+		hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+	return `${daypart}${name ? `, ${name}` : ""}`;
+}
+
+function isOverdue(task: Task) {
+	if (!task.dueDate || task.status === "done" || task.status === "canceled") {
+		return false;
+	}
+
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const dueDate = new Date(task.dueDate);
+	dueDate.setHours(0, 0, 0, 0);
+	return dueDate.getTime() < today.getTime();
+}
+
+function formatShortDate(value: string) {
+	return new Date(value).toLocaleDateString(undefined, {
+		month: "short",
+		day: "numeric",
+	});
+}
+
+function getNotificationCopy(notification: Notification) {
+	const taskTitle = String(notification.payload?.taskTitle || "a task");
+
+	if (notification.type === "task.assigned") {
+		return {
+			title: "New task assigned",
+			subtitle: taskTitle,
+		};
+	}
+
+	if (notification.type === "task.commented") {
+		return {
+			title: "New reply on your work",
+			subtitle: taskTitle,
+		};
+	}
+
+	if (notification.type === "comment.mentioned") {
+		return {
+			title: "You were mentioned",
+			subtitle: taskTitle,
+		};
+	}
+
+	if (notification.type === "task.status_changed") {
+		return {
+			title: "Task status changed",
+			subtitle: taskTitle,
+		};
+	}
+
+	return {
+		title: "New notification",
+		subtitle: taskTitle,
+	};
+}
+
+function getActivityCopy(activity: ActivityEvent) {
+	const actor = activity.actor?.name || activity.actor?.email || "You";
+	const target =
+		typeof activity.metadata?.taskTitle === "string"
+			? activity.metadata.taskTitle
+			: typeof activity.metadata?.projectName === "string"
+				? activity.metadata.projectName
+				: activity.entityType || "workspace";
+
+	return {
+		title: activity.type.replace(".", " "),
+		subtitle: `${actor} · ${target}`,
+	};
+}
 
 function WorkspaceHome({
 	workspaceId,
@@ -74,9 +165,19 @@ function WorkspaceHome({
 	userId?: string;
 	canCreateTask: boolean;
 }) {
+	const { user } = useAuth();
+	const { data: notifications = [] } = useNotifications();
+	const markNotificationAsRead = useMarkNotificationAsRead();
+	const { data: userActivities = [] } = useActivities(workspaceId, {
+		actorId: userId,
+		limit: 6,
+	});
 	const assignedTasks = tasks
 		.filter((task) => task.assigneeId === userId && task.status !== "done")
-		.slice(0, 5);
+		.sort(
+			(a, b) =>
+				new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+		);
 	const recentTasks = [...tasks]
 		.sort(
 			(a, b) =>
@@ -84,7 +185,44 @@ function WorkspaceHome({
 		)
 		.slice(0, 4);
 	const activeTasks = tasks.filter((task) => task.status === "in_progress");
+	const overdueAssignedTasks = assignedTasks.filter(isOverdue);
+	const workspaceNotifications = notifications.filter(
+		(notification) => notification.workspaceId === workspaceId,
+	);
+	const unreadWorkspaceNotifications = workspaceNotifications.filter(
+		(notification) => !notification.read,
+	);
 	const isOnline = usePresenceStore((state) => state.onlineUserIds);
+	const notificationTaskIds = new Set(
+		unreadWorkspaceNotifications
+			.map((notification) => notification.payload?.taskId)
+			.filter((taskId): taskId is string => typeof taskId === "string"),
+	);
+	const attentionAssignedTasks = assignedTasks.filter(
+		(task) =>
+			task.status === "todo" &&
+			!isOverdue(task) &&
+			!notificationTaskIds.has(task.id),
+	);
+	const needsAttentionCount =
+		unreadWorkspaceNotifications.length +
+		overdueAssignedTasks.length +
+		attentionAssignedTasks.length;
+	const myWorkTasks = [
+		...assignedTasks.filter((task) => task.status === "in_progress"),
+		...assignedTasks.filter((task) => task.status !== "in_progress"),
+	].slice(0, 5);
+
+	const openNotification = (notification: Notification) => {
+		if (!notification.read) {
+			markNotificationAsRead.mutate(notification.id);
+		}
+
+		const taskId = notification.payload?.taskId;
+		if (typeof taskId === "string") {
+			onTaskClick(taskId);
+		}
+	};
 
 	return (
 		<div className="mx-auto grid w-full max-w-[1600px] min-w-0 gap-5 lg:gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
@@ -141,6 +279,210 @@ function WorkspaceHome({
 					</div>
 				</section>
 
+				<section className="space-y-4">
+					<div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+						<div>
+							<p className="ot-label">Personal inbox</p>
+							<h3 className="mt-1 text-xl font-semibold tracking-tight text-zinc-100">
+								{getGreeting(user?.name || user?.email)}
+							</h3>
+						</div>
+						<Badge tone={needsAttentionCount > 0 ? "warning" : "success"}>
+							Needs Attention ({needsAttentionCount})
+						</Badge>
+					</div>
+
+					<div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,340px)]">
+						<section className="rounded-xl border border-zinc-900 bg-zinc-950/45 p-4">
+							<div className="mb-3 flex items-center justify-between">
+								<div className="flex items-center gap-2">
+									<AlertCircle className="h-4 w-4 text-amber-300" />
+									<h4 className="text-sm font-semibold text-zinc-100">
+										Needs Attention
+									</h4>
+								</div>
+								<Badge tone={needsAttentionCount > 0 ? "warning" : "neutral"}>
+									{needsAttentionCount}
+								</Badge>
+							</div>
+
+							<div className="space-y-2">
+								{unreadWorkspaceNotifications
+									.slice(0, 4)
+									.map((notification) => {
+										const copy = getNotificationCopy(notification);
+
+										return (
+											<button
+												key={notification.id}
+												type="button"
+												onClick={() => openNotification(notification)}
+												className="grid w-full grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-zinc-900 bg-zinc-950/70 px-3 py-2.5 text-left transition-colors hover:border-zinc-800 hover:bg-zinc-900/70"
+											>
+												<span className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-500/20 bg-violet-500/10 text-violet-300">
+													<Bell className="h-4 w-4" />
+												</span>
+												<span className="min-w-0">
+													<span className="block truncate text-sm font-semibold text-zinc-100">
+														{copy.title}
+													</span>
+													<span className="mt-0.5 block truncate text-xs text-zinc-500">
+														{copy.subtitle}
+													</span>
+												</span>
+												<span className="text-[10px] font-medium text-zinc-600">
+													{formatShortDate(notification.createdAt)}
+												</span>
+											</button>
+										);
+									})}
+
+								{overdueAssignedTasks.slice(0, 3).map((task) => (
+									<button
+										key={`overdue-${task.id}`}
+										type="button"
+										onClick={() => onTaskClick(task.id)}
+										className="grid w-full grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-red-500/15 bg-red-500/5 px-3 py-2.5 text-left transition-colors hover:border-red-500/25 hover:bg-red-500/10"
+									>
+										<span className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/20 bg-red-500/10 text-red-300">
+											<CalendarClock className="h-4 w-4" />
+										</span>
+										<span className="min-w-0">
+											<span className="block truncate text-sm font-semibold text-zinc-100">
+												{task.title}
+											</span>
+											<span className="mt-0.5 block truncate text-xs text-red-300/80">
+												Overdue since{" "}
+												{task.dueDate
+													? formatShortDate(task.dueDate)
+													: "earlier"}
+											</span>
+										</span>
+										<Badge tone="danger">Overdue</Badge>
+									</button>
+								))}
+
+								{attentionAssignedTasks.slice(0, 3).map((task) => (
+									<button
+										key={`assigned-${task.id}`}
+										type="button"
+										onClick={() => onTaskClick(task.id)}
+										className="grid w-full grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-zinc-900 bg-zinc-950/70 px-3 py-2.5 text-left transition-colors hover:border-zinc-800 hover:bg-zinc-900/70"
+									>
+										<span className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-300">
+											<Briefcase className="h-4 w-4" />
+										</span>
+										<span className="min-w-0">
+											<span className="block truncate text-sm font-semibold text-zinc-100">
+												{task.title}
+											</span>
+											<span className="mt-0.5 block truncate text-xs text-zinc-500">
+												Assigned to you
+											</span>
+										</span>
+										<Badge tone="warning">New</Badge>
+									</button>
+								))}
+
+								{needsAttentionCount === 0 && (
+									<p className="rounded-lg border border-dashed border-zinc-900 px-3 py-8 text-center text-xs font-medium text-zinc-600">
+										Nothing needs attention right now.
+									</p>
+								)}
+							</div>
+						</section>
+
+						<section className="rounded-xl border border-zinc-900 bg-zinc-950/45 p-4">
+							<div className="mb-3 flex items-center justify-between">
+								<div className="flex items-center gap-2">
+									<Briefcase className="h-4 w-4 text-violet-300" />
+									<h4 className="text-sm font-semibold text-zinc-100">
+										My Work
+									</h4>
+								</div>
+								<Badge tone="accent">{assignedTasks.length}</Badge>
+							</div>
+
+							<div className="space-y-2">
+								{myWorkTasks.map((task) => (
+									<button
+										key={task.id}
+										type="button"
+										onClick={() => onTaskClick(task.id)}
+										className="flex w-full min-w-0 items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-900/70"
+									>
+										<span className="min-w-0">
+											<span className="block truncate text-sm font-semibold text-zinc-200">
+												{task.title}
+											</span>
+											<span className="mt-0.5 block truncate text-xs text-zinc-600">
+												{task.dueDate
+													? `Due ${formatShortDate(task.dueDate)}`
+													: "No due date"}
+											</span>
+										</span>
+										<Badge
+											className="shrink-0"
+											tone={
+												STATUS_COLUMNS.find(
+													(item) => item.value === task.status,
+												)?.tone || "neutral"
+											}
+										>
+											{task.status.replace("_", " ")}
+										</Badge>
+									</button>
+								))}
+
+								{myWorkTasks.length === 0 && (
+									<p className="rounded-lg border border-dashed border-zinc-900 px-3 py-8 text-center text-xs font-medium text-zinc-600">
+										No assigned work is active.
+									</p>
+								)}
+							</div>
+						</section>
+					</div>
+
+					<section className="rounded-xl border border-zinc-900 bg-zinc-950/45 p-4">
+						<div className="mb-3 flex items-center gap-2">
+							<Activity className="h-4 w-4 text-emerald-300" />
+							<h4 className="text-sm font-semibold text-zinc-100">
+								Recent Activity By You
+							</h4>
+						</div>
+						<div className="grid gap-2 md:grid-cols-2">
+							{userActivities.slice(0, 4).map((activity) => {
+								const copy = getActivityCopy(activity);
+
+								return (
+									<div
+										key={activity.id}
+										className="rounded-lg border border-zinc-900 bg-zinc-950/55 px-3 py-2.5"
+									>
+										<div className="flex items-center justify-between gap-3">
+											<p className="truncate text-sm font-semibold capitalize text-zinc-200">
+												{copy.title}
+											</p>
+											<span className="shrink-0 text-[10px] font-medium text-zinc-600">
+												{formatShortDate(activity.createdAt)}
+											</span>
+										</div>
+										<p className="mt-1 truncate text-xs text-zinc-600">
+											{copy.subtitle}
+										</p>
+									</div>
+								);
+							})}
+
+							{userActivities.length === 0 && (
+								<p className="rounded-lg border border-dashed border-zinc-900 px-3 py-8 text-center text-xs font-medium text-zinc-600 md:col-span-2">
+									No recent activity is tied to you yet.
+								</p>
+							)}
+						</div>
+					</section>
+				</section>
+
 				<ActivityTimeline
 					workspaceId={workspaceId}
 					workspaceName={workspaceName}
@@ -151,98 +493,6 @@ function WorkspaceHome({
 			</div>
 
 			<aside className="min-w-0 space-y-4">
-				<section className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 sm:p-5">
-					<div className="mb-4">
-						<p className="ot-label">Workspace Health</p>
-						<h3 className="mt-1 text-sm font-semibold text-zinc-100">
-							Task distribution
-						</h3>
-					</div>
-					<div className="flex items-center gap-6">
-						<AvatarWithRing
-							name={workspaceName || "Workspace"}
-							size="xl"
-							tasks={{
-								todo: tasks.filter((t) => t.status === "todo").length,
-								inProgress: activeTasks.length,
-								done: tasks.filter((t) => t.status === "done").length,
-							}}
-							className="ml-2"
-						/>
-						<div className="flex flex-col gap-2.5 flex-1">
-							<div className="flex items-center justify-between text-xs">
-								<div className="flex items-center gap-1.5">
-									<div className="h-2 w-2 rounded-full bg-zinc-500" />
-									<span className="text-zinc-400">Todo</span>
-								</div>
-								<span className="font-semibold text-zinc-100">
-									{tasks.filter((t) => t.status === "todo").length}
-								</span>
-							</div>
-							<div className="flex items-center justify-between text-xs">
-								<div className="flex items-center gap-1.5">
-									<div className="h-2 w-2 rounded-full bg-violet-400" />
-									<span className="text-zinc-400">In progress</span>
-								</div>
-								<span className="font-semibold text-violet-300">
-									{activeTasks.length}
-								</span>
-							</div>
-							<div className="flex items-center justify-between text-xs">
-								<div className="flex items-center gap-1.5">
-									<div className="h-2 w-2 rounded-full bg-emerald-400" />
-									<span className="text-zinc-400">Done</span>
-								</div>
-								<span className="font-semibold text-emerald-300">
-									{tasks.filter((t) => t.status === "done").length}
-								</span>
-							</div>
-						</div>
-					</div>
-				</section>
-
-				<section className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4">
-					<div className="mb-3 flex items-center justify-between">
-						<div>
-							<p className="ot-label">Focus queue</p>
-							<h3 className="mt-1 text-sm font-semibold text-zinc-100">
-								Assigned to you
-							</h3>
-						</div>
-						<Badge tone="accent">{assignedTasks.length}</Badge>
-					</div>
-					<div className="space-y-3">
-						{assignedTasks.length === 0 ? (
-							<p className="rounded-xl border border-dashed border-zinc-900 px-3 py-6 text-center text-xs text-zinc-600">
-								No assigned tasks require attention.
-							</p>
-						) : (
-							assignedTasks.map((task) => (
-								<button
-									key={task.id}
-									type="button"
-									onClick={() => onTaskClick(task.id)}
-									className="flex w-full min-w-0 flex-col gap-2 rounded-xl border border-zinc-800/80 bg-zinc-950/70 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-zinc-700 hover:bg-zinc-900/70 hover:shadow-(--ot-shadow-soft)"
-								>
-									<p className="line-clamp-2 text-sm font-semibold text-zinc-100">
-										{task.title}
-									</p>
-									<div className="flex w-full items-center justify-between mt-1">
-										<Badge tone="accent" className="text-[10px]">
-											{task.status.replace("_", " ")}
-										</Badge>
-										{task.dueDate && (
-											<span className="text-[10px] text-zinc-500">
-												Due {new Date(task.dueDate).toLocaleDateString()}
-											</span>
-										)}
-									</div>
-								</button>
-							))
-						)}
-					</div>
-				</section>
-
 				<section className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4">
 					<div className="mb-3 flex items-center justify-between">
 						<div>
@@ -274,7 +524,7 @@ function WorkspaceHome({
 
 				<section className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4">
 					<div className="mb-3 flex items-center gap-2">
-						<MessageSquare className="h-4 w-4 text-violet-300" />
+						<Clock3 className="h-4 w-4 text-violet-300" />
 						<h3 className="text-sm font-semibold text-zinc-100">
 							Recent task surfaces
 						</h3>
@@ -324,6 +574,7 @@ export default function Home() {
 		viewMode,
 		showSettings,
 		showActivityExplorer,
+		showAnalytics,
 		openTaskModal,
 		closeTaskModal,
 		openCreateTaskModal,
@@ -392,6 +643,8 @@ export default function Home() {
 					<WorkspaceSettings workspaceId={activeWorkspaceId} />
 				) : showActivityExplorer ? (
 					<WorkspaceEventExplorer workspaceId={activeWorkspaceId} />
+				) : showAnalytics ? (
+					<WorkspaceAnalytics workspaceId={activeWorkspaceId} />
 				) : !activeProjectId ? (
 					<WorkspaceHome
 						workspaceId={activeWorkspaceId}

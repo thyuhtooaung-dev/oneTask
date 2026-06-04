@@ -2,6 +2,7 @@
 
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { SocketContext } from "@/features/realtime/context/SocketContext";
+import { GlobalSearch } from "@/features/search/components/GlobalSearch";
 import { Badge } from "@/shared/ui/badge/Badge";
 import { cn } from "@/shared/ui/cn";
 import { ChevronRight, Home, Menu, Radio } from "lucide-react";
@@ -80,6 +81,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 					</nav>
 
 					<div className="flex shrink-0 items-center gap-2 sm:gap-3">
+						<GlobalSearch workspaceId={activeWorkspaceId} />
 						<NotificationBell />
 						<Badge tone={isConnected ? "success" : "neutral"}>
 							<Radio className="h-3 w-3" />

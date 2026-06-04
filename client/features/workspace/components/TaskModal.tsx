@@ -113,7 +113,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 		onClose();
 	};
 
-	const form = (
+	const taskDetailsForm = (
 		<form
 			onSubmit={handleSubmit}
 			className="grid min-h-full gap-4 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px]"
@@ -145,13 +145,16 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						placeholder="Add context, constraints, acceptance notes, or links."
 					/>
 				</div>
-
-				{mode === "edit" && task && (
-					<TaskComments taskId={task.id} workspaceId={workspaceId} />
-				)}
 			</div>
 
 			<aside className="space-y-4 rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 lg:sticky lg:top-0 lg:self-start">
+				<div>
+					<p className="ot-label">Task controls</p>
+					<h3 className="mt-1 text-sm font-semibold text-zinc-100">
+						Details and ownership
+					</h3>
+				</div>
+
 				<div className="space-y-2">
 					<label htmlFor={`${mode}-task-status`} className="ot-label">
 						Status
@@ -281,6 +284,17 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 		</form>
 	);
 
+	const editContent = (
+		<div className="min-h-full space-y-4">
+			{taskDetailsForm}
+			{task && (
+				<section className="mx-4 mb-4 rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 sm:mx-6 sm:mb-6 sm:p-5">
+					<TaskComments taskId={task.id} workspaceId={workspaceId} />
+				</section>
+			)}
+		</div>
+	);
+
 	if (mode === "create") {
 		return (
 			<Dialog
@@ -290,7 +304,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 				onClose={onClose}
 				className="max-w-[min(1280px,calc(100vw-1.5rem))] overflow-y-auto"
 			>
-				{form}
+				{taskDetailsForm}
 			</Dialog>
 		);
 	}
@@ -303,7 +317,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 				description="Edit details and continue the conversation without losing workspace context."
 				onClose={onClose}
 			>
-				{form}
+				{editContent}
 			</Drawer>
 			<ConfirmDialog
 				open={isDeleteConfirmOpen}

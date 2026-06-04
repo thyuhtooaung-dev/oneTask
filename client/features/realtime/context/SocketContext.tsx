@@ -146,6 +146,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 							title = "New Comment";
 							description = `Someone commented on ${notification.payload?.taskTitle || "your task"}`;
 							break;
+						case "comment.mentioned":
+							title = "Mentioned";
+							description = `You were mentioned on ${notification.payload?.taskTitle || "a task"}`;
+							break;
 						case "task.status_changed":
 							title = "Status Changed";
 							description = `${notification.payload?.taskTitle || "Your task"} changed to ${String(notification.payload?.status || "unknown").replace("_", " ")}`;

@@ -28,6 +28,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RealtimeModule } from './realtime/realtime.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -77,6 +79,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     CommentsModule,
     RealtimeModule,
     NotificationsModule,
+    AnalyticsModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [

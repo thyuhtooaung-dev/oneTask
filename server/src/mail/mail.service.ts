@@ -1,19 +1,27 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Resend } from 'resend';
+import { createTransport, Transporter, SentMessageInfo } from 'nodemailer';
 
 @Injectable()
 export class MailService {
-  private resend: Resend;
+  private transporter: Transporter;
   private readonly logger = new Logger(MailService.name);
 
   constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('RESEND_API_KEY');
-    if (apiKey) {
-      this.resend = new Resend(apiKey);
+    const user = this.configService.get<string>('SMTP_USER');
+    const pass = this.configService.get<string>('SMTP_PASS');
+
+    if (user && pass) {
+      this.transporter = createTransport({
+        service: 'gmail',
+        auth: {
+          user,
+          pass,
+        },
+      });
     } else {
       this.logger.warn(
-        'RESEND_API_KEY is not configured. Emails will not be sent.',
+        'SMTP_USER or SMTP_PASS is not configured. Emails will not be sent.',
       );
     }
   }
@@ -23,8 +31,8 @@ export class MailService {
     workspaceName: string,
     inviterName: string,
     inviteLink: string,
-  ) {
-    if (!this.resend) {
+  ): Promise<SentMessageInfo | void> {
+    if (!this.transporter) {
       this.logger.warn(
         `Would have sent invite email to ${to} for workspace ${workspaceName}`,
       );
@@ -32,8 +40,8 @@ export class MailService {
     }
 
     try {
-      const data = await this.resend.emails.send({
-        from: 'oneTask <onboarding@resend.dev>',
+      const info = await this.transporter.sendMail({
+        from: '"oneTask" <onboarding@onetask.app>',
         to,
         subject: `You've been invited to join ${workspaceName} on oneTask`,
         html: `
@@ -50,8 +58,8 @@ export class MailService {
           </div>
         `,
       });
-      this.logger.log(`Invite email sent to ${to}: ${data.data?.id}`);
-      return data;
+      this.logger.log(`Invite email sent to ${to}: ${info.messageId}`);
+      return info;
     } catch (error) {
       this.logger.error('Failed to send invite email', error);
     }

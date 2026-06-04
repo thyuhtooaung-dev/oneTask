@@ -8,10 +8,11 @@ import { ActivitiesModule } from '../activities/activities.module';
 import { TasksModule } from '../tasks/tasks.module';
 
 import { NotificationsModule } from '../notifications/notifications.module';
+import { WorkspaceMember } from '../workspaces/entities/workspace-member.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Comment]),
+    TypeOrmModule.forFeature([Comment, WorkspaceMember]),
     WorkspacesModule,
     ActivitiesModule,
     TasksModule,

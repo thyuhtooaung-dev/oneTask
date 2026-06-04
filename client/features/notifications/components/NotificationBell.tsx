@@ -15,7 +15,8 @@ export function NotificationBell() {
 	const { data: notifications = [], isLoading } = useNotifications();
 	const markAsRead = useMarkNotificationAsRead();
 	const markAllAsRead = useMarkAllNotificationsAsRead();
-	const { openTaskModal } = useUIStore();
+	const { isNotificationsOpen, openTaskModal, setNotificationsOpen } =
+		useUIStore();
 
 	const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -27,6 +28,7 @@ export function NotificationBell() {
 		if (
 			(notification.type === "task.assigned" ||
 				notification.type === "task.commented" ||
+				notification.type === "comment.mentioned" ||
 				notification.type === "task.status_changed") &&
 			notification.payload?.taskId
 		) {
@@ -35,7 +37,10 @@ export function NotificationBell() {
 	};
 
 	return (
-		<DropdownMenu.Root>
+		<DropdownMenu.Root
+			open={isNotificationsOpen}
+			onOpenChange={setNotificationsOpen}
+		>
 			<DropdownMenu.Trigger asChild>
 				<Button
 					variant="ghost"
@@ -113,6 +118,14 @@ export function NotificationBell() {
 													<span className="font-semibold text-violet-300">
 														{(notification.payload?.taskTitle as string) ||
 															"your task"}
+													</span>
+												</>
+											) : notification.type === "comment.mentioned" ? (
+												<>
+													You were mentioned on{" "}
+													<span className="font-semibold text-violet-300">
+														{(notification.payload?.taskTitle as string) ||
+															"a task"}
 													</span>
 												</>
 											) : notification.type === "task.status_changed" ? (

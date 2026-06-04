@@ -6,6 +6,7 @@ import { Badge } from "@/shared/ui/badge/Badge";
 import { Button } from "@/shared/ui/button/Button";
 import { ConfirmDialog } from "@/shared/ui/dialog/ConfirmDialog";
 import {
+	AtSign,
 	Edit3,
 	Image as ImageIcon,
 	Loader2,
@@ -17,7 +18,7 @@ import {
 	X,
 } from "lucide-react";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
 	type CommentAttachment,
 	type TaskComment,
@@ -26,6 +27,10 @@ import {
 	useDeleteComment,
 	useUpdateComment,
 } from "../hooks/useCommentData";
+import {
+	type WorkspaceMember,
+	useWorkspaceDetail,
+} from "../hooks/useWorkspaceData";
 
 const MAX_ATTACHMENTS = 4;
 const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024;
@@ -100,18 +105,84 @@ function AttachmentGrid({
 	);
 }
 
+function getMentionAliases(member: WorkspaceMember) {
+	return [
+		member.user?.email,
+		member.user?.email?.split("@")[0],
+		member.user?.name,
+		member.user?.name?.replace(/\s+/g, ""),
+	]
+		.filter(Boolean)
+		.map((value) => String(value).toLowerCase());
+}
+
+function getActiveMention(value: string, cursor: number) {
+	const prefix = value.slice(0, cursor);
+	const match = prefix.match(/(^|\s)@([^\s@]*)$/);
+	if (!match) return null;
+
+	const query = match[2];
+	return {
+		query,
+		start: cursor - query.length - 1,
+		end: cursor,
+	};
+}
+
+function renderCommentContent(content: string, members: WorkspaceMember[]) {
+	const mentionAliases = new Set(members.flatMap(getMentionAliases));
+	const nodes: React.ReactNode[] = [];
+	const pattern =
+		/@([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|[A-Za-z0-9._-]+)/g;
+	let cursor = 0;
+
+	for (const match of content.matchAll(pattern)) {
+		const index = match.index || 0;
+		const token = match[1].toLowerCase();
+		if (index > cursor) nodes.push(content.slice(cursor, index));
+
+		if (mentionAliases.has(token)) {
+			const member = members.find((m) => getMentionAliases(m).includes(token));
+			const displayName = member
+				? member.user?.name
+					? member.user.name.replace(/\s+/g, "")
+					: member.user?.email?.split("@")[0]
+				: match[1];
+
+			nodes.push(
+				<span
+					key={`${match[0]}-${index}`}
+					className="rounded bg-violet-500/10 px-1 font-semibold text-violet-200"
+				>
+					@{displayName}
+				</span>,
+			);
+		} else {
+			nodes.push(match[0]);
+		}
+
+		cursor = index + match[0].length;
+	}
+
+	if (cursor < content.length) nodes.push(content.slice(cursor));
+	return nodes;
+}
+
 export const TaskComments: React.FC<TaskCommentsProps> = ({
 	taskId,
 	workspaceId,
 }) => {
 	const { user } = useAuth();
+	const { data: workspace } = useWorkspaceDetail(workspaceId);
 	const { data: comments = [], isLoading } = useComments(taskId);
 	const createComment = useCreateComment(taskId, workspaceId);
 	const updateComment = useUpdateComment(taskId, workspaceId);
 	const deleteComment = useDeleteComment(taskId, workspaceId);
 
+	const composerRef = useRef<HTMLTextAreaElement | null>(null);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const [commentContent, setCommentContent] = useState("");
+	const [composerCursor, setComposerCursor] = useState(0);
 	const [attachments, setAttachments] = useState<CommentAttachment[]>([]);
 	const [attachmentError, setAttachmentError] = useState("");
 	const [editingId, setEditingId] = useState<string | null>(null);
@@ -119,6 +190,22 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 	const [deleteTarget, setDeleteTarget] = useState<TaskComment | null>(null);
 
 	const canSend = commentContent.trim().length > 0 || attachments.length > 0;
+	const members = useMemo(() => workspace?.members || [], [workspace]);
+	const activeMention = useMemo(
+		() => getActiveMention(commentContent, composerCursor),
+		[commentContent, composerCursor],
+	);
+	const mentionMatches = useMemo(() => {
+		if (!activeMention) return [];
+		const query = activeMention.query.toLowerCase();
+		return members
+			.filter((member) => member.userId !== user?.id)
+			.filter((member) => {
+				if (!query) return true;
+				return getMentionAliases(member).some((alias) => alias.includes(query));
+			})
+			.slice(0, 6);
+	}, [activeMention, members, user?.id]);
 
 	const handleCreateComment = async () => {
 		if (!canSend || createComment.isPending) return;
@@ -140,6 +227,32 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 			event.preventDefault();
 			void handleCreateComment();
 		}
+	};
+
+	const syncComposerCursor = () => {
+		setComposerCursor(composerRef.current?.selectionStart || 0);
+	};
+
+	const insertMention = (member: WorkspaceMember) => {
+		if (!activeMention) return;
+
+		const displayName = member.user?.name
+			? member.user.name.replace(/\s+/g, "")
+			: member.user?.email?.split("@")[0] || member.userId;
+
+		const mentionValue = `@${displayName} `;
+		const nextContent = `${commentContent.slice(
+			0,
+			activeMention.start,
+		)}${mentionValue}${commentContent.slice(activeMention.end)}`;
+		const nextCursor = activeMention.start + mentionValue.length;
+
+		setCommentContent(nextContent);
+		setComposerCursor(nextCursor);
+		requestAnimationFrame(() => {
+			composerRef.current?.focus();
+			composerRef.current?.setSelectionRange(nextCursor, nextCursor);
+		});
 	};
 
 	const handleAttachmentSelect = async (
@@ -203,7 +316,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 	};
 
 	return (
-		<section className="space-y-3 border-t border-zinc-900 pt-4">
+		<section className="space-y-3">
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div className="min-w-0">
 					<p className="ot-label">Conversation</p>
@@ -341,7 +454,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 											<>
 												{comment.content && (
 													<p className="whitespace-pre-wrap break-words text-sm leading-6 text-zinc-400">
-														{comment.content}
+														{renderCommentContent(comment.content, members)}
 													</p>
 												)}
 												<AttachmentGrid attachments={commentAttachments} />
@@ -355,14 +468,43 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 				)}
 			</div>
 
-			<div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/80 focus-within:border-violet-500/60 focus-within:ring-2 focus-within:ring-violet-500/10">
+			<div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/80 focus-within:border-violet-500/60 focus-within:ring-2 focus-within:ring-violet-500/10">
 				<textarea
+					ref={composerRef}
 					value={commentContent}
-					onChange={(event) => setCommentContent(event.target.value)}
+					onChange={(event) => {
+						setCommentContent(event.target.value);
+						setComposerCursor(event.target.selectionStart);
+					}}
 					onKeyDown={handleComposerKeyDown}
+					onKeyUp={syncComposerCursor}
+					onSelect={syncComposerCursor}
 					className="min-h-24 w-full resize-y bg-transparent px-3 py-3 text-sm leading-6 text-zinc-200 outline-none placeholder:text-zinc-600"
-					placeholder="Write a comment. Enter to send, Shift + Enter for a new line."
+					placeholder="Write a comment. Use @ to mention a teammate."
 				/>
+
+				{activeMention && mentionMatches.length > 0 && (
+					<div className="absolute left-3 right-3 top-12 z-10 max-h-56 overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-950 p-1 shadow-[0_16px_44px_rgba(0,0,0,0.36)]">
+						{mentionMatches.map((member) => (
+							<button
+								key={member.userId}
+								type="button"
+								onClick={() => insertMention(member)}
+								className="flex min-h-10 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors hover:bg-zinc-900"
+							>
+								<AtSign className="h-4 w-4 shrink-0 text-violet-300" />
+								<span className="min-w-0">
+									<span className="block truncate text-sm font-semibold text-zinc-200">
+										{member.user?.name || member.user?.email || "Member"}
+									</span>
+									<span className="block truncate text-[11px] font-medium text-zinc-600">
+										{member.user?.email}
+									</span>
+								</span>
+							</button>
+						))}
+					</div>
+				)}
 
 				{attachments.length > 0 && (
 					<div className="border-t border-zinc-900 px-3 py-3">

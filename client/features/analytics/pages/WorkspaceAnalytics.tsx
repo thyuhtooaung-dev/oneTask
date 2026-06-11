@@ -12,7 +12,6 @@ import {
 	TrendingUp,
 	Trophy,
 } from "lucide-react";
-import { useMemo } from "react";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
 
 interface WorkspaceAnalyticsProps {

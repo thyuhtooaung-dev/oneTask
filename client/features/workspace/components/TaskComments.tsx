@@ -17,6 +17,7 @@ import {
 	Trash2,
 	X,
 } from "lucide-react";
+import Image from "next/image";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -77,7 +78,7 @@ function AttachmentGrid({
 					key={`${attachment.name}-${attachment.size}-${index}`}
 					className="group/image relative overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950"
 				>
-					<img
+					<Image
 						src={attachment.dataUrl}
 						alt={attachment.name}
 						className="max-h-64 w-full object-contain"
@@ -453,7 +454,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 										) : (
 											<>
 												{comment.content && (
-													<p className="whitespace-pre-wrap break-words text-sm leading-6 text-zinc-400">
+													<p className="whitespace-pre-wrap wrap-break-word text-sm leading-6 text-zinc-400">
 														{renderCommentContent(comment.content, members)}
 													</p>
 												)}

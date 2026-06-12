@@ -134,6 +134,59 @@ export function useCreateProject(workspaceId: string | null) {
 	});
 }
 
+/**
+ * Updates a project
+ */
+export function useUpdateProject(workspaceId: string | null) {
+	const queryClient = useQueryClient();
+
+	return useMutation<
+		Project,
+		Error,
+		{ projectId: string; name?: string; description?: string }
+	>({
+		mutationFn: async ({ projectId, ...body }) => {
+			if (!workspaceId) throw new Error("Workspace ID is required");
+			const response = await axiosClient.patch<Project>(
+				`/workspaces/${workspaceId}/projects/${projectId}`,
+				body,
+			);
+			return response.data;
+		},
+		onSuccess: () => {
+			if (workspaceId) {
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.workspaces.projects(workspaceId),
+				});
+			}
+		},
+	});
+}
+
+/**
+ * Archives a project
+ */
+export function useArchiveProject(workspaceId: string | null) {
+	const queryClient = useQueryClient();
+
+	return useMutation<Project, Error, string>({
+		mutationFn: async (projectId) => {
+			if (!workspaceId) throw new Error("Workspace ID is required");
+			const response = await axiosClient.post<Project>(
+				`/workspaces/${workspaceId}/projects/${projectId}/archive`,
+			);
+			return response.data;
+		},
+		onSuccess: () => {
+			if (workspaceId) {
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.workspaces.projects(workspaceId),
+				});
+			}
+		},
+	});
+}
+
 export function useWorkspaceInvites(workspaceId: string | null) {
 	return useQuery<WorkspaceInvite[]>({
 		queryKey: queryKeys.workspaces.invites(workspaceId || ""),

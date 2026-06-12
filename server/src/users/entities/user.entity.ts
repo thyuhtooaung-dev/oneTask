@@ -24,7 +24,7 @@ export class User {
   @Column({ nullable: true })
   name: string;
 
-  @Column({ nullable: true })
+  @Column('text', { nullable: true })
   avatarUrl: string;
 
   @CreateDateColumn({ type: 'timestamptz' })

@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Project, WorkspaceUser } from "./useWorkspaceData";
 
 export type TaskStatus = "todo" | "in_progress" | "done" | "canceled";
+export type TaskPriority = "none" | "low" | "medium" | "high" | "urgent";
 
 export interface Task {
 	id: string;
@@ -14,6 +15,7 @@ export interface Task {
 	title: string;
 	description?: string;
 	status: TaskStatus;
+	priority: TaskPriority;
 	assigneeId?: string | null;
 	reporterId?: string | null;
 	dueDate?: string | null;
@@ -28,6 +30,8 @@ interface TaskPayload {
 	title: string;
 	description?: string;
 	status?: TaskStatus;
+	priority?: TaskPriority;
+	dueDate?: string | null;
 	projectId: string;
 	assigneeId?: string | null;
 }
@@ -37,6 +41,8 @@ interface UpdateTaskPayload {
 	title?: string;
 	description?: string | null;
 	status?: TaskStatus;
+	priority?: TaskPriority;
+	dueDate?: string | null;
 	assigneeId?: string | null;
 }
 

@@ -19,6 +19,8 @@ export enum EventType {
   MEMBER_UPDATED = 'member.updated',
   WORKSPACE_CREATED = 'workspace.created',
   PROJECT_CREATED = 'project.created',
+  PROJECT_UPDATED = 'project.updated',
+  PROJECT_ARCHIVED = 'project.archived',
 }
 
 @Entity('activity_events')

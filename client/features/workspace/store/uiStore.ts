@@ -7,11 +7,13 @@ interface UIState {
 	isTaskModalOpen: boolean;
 	isCreateTaskModalOpen: boolean;
 	isCreateProjectModalOpen: boolean;
+	isProjectSettingsModalOpen: boolean;
 	viewMode: "list" | "board";
 	showSettings: boolean;
 	showActivityExplorer: boolean;
 	showAnalytics: boolean;
 	isNotificationsOpen: boolean;
+	isUserProfileModalOpen: boolean;
 	setActiveWorkspaceId: (id: string | null) => void;
 	setActiveProjectId: (id: string | null) => void;
 	openTaskModal: (taskId: string) => void;
@@ -20,11 +22,14 @@ interface UIState {
 	closeCreateTaskModal: () => void;
 	openCreateProjectModal: () => void;
 	closeCreateProjectModal: () => void;
+	openProjectSettingsModal: () => void;
+	closeProjectSettingsModal: () => void;
 	setViewMode: (mode: "list" | "board") => void;
 	setShowSettings: (show: boolean) => void;
 	setShowActivityExplorer: (show: boolean) => void;
 	setShowAnalytics: (show: boolean) => void;
 	setNotificationsOpen: (open: boolean) => void;
+	setUserProfileModalOpen: (open: boolean) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -34,11 +39,13 @@ export const useUIStore = create<UIState>((set) => ({
 	isTaskModalOpen: false,
 	isCreateTaskModalOpen: false,
 	isCreateProjectModalOpen: false,
+	isProjectSettingsModalOpen: false,
 	viewMode: "list",
 	showSettings: false,
 	showActivityExplorer: false,
 	showAnalytics: false,
 	isNotificationsOpen: false,
+	isUserProfileModalOpen: false,
 	setActiveWorkspaceId: (id) =>
 		set({
 			activeWorkspaceId: id,
@@ -47,6 +54,7 @@ export const useUIStore = create<UIState>((set) => ({
 			isTaskModalOpen: false,
 			isCreateTaskModalOpen: false,
 			isCreateProjectModalOpen: false,
+			isProjectSettingsModalOpen: false,
 			showSettings: false,
 			showActivityExplorer: false,
 			showAnalytics: false,
@@ -58,6 +66,7 @@ export const useUIStore = create<UIState>((set) => ({
 			showSettings: false,
 			showActivityExplorer: false,
 			showAnalytics: false,
+			isProjectSettingsModalOpen: false,
 		}),
 	openTaskModal: (taskId) =>
 		set({
@@ -75,6 +84,8 @@ export const useUIStore = create<UIState>((set) => ({
 	closeCreateTaskModal: () => set({ isCreateTaskModalOpen: false }),
 	openCreateProjectModal: () => set({ isCreateProjectModalOpen: true }),
 	closeCreateProjectModal: () => set({ isCreateProjectModalOpen: false }),
+	openProjectSettingsModal: () => set({ isProjectSettingsModalOpen: true }),
+	closeProjectSettingsModal: () => set({ isProjectSettingsModalOpen: false }),
 	setViewMode: (mode) => set({ viewMode: mode }),
 	setShowSettings: (show) =>
 		set({
@@ -98,4 +109,5 @@ export const useUIStore = create<UIState>((set) => ({
 			showActivityExplorer: false,
 		}),
 	setNotificationsOpen: (open) => set({ isNotificationsOpen: open }),
+	setUserProfileModalOpen: (open) => set({ isUserProfileModalOpen: open }),
 }));

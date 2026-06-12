@@ -149,6 +149,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 												description={task.description}
 												assigneeName={task.assignee?.name}
 												assigneeEmail={task.assignee?.email}
+												priority={task.priority}
+												dueDate={task.dueDate}
 												createdAt={task.createdAt}
 												onClick={() => onTaskClick(task.id)}
 												accentClassName={column.accentClassName}
@@ -254,6 +256,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 												description={task.description}
 												assigneeName={task.assignee?.name}
 												assigneeEmail={task.assignee?.email}
+												priority={task.priority}
+												dueDate={task.dueDate}
 												createdAt={task.createdAt}
 												onClick={() => onTaskClick(task.id)}
 												draggable

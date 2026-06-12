@@ -30,9 +30,7 @@ export class AuthController {
   }
 
   @Get('profile')
-  getProfile(
-    @CurrentUser() user: { id: string; email: string; name?: string },
-  ) {
-    return user;
+  async getProfile(@CurrentUser() user: { id: string }) {
+    return this.authService.getProfile(user.id);
   }
 }

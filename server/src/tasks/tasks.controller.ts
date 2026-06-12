@@ -33,6 +33,8 @@ export class TasksController {
       body.projectId,
       user.id,
       body.assigneeId,
+      body.priority,
+      body.dueDate,
     );
   }
 

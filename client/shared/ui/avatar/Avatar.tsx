@@ -1,9 +1,11 @@
 import { User } from "lucide-react";
+import Image from "next/image";
 import { cn } from "../cn";
 
 interface AvatarProps {
 	name?: string | null;
 	email?: string | null;
+	src?: string | null;
 	size?: "sm" | "md" | "lg" | "xl";
 	className?: string;
 	isOnline?: boolean;
@@ -16,9 +18,17 @@ const sizeClasses = {
 	xl: "h-12 w-12 text-base",
 };
 
+const pixelSizes = {
+	sm: 24,
+	md: 32,
+	lg: 40,
+	xl: 48,
+};
+
 export function Avatar({
 	name,
 	email,
+	src,
 	size = "md",
 	className,
 	isOnline,
@@ -35,13 +45,23 @@ export function Avatar({
 		<div className="relative inline-flex shrink-0">
 			<div
 				className={cn(
-					"inline-flex shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 font-bold text-violet-300",
+					"inline-flex shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 font-bold text-violet-300 overflow-hidden",
 					sizeClasses[size],
 					className,
 				)}
 				title={label || "Unassigned"}
 			>
-				{initials || <User className="h-3.5 w-3.5 text-zinc-600" />}
+				{src ? (
+					<Image
+						src={src}
+						alt={label || "Avatar"}
+						width={pixelSizes[size]}
+						height={pixelSizes[size]}
+						className="h-full w-full object-cover"
+					/>
+				) : (
+					initials || <User className="h-3.5 w-3.5 text-zinc-600" />
+				)}
 			</div>
 			{isOnline && (
 				<div

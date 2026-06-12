@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Task, TaskStatus } from './entities/task.entity';
+import { Task, TaskStatus, TaskPriority } from './entities/task.entity';
 import { ActivitiesService } from '../activities/activities.service';
 import { EventType } from '../activities/entities/activity-event.entity';
 import { Project } from '../projects/entities/project.entity';
@@ -32,6 +32,8 @@ export class TasksService {
     projectId: string,
     reporterId: string,
     assigneeId?: string,
+    priority?: TaskPriority,
+    dueDate?: string,
   ): Promise<Task> {
     await this.policyService.assertAction(
       reporterId,
@@ -61,6 +63,8 @@ export class TasksService {
       projectId,
       reporterId,
       assigneeId,
+      priority: priority || TaskPriority.NONE,
+      dueDate: dueDate ? new Date(dueDate) : null,
     });
     const savedTask = await this.taskRepository.save(task);
 
@@ -131,6 +135,8 @@ export class TasksService {
       description?: string | null;
       status?: TaskStatus;
       assigneeId?: string | null;
+      priority?: TaskPriority;
+      dueDate?: string | null;
     },
   ): Promise<Task> {
     const task = await this.findOne(id);
@@ -162,6 +168,23 @@ export class TasksService {
     if (body.status !== undefined && body.status !== task.status) {
       changes.status = { from: task.status, to: body.status };
       task.status = body.status;
+    }
+
+    if (body.priority !== undefined && body.priority !== task.priority) {
+      changes.priority = { from: task.priority, to: body.priority };
+      task.priority = body.priority;
+    }
+
+    if (
+      body.dueDate !== undefined &&
+      (body.dueDate ? new Date(body.dueDate).toISOString() : null) !==
+        (task.dueDate ? task.dueDate.toISOString() : null)
+    ) {
+      changes.dueDate = {
+        from: task.dueDate ? task.dueDate.toISOString() : null,
+        to: body.dueDate ? new Date(body.dueDate).toISOString() : null,
+      };
+      task.dueDate = body.dueDate ? new Date(body.dueDate) : null;
     }
 
     if (

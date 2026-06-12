@@ -6,11 +6,23 @@ import { ConfirmDialog } from "@/shared/ui/dialog/ConfirmDialog";
 import { Dialog } from "@/shared/ui/dialog/Dialog";
 import { Drawer } from "@/shared/ui/drawer/Drawer";
 import { DropdownMenu } from "@/shared/ui/dropdown-menu/DropdownMenu";
-import { ChevronDown, Loader2, Save, Trash2 } from "lucide-react";
+import {
+	AlertOctagon,
+	ChevronDown,
+	Loader2,
+	Minus,
+	Save,
+	Settings,
+	SignalHigh,
+	SignalLow,
+	SignalMedium,
+	Trash2,
+} from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import {
 	type Task,
+	type TaskPriority,
 	type TaskStatus,
 	useCreateTask,
 	useDeleteTask,
@@ -28,6 +40,29 @@ const STATUS_OPTIONS: Array<{
 	{ value: "in_progress", label: "In progress", tone: "accent" },
 	{ value: "done", label: "Done", tone: "success" },
 	{ value: "canceled", label: "Canceled", tone: "danger" },
+];
+
+const PRIORITY_OPTIONS: Array<{
+	value: TaskPriority;
+	label: string;
+	icon: React.ElementType;
+	color: string;
+}> = [
+	{ value: "none", label: "No priority", icon: Minus, color: "text-zinc-500" },
+	{ value: "low", label: "Low", icon: SignalLow, color: "text-zinc-400" },
+	{
+		value: "medium",
+		label: "Medium",
+		icon: SignalMedium,
+		color: "text-yellow-400",
+	},
+	{ value: "high", label: "High", icon: SignalHigh, color: "text-orange-400" },
+	{
+		value: "urgent",
+		label: "Urgent",
+		icon: AlertOctagon,
+		color: "text-red-500",
+	},
 ];
 
 interface TaskModalProps {
@@ -56,7 +91,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	const [description, setDescription] = useState("");
 	const [status, setStatus] = useState<TaskStatus>("todo");
 	const [assigneeId, setAssigneeId] = useState("");
+	const [priority, setPriority] = useState<TaskPriority>("none");
+	const [dueDate, setDueDate] = useState<string>("");
 	const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+	const [isControlsModalOpen, setIsControlsModalOpen] = useState(false);
 
 	const [prevTask, setPrevTask] = useState<Task | undefined>(undefined);
 	const [prevIsOpen, setPrevIsOpen] = useState(false);
@@ -69,7 +107,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 			setDescription(task?.description || "");
 			setStatus(task?.status || "todo");
 			setAssigneeId(task?.assigneeId || "");
+			setPriority(task?.priority || "none");
+			setDueDate(task?.dueDate ? task.dueDate.split("T")[0] : "");
 			setIsDeleteConfirmOpen(false);
+			setIsControlsModalOpen(false);
 		}
 	}
 
@@ -91,6 +132,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 				title: title.trim(),
 				description: description.trim() || undefined,
 				status,
+				priority,
+				dueDate: dueDate || null,
 				projectId,
 				assigneeId: assigneeId || null,
 			});
@@ -100,6 +143,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 				title: title.trim(),
 				description: description.trim() || null,
 				status,
+				priority,
+				dueDate: dueDate || null,
 				assigneeId: assigneeId || null,
 			});
 		}
@@ -114,15 +159,27 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	};
 
 	const taskDetailsForm = (
-		<form
-			onSubmit={handleSubmit}
-			className="grid min-h-full gap-4 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px]"
-		>
-			<div className="min-w-0 space-y-4">
+		<>
+			<form
+				onSubmit={handleSubmit}
+				className="flex min-h-full flex-col gap-4 p-4 sm:gap-6 sm:p-6"
+			>
 				<div className="space-y-2">
-					<label htmlFor={`${mode}-task-title`} className="ot-label">
-						Title
-					</label>
+					<div className="flex items-center justify-between">
+						<label htmlFor={`${mode}-task-title`} className="ot-label">
+							Title
+						</label>
+						<Button
+							type="button"
+							variant="ghost"
+							size="icon"
+							onClick={() => setIsControlsModalOpen(true)}
+							title="Task controls"
+							className="h-8 w-8"
+						>
+							<Settings className="h-4 w-4" />
+						</Button>
+					</div>
 					<input
 						id={`${mode}-task-title`}
 						required
@@ -133,7 +190,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 					/>
 				</div>
 
-				<div className="space-y-2">
+				<div className="space-y-2 flex-1">
 					<label htmlFor={`${mode}-task-description`} className="ot-label">
 						Description
 					</label>
@@ -145,110 +202,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						placeholder="Add context, constraints, acceptance notes, or links."
 					/>
 				</div>
-			</div>
 
-			<aside className="space-y-4 rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 lg:sticky lg:top-0 lg:self-start">
-				<div>
-					<p className="ot-label">Task controls</p>
-					<h3 className="mt-1 text-sm font-semibold text-zinc-100">
-						Details and ownership
-					</h3>
-				</div>
-
-				<div className="space-y-2">
-					<label htmlFor={`${mode}-task-status`} className="ot-label">
-						Status
-					</label>
-					<DropdownMenu.Root>
-						<DropdownMenu.Trigger asChild>
-							<button
-								id={`${mode}-task-status`}
-								type="button"
-								className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
-							>
-								<span className="truncate text-zinc-100">
-									{STATUS_OPTIONS.find((opt) => opt.value === status)?.label ||
-										"Select status"}
-								</span>
-								<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
-							</button>
-						</DropdownMenu.Trigger>
-						<DropdownMenu.Content
-							align="start"
-							className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)]"
-						>
-							<DropdownMenu.Label>Status</DropdownMenu.Label>
-							<DropdownMenu.RadioGroup
-								value={status}
-								onValueChange={(val) => setStatus(val as TaskStatus)}
-							>
-								{STATUS_OPTIONS.map((option) => (
-									<DropdownMenu.RadioItem
-										key={option.value}
-										value={option.value}
-									>
-										{option.label}
-									</DropdownMenu.RadioItem>
-								))}
-							</DropdownMenu.RadioGroup>
-						</DropdownMenu.Content>
-					</DropdownMenu.Root>
-					{activeStatus && (
-						<Badge tone={activeStatus.tone}>{activeStatus.label}</Badge>
-					)}
-				</div>
-
-				<div className="space-y-2">
-					<label htmlFor={`${mode}-task-assignee`} className="ot-label">
-						Assignee
-					</label>
-					<DropdownMenu.Root>
-						<DropdownMenu.Trigger asChild>
-							<button
-								id={`${mode}-task-assignee`}
-								type="button"
-								className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
-							>
-								<span className="truncate text-zinc-100">
-									{assigneeId === ""
-										? "Unassigned"
-										: members.find((m) => m.userId === assigneeId)?.user
-												?.name ||
-											members.find((m) => m.userId === assigneeId)?.user
-												?.email ||
-											assigneeId}
-								</span>
-								<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
-							</button>
-						</DropdownMenu.Trigger>
-						<DropdownMenu.Content
-							align="start"
-							className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)] max-h-[300px]"
-						>
-							<DropdownMenu.Label>Assignee</DropdownMenu.Label>
-							<DropdownMenu.RadioGroup
-								value={assigneeId}
-								onValueChange={setAssigneeId}
-							>
-								<DropdownMenu.RadioItem value="">
-									Unassigned
-								</DropdownMenu.RadioItem>
-								{members.map((member) => (
-									<DropdownMenu.RadioItem
-										key={member.userId}
-										value={member.userId}
-									>
-										<span className="truncate">
-											{member.user?.name || member.user?.email || member.userId}
-										</span>
-									</DropdownMenu.RadioItem>
-								))}
-							</DropdownMenu.RadioGroup>
-						</DropdownMenu.Content>
-					</DropdownMenu.Root>
-				</div>
-
-				<div className="flex flex-col-reverse gap-3 border-t border-zinc-900 pt-4 sm:flex-row sm:items-center sm:justify-between">
+				<div className="mt-auto flex flex-col-reverse gap-3 border-t border-zinc-900 pt-4 sm:flex-row sm:items-center sm:justify-end">
 					{mode === "edit" ? (
 						<Button
 							type="button"
@@ -280,8 +235,190 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						{mode === "create" ? "Create" : "Save"}
 					</Button>
 				</div>
-			</aside>
-		</form>
+			</form>
+
+			<Dialog
+				open={isControlsModalOpen}
+				title="Task Controls"
+				description="Update status, assignee, priority, and due dates."
+				onClose={() => setIsControlsModalOpen(false)}
+			>
+				<div className="space-y-4 p-4 sm:p-6">
+					<div className="space-y-2">
+						<label htmlFor={`${mode}-task-status`} className="ot-label">
+							Status
+						</label>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger asChild>
+								<button
+									id={`${mode}-task-status`}
+									type="button"
+									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
+								>
+									<span className="truncate text-zinc-100">
+										{STATUS_OPTIONS.find((opt) => opt.value === status)
+											?.label || "Select status"}
+									</span>
+									<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+								</button>
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content
+								align="start"
+								className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)]"
+							>
+								<DropdownMenu.Label>Status</DropdownMenu.Label>
+								<DropdownMenu.RadioGroup
+									value={status}
+									onValueChange={(val) => setStatus(val as TaskStatus)}
+								>
+									{STATUS_OPTIONS.map((option) => (
+										<DropdownMenu.RadioItem
+											key={option.value}
+											value={option.value}
+										>
+											{option.label}
+										</DropdownMenu.RadioItem>
+									))}
+								</DropdownMenu.RadioGroup>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
+						{activeStatus && (
+							<Badge tone={activeStatus.tone}>{activeStatus.label}</Badge>
+						)}
+					</div>
+
+					<div className="space-y-2">
+						<label htmlFor={`${mode}-task-assignee`} className="ot-label">
+							Assignee
+						</label>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger asChild>
+								<button
+									id={`${mode}-task-assignee`}
+									type="button"
+									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
+								>
+									<span className="truncate text-zinc-100">
+										{assigneeId === ""
+											? "Unassigned"
+											: members.find((m) => m.userId === assigneeId)?.user
+													?.name ||
+												members.find((m) => m.userId === assigneeId)?.user
+													?.email ||
+												assigneeId}
+									</span>
+									<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+								</button>
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content
+								align="start"
+								className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)] max-h-[300px]"
+							>
+								<DropdownMenu.Label>Assignee</DropdownMenu.Label>
+								<DropdownMenu.RadioGroup
+									value={assigneeId}
+									onValueChange={setAssigneeId}
+								>
+									<DropdownMenu.RadioItem value="">
+										Unassigned
+									</DropdownMenu.RadioItem>
+									{members.map((member) => (
+										<DropdownMenu.RadioItem
+											key={member.userId}
+											value={member.userId}
+										>
+											<span className="truncate">
+												{member.user?.name ||
+													member.user?.email ||
+													member.userId}
+											</span>
+										</DropdownMenu.RadioItem>
+									))}
+								</DropdownMenu.RadioGroup>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
+					</div>
+
+					<div className="space-y-2">
+						<label htmlFor={`${mode}-task-priority`} className="ot-label">
+							Priority
+						</label>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger asChild>
+								<button
+									id={`${mode}-task-priority`}
+									type="button"
+									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
+								>
+									<div className="flex items-center gap-2 text-zinc-100">
+										{(() => {
+											const option = PRIORITY_OPTIONS.find(
+												(opt) => opt.value === priority,
+											);
+											if (!option) return null;
+											const Icon = option.icon;
+											return <Icon className={`h-4 w-4 ${option.color}`} />;
+										})()}
+										<span className="truncate">
+											{
+												PRIORITY_OPTIONS.find((opt) => opt.value === priority)
+													?.label
+											}
+										</span>
+									</div>
+									<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+								</button>
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content
+								align="start"
+								className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)]"
+							>
+								<DropdownMenu.Label>Priority</DropdownMenu.Label>
+								<DropdownMenu.RadioGroup
+									value={priority}
+									onValueChange={(val) => setPriority(val as TaskPriority)}
+								>
+									{PRIORITY_OPTIONS.map((option) => (
+										<DropdownMenu.RadioItem
+											key={option.value}
+											value={option.value}
+										>
+											<div className="flex items-center gap-2">
+												<option.icon className={`h-4 w-4 ${option.color}`} />
+												{option.label}
+											</div>
+										</DropdownMenu.RadioItem>
+									))}
+								</DropdownMenu.RadioGroup>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
+					</div>
+
+					<div className="space-y-2">
+						<label htmlFor={`${mode}-task-duedate`} className="ot-label">
+							Due Date
+						</label>
+						<input
+							id={`${mode}-task-duedate`}
+							type="date"
+							value={dueDate}
+							onChange={(e) => setDueDate(e.target.value)}
+							className="ot-input flex min-h-10 w-full px-3 text-sm font-medium text-zinc-100 scheme-dark"
+						/>
+					</div>
+
+					<div className="flex justify-end border-t border-zinc-900 pt-4">
+						<Button
+							type="button"
+							variant="primary"
+							onClick={() => setIsControlsModalOpen(false)}
+						>
+							Done
+						</Button>
+					</div>
+				</div>
+			</Dialog>
+		</>
 	);
 
 	const editContent = (

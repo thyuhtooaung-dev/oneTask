@@ -1,4 +1,11 @@
-import { Calendar } from "lucide-react";
+import {
+	AlertOctagon,
+	Calendar,
+	Minus,
+	SignalHigh,
+	SignalLow,
+	SignalMedium,
+} from "lucide-react";
 import { Avatar } from "../avatar/Avatar";
 import { cn } from "../cn";
 
@@ -7,6 +14,8 @@ interface TaskCardProps {
 	description?: string | null;
 	assigneeName?: string | null;
 	assigneeEmail?: string | null;
+	priority?: "none" | "low" | "medium" | "high" | "urgent";
+	dueDate?: string | null;
 	createdAt?: string;
 	onClick?: () => void;
 	draggable?: boolean;
@@ -24,11 +33,21 @@ function formatDate(value?: string) {
 	});
 }
 
+const PRIORITY_ICONS = {
+	none: { icon: Minus, color: "text-zinc-500" },
+	low: { icon: SignalLow, color: "text-zinc-400" },
+	medium: { icon: SignalMedium, color: "text-yellow-400" },
+	high: { icon: SignalHigh, color: "text-orange-400" },
+	urgent: { icon: AlertOctagon, color: "text-red-500" },
+};
+
 export function TaskCard({
 	title,
 	description,
 	assigneeName,
 	assigneeEmail,
+	priority,
+	dueDate,
 	createdAt,
 	onClick,
 	draggable,
@@ -69,12 +88,35 @@ export function TaskCard({
 						{assigneeName || assigneeEmail || "Unassigned"}
 					</span>
 				</div>
-				{createdAt && (
-					<span className="inline-flex items-center gap-1 text-[10px] font-medium text-zinc-600">
-						<Calendar className="h-3 w-3" />
-						{formatDate(createdAt)}
-					</span>
-				)}
+				<div className="flex items-center gap-2">
+					{priority &&
+						priority !== "none" &&
+						(() => {
+							const PriorityIcon = PRIORITY_ICONS[priority].icon;
+							return (
+								<PriorityIcon
+									className={`h-3 w-3 ${PRIORITY_ICONS[priority].color}`}
+								/>
+							);
+						})()}
+					{(dueDate || createdAt) &&
+						(() => {
+							const isOverdue =
+								dueDate &&
+								new Date(dueDate) < new Date(new Date().setHours(0, 0, 0, 0));
+							return (
+								<span
+									className={cn(
+										"inline-flex items-center gap-1 text-[10px] font-medium",
+										isOverdue ? "text-red-400" : "text-zinc-600",
+									)}
+								>
+									<Calendar className="h-3 w-3" />
+									{formatDate(dueDate || createdAt)}
+								</span>
+							);
+						})()}
+				</div>
 			</div>
 		</button>
 	);

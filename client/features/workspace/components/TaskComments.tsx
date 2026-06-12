@@ -81,6 +81,8 @@ function AttachmentGrid({
 					<Image
 						src={attachment.dataUrl}
 						alt={attachment.name}
+						width={1200}
+						height={1200}
 						className="max-h-64 w-full object-contain"
 					/>
 					<div className="flex items-center justify-between gap-2 border-t border-zinc-900 px-2 py-1.5">

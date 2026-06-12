@@ -20,6 +20,14 @@ export enum TaskStatus {
   CANCELED = 'canceled',
 }
 
+export enum TaskPriority {
+  NONE = 'none',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  URGENT = 'urgent',
+}
+
 @Entity('tasks')
 export class Task {
   @PrimaryGeneratedColumn('uuid')
@@ -51,6 +59,13 @@ export class Task {
     default: TaskStatus.TODO,
   })
   status: TaskStatus;
+
+  @Column({
+    type: 'enum',
+    enum: TaskPriority,
+    default: TaskPriority.NONE,
+  })
+  priority: TaskPriority;
 
   @Column({ nullable: true })
   assigneeId?: string | null;

@@ -28,4 +28,7 @@ export class Project {
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  archivedAt?: Date;
 }

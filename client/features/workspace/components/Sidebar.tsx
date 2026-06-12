@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfileModal } from "@/features/auth/components/UserProfileModal";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Avatar } from "@/shared/ui/avatar/Avatar";
 import { Button } from "@/shared/ui/button/Button";
@@ -19,6 +20,7 @@ import {
 	PanelLeftOpen,
 	Plus,
 	Settings,
+	User as UserIcon,
 } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
@@ -107,6 +109,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		setShowAnalytics,
 		openCreateProjectModal,
 		closeCreateProjectModal,
+		isUserProfileModalOpen,
+		setUserProfileModalOpen,
 	} = useUIStore();
 
 	const { data: workspaces = [], isLoading: isLoadingWorkspaces } =
@@ -500,7 +504,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 						)}
 					>
 						<div className="flex min-w-0 items-center gap-3">
-							<Avatar name={user.name} email={user.email} size="md" />
+							<Avatar
+								name={user.name}
+								email={user.email}
+								src={user.avatarUrl}
+								size="md"
+							/>
 							{!isSidebarCompact && (
 								<div className="min-w-0">
 									<p className="truncate text-xs font-semibold text-zinc-100">
@@ -512,14 +521,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
 								</div>
 							)}
 						</div>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={() => setIsLogoutDialogOpen(true)}
-							title="Log out"
-						>
-							<LogOut className="h-4 w-4" />
-						</Button>
+						<div className="flex items-center gap-1">
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setUserProfileModalOpen(true)}
+								title="Profile settings"
+							>
+								<Settings className="h-4 w-4" />
+							</Button>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setIsLogoutDialogOpen(true)}
+								title="Log out"
+							>
+								<LogOut className="h-4 w-4" />
+							</Button>
+						</div>
 					</div>
 				</div>
 			)}
@@ -638,6 +657,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					</Button>
 				</form>
 			</Dialog>
+			<UserProfileModal />
 		</aside>
 	);
 };

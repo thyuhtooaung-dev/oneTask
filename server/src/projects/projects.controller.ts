@@ -3,6 +3,8 @@ import { ProjectsService } from './projects.service';
 import { WorkspaceMemberGuard } from '../workspaces/guards/workspace-member.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateProjectDto } from '../common/dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
+import { Patch } from '@nestjs/common';
 
 @Controller()
 export class ProjectsController {
@@ -33,5 +35,26 @@ export class ProjectsController {
   @UseGuards(WorkspaceMemberGuard)
   async findOne(@Param('projectId') projectId: string) {
     return this.projectsService.findOne(projectId);
+  }
+
+  @Patch('workspaces/:workspaceId/projects/:projectId')
+  @UseGuards(WorkspaceMemberGuard)
+  async update(
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Body() body: UpdateProjectDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.projectsService.update(projectId, workspaceId, user.id, body);
+  }
+
+  @Post('workspaces/:workspaceId/projects/:projectId/archive')
+  @UseGuards(WorkspaceMemberGuard)
+  async archive(
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.projectsService.archive(projectId, workspaceId, user.id);
   }
 }

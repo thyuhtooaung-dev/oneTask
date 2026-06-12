@@ -8,6 +8,7 @@ import {
 	useMarkNotificationAsRead,
 	useNotifications,
 } from "@/features/notifications/hooks/useNotifications";
+import { ProjectSettingsModal } from "@/features/projects/components/ProjectSettingsModal";
 import { usePresenceStore } from "@/features/realtime/store/presenceStore";
 import { ActivityTimeline } from "@/features/workspace/components/ActivityTimeline";
 import { DashboardLayout } from "@/features/workspace/components/DashboardLayout";
@@ -39,8 +40,10 @@ import { cn } from "@/shared/ui/cn";
 import {
 	Activity,
 	AlertCircle,
+	AlertOctagon,
 	Bell,
 	Briefcase,
+	Calendar,
 	CalendarClock,
 	CheckCircle2,
 	Circle,
@@ -49,7 +52,12 @@ import {
 	Kanban,
 	List,
 	Loader2,
+	Minus,
 	Plus,
+	Settings,
+	SignalHigh,
+	SignalLow,
+	SignalMedium,
 	Sparkles,
 	XCircle,
 } from "lucide-react";
@@ -67,6 +75,14 @@ const STATUS_COLUMNS: Array<{
 	{ value: "done", label: "Done", icon: CheckCircle2, tone: "success" },
 	{ value: "canceled", label: "Canceled", icon: XCircle, tone: "danger" },
 ];
+
+const PRIORITY_ICONS = {
+	none: { icon: Minus, color: "text-zinc-500" },
+	low: { icon: SignalLow, color: "text-zinc-400" },
+	medium: { icon: SignalMedium, color: "text-yellow-400" },
+	high: { icon: SignalHigh, color: "text-orange-400" },
+	urgent: { icon: AlertOctagon, color: "text-red-500" },
+};
 
 function getGreeting(name?: string) {
 	const hour = new Date().getHours();
@@ -581,6 +597,7 @@ export default function Home() {
 		closeCreateTaskModal,
 		setViewMode,
 		setActiveProjectId,
+		openProjectSettingsModal,
 	} = useUIStore();
 	const { data: workspaces = [] } = useWorkspaces();
 	const { data: projects = [] } = useProjects(activeWorkspaceId);
@@ -609,6 +626,24 @@ export default function Home() {
 			),
 		[projectTasks],
 	);
+
+	const projectContributorsCount = useMemo(() => {
+		const assignees = new Set(
+			projectTasks.map((t) => t.assigneeId).filter(Boolean),
+		);
+		return assignees.size;
+	}, [projectTasks]);
+
+	const completedProjectTasksCount = useMemo(() => {
+		return projectTasks.filter((t) => t.status === "done").length;
+	}, [projectTasks]);
+
+	const recentProjectActivityCount = useMemo(() => {
+		const now = new Date();
+		const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+		return projectTasks.filter((t) => new Date(t.updatedAt) >= oneWeekAgo)
+			.length;
+	}, [projectTasks]);
 
 	const handleStatusChange = (task: Task, status: TaskStatus) => {
 		if (task.status === status) return;
@@ -670,6 +705,16 @@ export default function Home() {
 							</div>
 
 							<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+								<Button
+									variant="secondary"
+									onClick={openProjectSettingsModal}
+									title="Project settings"
+									className="w-full sm:w-auto"
+								>
+									<Settings className="h-4 w-4 sm:mr-0" />
+									<span className="sm:hidden ml-2">Settings</span>
+								</Button>
+
 								<div className="grid grid-cols-2 rounded-lg border border-zinc-800 bg-zinc-950 p-1 sm:flex sm:items-center">
 									<button
 										type="button"
@@ -707,6 +752,41 @@ export default function Home() {
 									<Plus className="h-4 w-4" />
 									New task
 								</Button>
+							</div>
+						</div>
+
+						<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+							<div className="rounded-xl border border-zinc-900/80 bg-zinc-950/45 p-4 shadow-(--ot-shadow-soft)">
+								<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+									Total Tasks
+								</p>
+								<p className="mt-1.5 text-xl font-semibold text-zinc-100">
+									{projectTasks.length}
+								</p>
+							</div>
+							<div className="rounded-xl border border-zinc-900/80 bg-zinc-950/45 p-4 shadow-(--ot-shadow-soft)">
+								<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+									Completed
+								</p>
+								<p className="mt-1.5 text-xl font-semibold text-emerald-300">
+									{completedProjectTasksCount}
+								</p>
+							</div>
+							<div className="rounded-xl border border-zinc-900/80 bg-zinc-950/45 p-4 shadow-(--ot-shadow-soft)">
+								<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+									Contributors
+								</p>
+								<p className="mt-1.5 text-xl font-semibold text-zinc-100">
+									{projectContributorsCount}
+								</p>
+							</div>
+							<div className="rounded-xl border border-zinc-900/80 bg-zinc-950/45 p-4 shadow-(--ot-shadow-soft)">
+								<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+									Recent Activity
+								</p>
+								<p className="mt-1.5 text-xl font-semibold text-zinc-100">
+									{recentProjectActivityCount}
+								</p>
 							</div>
 						</div>
 
@@ -779,12 +859,51 @@ export default function Home() {
 																</p>
 															</button>
 
-															<div className="flex min-w-0 items-center text-xs font-medium text-zinc-500">
+															<div className="flex min-w-0 flex-col justify-center gap-1 text-xs font-medium text-zinc-500">
 																<span className="truncate">
 																	{task.assignee?.name ||
 																		task.assignee?.email ||
 																		"Unassigned"}
 																</span>
+																<div className="flex items-center gap-2">
+																	{task.priority &&
+																		task.priority !== "none" &&
+																		(() => {
+																			const PriorityIcon =
+																				PRIORITY_ICONS[task.priority].icon;
+																			return (
+																				<PriorityIcon
+																					className={`h-3 w-3 ${PRIORITY_ICONS[task.priority].color}`}
+																				/>
+																			);
+																		})()}
+																	{task.dueDate &&
+																		(() => {
+																			const isOverdue =
+																				new Date(task.dueDate) <
+																				new Date(
+																					new Date().setHours(0, 0, 0, 0),
+																				);
+																			return (
+																				<span
+																					className={cn(
+																						"inline-flex items-center gap-1 text-[10px]",
+																						isOverdue
+																							? "text-red-400"
+																							: "text-zinc-600",
+																					)}
+																				>
+																					<Calendar className="h-3 w-3" />
+																					{new Date(
+																						task.dueDate,
+																					).toLocaleDateString(undefined, {
+																						month: "short",
+																						day: "numeric",
+																					})}
+																				</span>
+																			);
+																		})()}
+																</div>
 															</div>
 
 															<div className="flex flex-wrap items-center gap-1.5 md:col-span-2 lg:col-span-1">
@@ -841,6 +960,14 @@ export default function Home() {
 					task={selectedTask}
 					onClose={closeTaskModal}
 				/>
+				{activeProject && activeWorkspaceId && (
+					<ProjectSettingsModal
+						projectId={activeProject.id}
+						workspaceId={activeWorkspaceId}
+						initialName={activeProject.name}
+						initialDescription={activeProject.description}
+					/>
+				)}
 			</DashboardLayout>
 		</AuthGuard>
 	);

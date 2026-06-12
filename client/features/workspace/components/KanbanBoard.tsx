@@ -169,7 +169,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 												</DropdownMenu.Trigger>
 												<DropdownMenu.Content
 													align="start"
-													className="w-[var(--radix-dropdown-menu-trigger-width)] max-w-[calc(100vw-2rem)]"
+													className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)]"
 												>
 													<DropdownMenu.Label>Move task</DropdownMenu.Label>
 													<DropdownMenu.RadioGroup

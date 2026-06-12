@@ -140,7 +140,7 @@ export const UserProfileModal: React.FC = () => {
 						<div className="flex items-center gap-4">
 							<div className="relative">
 								{avatarUrl ? (
-									<Image
+									<img
 										src={avatarUrl}
 										alt="Avatar preview"
 										width={64}

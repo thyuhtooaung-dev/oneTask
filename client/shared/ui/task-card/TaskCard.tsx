@@ -64,7 +64,7 @@ export function TaskCard({
 			onDragEnd={onDragEnd}
 			onClick={onClick}
 			className={cn(
-				"group relative min-h-28 w-full overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/70 p-3 text-left shadow-[var(--ot-shadow-soft)] transition-all duration-150 hover:border-zinc-700 hover:bg-zinc-900/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+				"group relative min-h-28 w-full overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/70 p-3 text-left shadow-(--ot-shadow-soft) transition-all duration-150 hover:border-zinc-700 hover:bg-zinc-900/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
 				draggable && "cursor-grab active:cursor-grabbing",
 				isDragging && "scale-[0.98] border-violet-500/40 opacity-45",
 			)}

@@ -345,7 +345,14 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 					comments.map((comment) => {
 						const author =
 							comment.author?.name || comment.author?.email || "Unknown";
-						const canManage = user?.id === comment.authorId;
+						const currentUserMember = members.find(
+							(m) => m.userId === user?.id,
+						);
+						const role = currentUserMember?.role;
+						const canManage =
+							user?.id === comment.authorId ||
+							role === "OWNER" ||
+							role === "ADMIN";
 						const isEditing = editingId === comment.id;
 						const isUpdatingThis =
 							updateComment.isPending &&

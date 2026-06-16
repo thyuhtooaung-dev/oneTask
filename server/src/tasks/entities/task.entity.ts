@@ -82,6 +82,9 @@ export class Task {
   reporter: User;
 
   @Column({ nullable: true, type: 'timestamptz' })
+  startDate?: Date | null;
+
+  @Column({ nullable: true, type: 'timestamptz' })
   dueDate?: Date | null;
 
   @OneToMany(() => Comment, (comment: Comment) => comment.task)
@@ -92,4 +95,7 @@ export class Task {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  archivedAt?: Date | null;
 }

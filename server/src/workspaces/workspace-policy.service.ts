@@ -1,7 +1,10 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorkspaceMember } from './entities/workspace-member.entity';
+import {
+  WorkspaceMember,
+  WorkspaceRole,
+} from './entities/workspace-member.entity';
 import { WorkspaceAction, can } from './workspace-policy';
 
 @Injectable()
@@ -23,6 +26,14 @@ export class WorkspacePolicyService {
       throw new ForbiddenException('User is not a member of this workspace');
     }
     return member;
+  }
+
+  async getMemberRole(
+    userId: string,
+    workspaceId: string,
+  ): Promise<WorkspaceRole> {
+    const member = await this.assertUserIsWorkspaceMember(userId, workspaceId);
+    return member.role;
   }
 
   async assertAction(

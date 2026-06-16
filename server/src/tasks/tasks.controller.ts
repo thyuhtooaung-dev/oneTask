@@ -35,6 +35,7 @@ export class TasksController {
       body.assigneeId,
       body.priority,
       body.dueDate,
+      body.startDate,
     );
   }
 
@@ -67,5 +68,15 @@ export class TasksController {
     @CurrentUser() user: { id: string },
   ) {
     return this.tasksService.delete(taskId, user.id);
+  }
+
+  @Post('workspaces/:workspaceId/tasks/:taskId/archive')
+  @UseGuards(WorkspaceMemberGuard)
+  async archive(
+    @Param('taskId') taskId: string,
+    @Param('workspaceId') workspaceId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.tasksService.archive(taskId, user.id, workspaceId);
   }
 }

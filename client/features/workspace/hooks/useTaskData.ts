@@ -18,6 +18,7 @@ export interface Task {
 	priority: TaskPriority;
 	assigneeId?: string | null;
 	reporterId?: string | null;
+	startDate?: string | null;
 	dueDate?: string | null;
 	createdAt: string;
 	updatedAt: string;
@@ -31,6 +32,7 @@ interface TaskPayload {
 	description?: string;
 	status?: TaskStatus;
 	priority?: TaskPriority;
+	startDate?: string | null;
 	dueDate?: string | null;
 	projectId: string;
 	assigneeId?: string | null;
@@ -42,6 +44,7 @@ interface UpdateTaskPayload {
 	description?: string | null;
 	status?: TaskStatus;
 	priority?: TaskPriority;
+	startDate?: string | null;
 	dueDate?: string | null;
 	assigneeId?: string | null;
 }
@@ -111,6 +114,29 @@ export function useDeleteTask(workspaceId: string | null) {
 		mutationFn: async (taskId) => {
 			const response = await axiosClient.delete<{ deleted: true }>(
 				`/tasks/${taskId}`,
+			);
+			return response.data;
+		},
+		onSuccess: () => {
+			if (!workspaceId) return;
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.workspaces.tasks(workspaceId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.workspaces.activities(workspaceId),
+			});
+		},
+	});
+}
+
+export function useArchiveTask(workspaceId: string | null) {
+	const queryClient = useQueryClient();
+
+	return useMutation<Task, Error, string>({
+		mutationFn: async (taskId) => {
+			if (!workspaceId) throw new Error("Workspace ID is required");
+			const response = await axiosClient.post<Task>(
+				`/workspaces/${workspaceId}/tasks/${taskId}/archive`,
 			);
 			return response.data;
 		},

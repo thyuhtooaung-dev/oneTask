@@ -1,12 +1,12 @@
 # Product Vision & Architectural Manifesto: oneTask 🚀
 
-This document serves as the North Star for the design, architecture, and implementation of **oneTask**—a production-minded internal collaboration platform inspired by Linear, Slack, GitHub Activity, and Notion.
+This document serves as the North Star for the design, architecture, and implementation of **oneTask**—an all-in-one internal collaboration platform explicitly built to replace fragmented office tools (Excel, PowerPoint, and Google Drive).
 
 ---
 
 ## 💡 Core Philosophy: "Everything in the system is an event"
 
-The app is not meant to be a clone of existing project management tools. Instead, it focuses on a single event-driven loop:
+The app is not meant to be a generic SaaS. Instead, it focuses on being the singular hub for our office's workflow, driven by an event loop:
 
 ```
 User Action ➔ DB Mutation ➔ Activity Event ➔ Realtime Broadcaster ➔ UI Refresh
@@ -113,15 +113,19 @@ shared/
 | **15** | **Analytics Dashboard**       | `analytics/` module with aggregation queries for task completion, activity trends, and member stats.                                                                 | `WorkspaceAnalytics` page with interactive charts and insights.                                                                                      | ✅ Done |
 | **16** | **Project CRUD & Settings**   | Endpoints for editing project name/description and archiving projects. `PROJECT_UPDATED` & `PROJECT_ARCHIVED` events.                                                | `ProjectSettingsModal` for general and danger zone actions. Inline project dashboard reflecting tasks and contributors.                              | ✅ Done |
 | **17** | **Task Due Dates & Priorities**| `dueDate` and `priority` support added to DTOs, API, and `TasksService`.                                                                                             | Task modal updated with dynamic priority icons and HTML5 date pickers. Kanban and List views updated to render them.                                 | ✅ Done |
+| **18** | **Central Report Viewer & Daily Standups** | `ReportsModule` with `DailyReport` entity, submission upsert, and PM dashboard summary aggregation.                                                  | `WorkspaceReports` page with PM Dashboard (workload, bottlenecks) and My Daily Report (standup form with history).                                   | ✅ Done |
 
 ---
 
-## 🔮 What's Next
+## 🔮 What's Next (Office Hub Initiatives)
+
+Our immediate roadmap focuses on replacing our office's reliance on Excel, PowerPoint, and Google Drive:
 
 | Priority  | Feature                         | Scope              | Details                                                                                                                                                                                              |
 | :-------- | :------------------------------ | :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔴 High   | **User Profile & Settings**     | Backend + Frontend | Allow users to update their display name, avatar, and password. Add a profile page accessible from the sidebar.                                                                                      |
-| 🟡 Medium | **Session Report Emails**       | Backend            | Automated email summaries of workspace activity (daily/weekly digest) sent to members via the existing Gmail SMTP service.                                                                           |
+| 🟡 Medium | **File & Attachment Hub (50%)** | Backend + Frontend | **(Replaces Google Drive)** Allow file uploads on tasks/comments and create a centralized "Files" tab per project.                                                                                   |
+| 🟡 Medium | **Presentation & Timeline View**| Frontend           | **(Replaces PPT)** Add a full-screen Timeline (Gantt) view for projects to visually present roadmaps and assign tasks during meetings.                                                               |
+| 🟡 Medium | **Rich Text Project Briefs**    | Backend + Frontend | **(Replaces PPT)** Notion-style documents inside projects for rich text briefs with embedded images and task mentions.                                                                               |
+| 🟡 Medium | **Time Tracking**               | Backend + Frontend | **(Replaces Excel)** Allow users to log time on tasks to provide analytics on estimated vs. actual time spent.                                                                                       |
+| 🟢 Low    | **User Profile & Settings**     | Backend + Frontend | Allow users to update their display name, avatar, and password. Add a profile page accessible from the sidebar.                                                                                      |
 | 🟢 Low    | **Global Search**               | Backend + Frontend | Full-text search across tasks, comments, and activity events within a workspace. Add a search bar to the sidebar or top nav.                                                                         |
-| 🟢 Low    | **Task Labels & Tags**          | Backend + Frontend | Customizable color-coded labels that can be attached to tasks for categorization beyond status. Filter tasks by label in list and board views.                                                       |
-| 🟢 Low    | **File Attachments**            | Backend + Frontend | Allow file uploads on tasks and comments. Store in S3-compatible storage with download links in the task detail drawer.                                                                              |

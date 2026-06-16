@@ -1,5 +1,5 @@
 import { User } from "lucide-react";
-import Image from "next/image";
+
 import { cn } from "../cn";
 
 interface AvatarProps {
@@ -52,7 +52,7 @@ export function Avatar({
 				title={label || "Unassigned"}
 			>
 				{src ? (
-					<Image
+					<img
 						src={src}
 						alt={label || "Avatar"}
 						width={pixelSizes[size]}

@@ -5,8 +5,10 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Workspace } from '../../workspaces/entities/workspace.entity';
+import type { ProjectMember } from './project-member.entity';
 
 @Entity('projects')
 export class Project {
@@ -25,6 +27,12 @@ export class Project {
 
   @Column({ nullable: true })
   description?: string;
+
+  @Column({ default: false })
+  isPrivate: boolean;
+
+  @OneToMany('ProjectMember', (pm: ProjectMember) => pm.project)
+  members: ProjectMember[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

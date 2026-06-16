@@ -35,6 +35,7 @@ export interface Project {
 	name: string;
 	description?: string;
 	workspaceId: string;
+	isPrivate?: boolean;
 	createdAt: string;
 }
 
@@ -113,7 +114,11 @@ export function useProjects(workspaceId: string | null) {
 export function useCreateProject(workspaceId: string | null) {
 	const queryClient = useQueryClient();
 
-	return useMutation<Project, Error, { name: string; description?: string }>({
+	return useMutation<
+		Project,
+		Error,
+		{ name: string; description?: string; isPrivate?: boolean }
+	>({
 		mutationFn: async (body) => {
 			if (!workspaceId)
 				throw new Error("Workspace ID is required to create a project");

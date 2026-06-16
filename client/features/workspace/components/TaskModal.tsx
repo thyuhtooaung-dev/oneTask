@@ -17,17 +17,19 @@ import {
 	SignalLow,
 	SignalMedium,
 	Trash2,
+	Archive,
 } from "lucide-react";
-import type React from "react";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
 	type Task,
 	type TaskPriority,
 	type TaskStatus,
 	useCreateTask,
 	useDeleteTask,
+	useArchiveTask,
 	useUpdateTask,
-} from "../hooks/useTaskData";
+} from "@/features/workspace/hooks/useTaskData";
 import { useWorkspaceDetail } from "../hooks/useWorkspaceData";
 import { TaskComments } from "./TaskComments";
 
@@ -83,9 +85,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	onClose,
 }) => {
 	const { data: workspace } = useWorkspaceDetail(workspaceId);
+	const { user } = useAuth();
 	const createTask = useCreateTask(workspaceId);
 	const updateTask = useUpdateTask(workspaceId);
 	const deleteTask = useDeleteTask(workspaceId);
+	const archiveTask = useArchiveTask(workspaceId);
 
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
@@ -115,6 +119,24 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	}
 
 	const members = useMemo(() => workspace?.members || [], [workspace]);
+
+	const currentMember = useMemo(
+		() => members.find((m) => m.userId === user?.id),
+		[members, user?.id],
+	);
+	const currentUserRole = currentMember?.role;
+	const isReporter = task?.reporterId === user?.id;
+	const isAssignee = task?.assigneeId === user?.id;
+
+	const canEditCore =
+		mode === "create" ||
+		currentUserRole === "OWNER" ||
+		currentUserRole === "ADMIN" ||
+		isReporter;
+	const canEditProgress = canEditCore || isAssignee;
+	const canDelete =
+		currentUserRole === "OWNER" || currentUserRole === "ADMIN" || isReporter;
+
 	const isPending =
 		createTask.isPending || updateTask.isPending || deleteTask.isPending;
 	const activeStatus = STATUS_OPTIONS.find((option) => option.value === status);
@@ -169,23 +191,26 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						<label htmlFor={`${mode}-task-title`} className="ot-label">
 							Title
 						</label>
-						<Button
-							type="button"
-							variant="ghost"
-							size="icon"
-							onClick={() => setIsControlsModalOpen(true)}
-							title="Task controls"
-							className="h-8 w-8"
-						>
-							<Settings className="h-4 w-4" />
-						</Button>
+						{currentUserRole !== "MEMBER" && (
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon"
+								onClick={() => setIsControlsModalOpen(true)}
+								title="Task controls"
+								className="h-8 w-8"
+							>
+								<Settings className="h-4 w-4" />
+							</Button>
+						)}
 					</div>
 					<input
 						id={`${mode}-task-title`}
 						required
 						value={title}
 						onChange={(event) => setTitle(event.target.value)}
-						className="ot-input min-h-11 px-3 text-sm font-medium"
+						disabled={!canEditCore}
+						className="ot-input min-h-11 px-3 text-sm font-medium disabled:opacity-50"
 						placeholder="Write a clear task title"
 					/>
 				</div>
@@ -198,13 +223,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						id={`${mode}-task-description`}
 						value={description}
 						onChange={(event) => setDescription(event.target.value)}
-						className="ot-input min-h-36 resize-y px-3 py-2.5 text-sm leading-6"
+						disabled={!canEditCore}
+						className="ot-input min-h-36 resize-y px-3 py-2.5 text-sm leading-6 disabled:opacity-50"
 						placeholder="Add context, constraints, acceptance notes, or links."
 					/>
 				</div>
 
 				<div className="mt-auto flex flex-col-reverse gap-3 border-t border-zinc-900 pt-4 sm:flex-row sm:items-center sm:justify-end">
-					{mode === "edit" ? (
+					{mode === "edit" && canDelete ? (
 						<Button
 							type="button"
 							variant="danger"
@@ -223,7 +249,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						type="submit"
 						variant="primary"
 						disabled={
-							isPending || !title.trim() || (mode === "create" && !projectId)
+							isPending ||
+							!title.trim() ||
+							(mode === "create" && !projectId) ||
+							!canEditProgress
 						}
 						className="w-full sm:w-auto"
 					>
@@ -253,7 +282,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 								<button
 									id={`${mode}-task-status`}
 									type="button"
-									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
+									disabled={!canEditProgress}
+									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium disabled:opacity-50"
 								>
 									<span className="truncate text-zinc-100">
 										{STATUS_OPTIONS.find((opt) => opt.value === status)
@@ -296,7 +326,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 								<button
 									id={`${mode}-task-assignee`}
 									type="button"
-									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
+									disabled={!canEditCore}
+									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium disabled:opacity-50"
 								>
 									<span className="truncate text-zinc-100">
 										{assigneeId === ""
@@ -348,7 +379,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 								<button
 									id={`${mode}-task-priority`}
 									type="button"
-									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium"
+									disabled={!canEditProgress}
+									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium disabled:opacity-50"
 								>
 									<div className="flex items-center gap-2 text-zinc-100">
 										{(() => {
@@ -403,11 +435,39 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 							type="date"
 							value={dueDate}
 							onChange={(e) => setDueDate(e.target.value)}
-							className="ot-input flex min-h-10 w-full px-3 text-sm font-medium text-zinc-100 scheme-dark"
+							disabled={!canEditProgress}
+							className="ot-input flex min-h-10 w-full px-3 text-sm font-medium text-zinc-100 scheme-dark disabled:opacity-50"
 						/>
 					</div>
 
-					<div className="flex justify-end border-t border-zinc-900 pt-4">
+					<div className="flex justify-between border-t border-zinc-900 pt-4">
+						{mode === "edit" && status === "done" && canEditCore ? (
+							<Button
+								type="button"
+								variant="secondary"
+								onClick={() => {
+									if (task) {
+										archiveTask.mutate(task.id, {
+											onSuccess: () => {
+												setIsControlsModalOpen(false);
+												onClose();
+											},
+										});
+									}
+								}}
+								disabled={archiveTask.isPending}
+								className="text-amber-500 hover:text-amber-400"
+							>
+								{archiveTask.isPending ? (
+									<Loader2 className="h-4 w-4 animate-spin mr-2" />
+								) : (
+									<Archive className="h-4 w-4 mr-2" />
+								)}
+								Archive Task
+							</Button>
+						) : (
+							<span />
+						)}
 						<Button
 							type="button"
 							variant="primary"

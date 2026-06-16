@@ -8,6 +8,7 @@ import { Workspace } from './workspaces/entities/workspace.entity';
 import { WorkspaceMember } from './workspaces/entities/workspace-member.entity';
 import { WorkspaceInvite } from './workspaces/entities/workspace-invite.entity';
 import { Project } from './projects/entities/project.entity';
+import { ProjectMember } from './projects/entities/project-member.entity';
 import { Task } from './tasks/entities/task.entity';
 import { Comment } from './comments/entities/comment.entity';
 import { ActivityEvent } from './activities/entities/activity-event.entity';
@@ -56,6 +57,7 @@ import { SearchModule } from './search/search.module';
           WorkspaceMember,
           WorkspaceInvite,
           Project,
+          ProjectMember,
           Task,
           Comment,
           ActivityEvent,

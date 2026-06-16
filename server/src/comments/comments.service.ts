@@ -13,7 +13,10 @@ import { EventType } from '../activities/entities/activity-event.entity';
 import { WorkspacePolicyService } from '../workspaces/workspace-policy.service';
 import { WorkspaceAction } from '../workspaces/workspace-policy';
 import { NotificationsService } from '../notifications/notifications.service';
-import { WorkspaceMember } from '../workspaces/entities/workspace-member.entity';
+import {
+  WorkspaceMember,
+  WorkspaceRole,
+} from '../workspaces/entities/workspace-member.entity';
 
 const MAX_COMMENT_ATTACHMENTS = 4;
 const MAX_ATTACHMENT_DATA_URL_BYTES = 2 * 1024 * 1024;
@@ -171,9 +174,18 @@ export class CommentsService {
       WorkspaceAction.COMMENT,
     );
 
-    if (comment.authorId !== userId) {
+    const role = await this.policyService.getMemberRole(
+      userId,
+      comment.task.workspaceId,
+    );
+
+    if (
+      comment.authorId !== userId &&
+      role !== WorkspaceRole.OWNER &&
+      role !== WorkspaceRole.ADMIN
+    ) {
       throw new ForbiddenException(
-        'Only the comment author can edit this comment',
+        'Only the comment author or admins can edit this comment',
       );
     }
 
@@ -216,9 +228,18 @@ export class CommentsService {
       WorkspaceAction.COMMENT,
     );
 
-    if (comment.authorId !== userId) {
+    const role = await this.policyService.getMemberRole(
+      userId,
+      comment.task.workspaceId,
+    );
+
+    if (
+      comment.authorId !== userId &&
+      role !== WorkspaceRole.OWNER &&
+      role !== WorkspaceRole.ADMIN
+    ) {
       throw new ForbiddenException(
-        'Only the comment author can delete this comment',
+        'Only the comment author or admins can delete this comment',
       );
     }
 

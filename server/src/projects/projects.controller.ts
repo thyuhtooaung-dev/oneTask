@@ -22,19 +22,26 @@ export class ProjectsController {
       body.description,
       workspaceId,
       user.id,
+      body.isPrivate,
     );
   }
 
   @Get('workspaces/:workspaceId/projects')
   @UseGuards(WorkspaceMemberGuard)
-  async findAll(@Param('workspaceId') workspaceId: string) {
-    return this.projectsService.findAllForWorkspace(workspaceId);
+  async findAll(
+    @Param('workspaceId') workspaceId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.projectsService.findAllForWorkspace(workspaceId, user.id);
   }
 
   @Get('projects/:projectId')
   @UseGuards(WorkspaceMemberGuard)
-  async findOne(@Param('projectId') projectId: string) {
-    return this.projectsService.findOne(projectId);
+  async findOne(
+    @Param('projectId') projectId: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.projectsService.findOne(projectId, user.id);
   }
 
   @Patch('workspaces/:workspaceId/projects/:projectId')

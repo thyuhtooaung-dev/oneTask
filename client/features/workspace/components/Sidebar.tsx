@@ -4,6 +4,7 @@ import { UserProfileModal } from "@/features/auth/components/UserProfileModal";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Avatar } from "@/shared/ui/avatar/Avatar";
 import { Button } from "@/shared/ui/button/Button";
+import { Checkbox } from "@/shared/ui/checkbox/Checkbox";
 import { cn } from "@/shared/ui/cn";
 import { Dialog } from "@/shared/ui/dialog/Dialog";
 import { DropdownMenu } from "@/shared/ui/dropdown-menu/DropdownMenu";
@@ -20,7 +21,6 @@ import {
 	PanelLeftOpen,
 	Plus,
 	Settings,
-	User as UserIcon,
 } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
@@ -109,7 +109,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		setShowAnalytics,
 		openCreateProjectModal,
 		closeCreateProjectModal,
-		isUserProfileModalOpen,
 		setUserProfileModalOpen,
 	} = useUIStore();
 
@@ -127,6 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	const [workspaceDesc, setWorkspaceDesc] = useState("");
 	const [projectName, setProjectName] = useState("");
 	const [projectDesc, setProjectDesc] = useState("");
+	const [projectIsPrivate, setProjectIsPrivate] = useState(false);
 
 	const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
 	const viewport = useViewportMode();
@@ -161,10 +161,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		const project = await createProjectMutation.mutateAsync({
 			name: projectName.trim(),
 			description: projectDesc.trim() || undefined,
+			isPrivate: projectIsPrivate,
 		});
 		setActiveProjectId(project.id);
 		setProjectName("");
 		setProjectDesc("");
+		setProjectIsPrivate(false);
 		closeCreateProjectModal();
 		onMobileClose?.();
 	};
@@ -643,6 +645,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
 							className="ot-input h-24 resize-none px-3 py-2 text-sm"
 							placeholder="What work belongs here?"
 						/>
+					</div>
+					<div className="flex items-center gap-2">
+						<Checkbox
+							id="project-is-private"
+							checked={projectIsPrivate}
+							onCheckedChange={(checked) =>
+								setProjectIsPrivate(checked as boolean)
+							}
+						/>
+						<label
+							htmlFor="project-is-private"
+							className="text-sm font-medium text-zinc-300"
+						>
+							Make project private
+						</label>
 					</div>
 					<Button
 						type="submit"

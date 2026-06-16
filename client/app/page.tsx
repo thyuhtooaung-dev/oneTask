@@ -322,36 +322,34 @@ function WorkspaceHome({
 								</Badge>
 							</div>
 
-							<div className="space-y-2">
-								{unreadWorkspaceNotifications
-									.slice(0, 4)
-									.map((notification) => {
-										const copy = getNotificationCopy(notification);
+							<div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+								{unreadWorkspaceNotifications.map((notification) => {
+									const copy = getNotificationCopy(notification);
 
-										return (
-											<button
-												key={notification.id}
-												type="button"
-												onClick={() => openNotification(notification)}
-												className="grid w-full grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-zinc-900 bg-zinc-950/70 px-3 py-2.5 text-left transition-colors hover:border-zinc-800 hover:bg-zinc-900/70"
-											>
-												<span className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-500/20 bg-violet-500/10 text-violet-300">
-													<Bell className="h-4 w-4" />
+									return (
+										<button
+											key={notification.id}
+											type="button"
+											onClick={() => openNotification(notification)}
+											className="grid w-full grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-zinc-900 bg-zinc-950/70 px-3 py-2.5 text-left transition-colors hover:border-zinc-800 hover:bg-zinc-900/70"
+										>
+											<span className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-500/20 bg-violet-500/10 text-violet-300">
+												<Bell className="h-4 w-4" />
+											</span>
+											<span className="min-w-0">
+												<span className="block truncate text-sm font-semibold text-zinc-100">
+													{copy.title}
 												</span>
-												<span className="min-w-0">
-													<span className="block truncate text-sm font-semibold text-zinc-100">
-														{copy.title}
-													</span>
-													<span className="mt-0.5 block truncate text-xs text-zinc-500">
-														{copy.subtitle}
-													</span>
+												<span className="mt-0.5 block truncate text-xs text-zinc-500">
+													{copy.subtitle}
 												</span>
-												<span className="text-[10px] font-medium text-zinc-600">
-													{formatShortDate(notification.createdAt)}
-												</span>
-											</button>
-										);
-									})}
+											</span>
+											<span className="text-[10px] font-medium text-zinc-600">
+												{formatShortDate(notification.createdAt)}
+											</span>
+										</button>
+									);
+								})}
 
 								{overdueAssignedTasks.slice(0, 3).map((task) => (
 									<button
@@ -606,6 +604,10 @@ export default function Home() {
 		useTasks(activeWorkspaceId);
 	const updateTask = useUpdateTask(activeWorkspaceId);
 
+	const currentUserRole = workspaceDetail?.members.find(
+		(m) => m.userId === user?.id,
+	)?.role;
+
 	const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
 	const activeProject = projects.find((p) => p.id === activeProjectId);
 	const projectTasks = useMemo(
@@ -644,6 +646,11 @@ export default function Home() {
 		return projectTasks.filter((t) => new Date(t.updatedAt) >= oneWeekAgo)
 			.length;
 	}, [projectTasks]);
+
+	const currentMember = useMemo(
+		() => workspaceDetail?.members.find((m) => m.userId === user?.id),
+		[workspaceDetail?.members, user?.id],
+	);
 
 	const handleStatusChange = (task: Task, status: TaskStatus) => {
 		if (task.status === status) return;
@@ -705,15 +712,17 @@ export default function Home() {
 							</div>
 
 							<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-								<Button
-									variant="secondary"
-									onClick={openProjectSettingsModal}
-									title="Project settings"
-									className="w-full sm:w-auto"
-								>
-									<Settings className="h-4 w-4 sm:mr-0" />
-									<span className="sm:hidden ml-2">Settings</span>
-								</Button>
+								{currentUserRole !== "MEMBER" && (
+									<Button
+										variant="secondary"
+										onClick={openProjectSettingsModal}
+										title="Project settings"
+										className="w-full sm:w-auto"
+									>
+										<Settings className="h-4 w-4 sm:mr-0" />
+										<span className="sm:hidden ml-2">Settings</span>
+									</Button>
+								)}
 
 								<div className="grid grid-cols-2 rounded-lg border border-zinc-800 bg-zinc-950 p-1 sm:flex sm:items-center">
 									<button
@@ -815,7 +824,9 @@ export default function Home() {
 								tasks={projectTasks}
 								onTaskClick={openTaskModal}
 								onStatusChange={handleStatusChange}
-								onCreateTaskClick={openCreateTaskModal}
+								onCreateTaskClick={() => openCreateTaskModal()}
+								currentUserId={user?.id}
+								currentUserRole={currentMember?.role}
 							/>
 						) : (
 							<div className="space-y-4">

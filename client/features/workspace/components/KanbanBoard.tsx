@@ -8,6 +8,7 @@ import { TaskCard } from "@/shared/ui/task-card/TaskCard";
 import {
 	CheckCircle2,
 	ChevronDown,
+	ChevronRight,
 	Circle,
 	Clock3,
 	Plus,
@@ -22,6 +23,8 @@ interface KanbanBoardProps {
 	onTaskClick: (taskId: string) => void;
 	onStatusChange: (task: Task, status: TaskStatus) => void;
 	onCreateTaskClick: () => void;
+	currentUserId?: string;
+	currentUserRole?: string;
 }
 
 const STATUS_COLUMNS: Array<{
@@ -66,10 +69,28 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	onTaskClick,
 	onStatusChange,
 	onCreateTaskClick,
+	currentUserId,
+	currentUserRole,
 }) => {
 	const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
 	const [activeDragOverColumn, setActiveDragOverColumn] =
 		useState<TaskStatus | null>(null);
+
+	const [collapsedColumns, setCollapsedColumns] = useState<
+		Record<TaskStatus, boolean>
+	>({
+		todo: false,
+		in_progress: false,
+		done: false,
+		canceled: false,
+	});
+
+	const toggleColumn = (status: TaskStatus) => {
+		setCollapsedColumns((prev) => ({
+			...prev,
+			[status]: !prev[status],
+		}));
+	};
 
 	const groupedTasks = useMemo(
 		() =>
@@ -142,55 +163,67 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 										No tasks
 									</div>
 								) : (
-									columnTasks.map((task) => (
-										<div key={task.id} className="space-y-2">
-											<TaskCard
-												title={task.title}
-												description={task.description}
-												assigneeName={task.assignee?.name}
-												assigneeEmail={task.assignee?.email}
-												priority={task.priority}
-												dueDate={task.dueDate}
-												createdAt={task.createdAt}
-												onClick={() => onTaskClick(task.id)}
-												accentClassName={column.accentClassName}
-											/>
-											<DropdownMenu.Root>
-												<DropdownMenu.Trigger asChild>
-													<button
-														type="button"
-														className="ot-input flex min-h-10 items-center justify-between gap-3 px-3 text-left text-xs font-semibold"
-													>
-														<span className="truncate">
-															Move to {column.label}
-														</span>
-														<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
-													</button>
-												</DropdownMenu.Trigger>
-												<DropdownMenu.Content
-													align="start"
-													className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)]"
-												>
-													<DropdownMenu.Label>Move task</DropdownMenu.Label>
-													<DropdownMenu.RadioGroup
-														value={task.status}
-														onValueChange={(value) =>
-															onStatusChange(task, value as TaskStatus)
-														}
-													>
-														{STATUS_COLUMNS.map((statusOption) => (
-															<DropdownMenu.RadioItem
-																key={statusOption.value}
-																value={statusOption.value}
+									columnTasks.map((task) => {
+										const isReporter = task.reporterId === currentUserId;
+										const isAssignee = task.assigneeId === currentUserId;
+										const canEditProgress =
+											currentUserRole === "OWNER" ||
+											currentUserRole === "ADMIN" ||
+											isReporter ||
+											isAssignee;
+
+										return (
+											<div key={task.id} className="space-y-2">
+												<TaskCard
+													title={task.title}
+													description={task.description}
+													assigneeName={task.assignee?.name}
+													assigneeEmail={task.assignee?.email}
+													priority={task.priority}
+													dueDate={task.dueDate}
+													createdAt={task.createdAt}
+													onClick={() => onTaskClick(task.id)}
+													accentClassName={column.accentClassName}
+												/>
+												{canEditProgress && (
+													<DropdownMenu.Root>
+														<DropdownMenu.Trigger asChild>
+															<button
+																type="button"
+																className="ot-input flex min-h-10 items-center justify-between gap-3 px-3 text-left text-xs font-semibold"
 															>
-																{statusOption.label}
-															</DropdownMenu.RadioItem>
-														))}
-													</DropdownMenu.RadioGroup>
-												</DropdownMenu.Content>
-											</DropdownMenu.Root>
-										</div>
-									))
+																<span className="truncate">
+																	Move to {column.label}
+																</span>
+																<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+															</button>
+														</DropdownMenu.Trigger>
+														<DropdownMenu.Content
+															align="start"
+															className="w-(--radix-dropdown-menu-trigger-width) max-w-[calc(100vw-2rem)]"
+														>
+															<DropdownMenu.Label>Move task</DropdownMenu.Label>
+															<DropdownMenu.RadioGroup
+																value={task.status}
+																onValueChange={(value) =>
+																	onStatusChange(task, value as TaskStatus)
+																}
+															>
+																{STATUS_COLUMNS.map((statusOption) => (
+																	<DropdownMenu.RadioItem
+																		key={statusOption.value}
+																		value={statusOption.value}
+																	>
+																		{statusOption.label}
+																	</DropdownMenu.RadioItem>
+																))}
+															</DropdownMenu.RadioGroup>
+														</DropdownMenu.Content>
+													</DropdownMenu.Root>
+												)}
+											</div>
+										);
+									})
 								)}
 							</div>
 						</section>
@@ -215,14 +248,37 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								onDragLeave={() => setActiveDragOverColumn(null)}
 								onDrop={(event) => handleDrop(event, column.value)}
 								className={cn(
-									"flex min-h-[520px] flex-col rounded-2xl border bg-zinc-950/35 p-3 transition-all duration-150",
-									isActiveDrop
+									"flex flex-col rounded-2xl border transition-all duration-150",
+									collapsedColumns[column.value]
+										? "h-14 overflow-hidden bg-zinc-950/20"
+										: "min-h-[520px] bg-zinc-950/35 p-3",
+									isActiveDrop && !collapsedColumns[column.value]
 										? "border-violet-500/35 bg-violet-500/5"
 										: "border-zinc-900",
 								)}
 							>
-								<div className="sticky top-0 z-10 mb-3 flex items-center justify-between gap-3 bg-zinc-950/95 px-1 py-1">
-									<div className="flex items-center gap-2">
+								<div
+									className={cn(
+										"sticky top-0 z-10 flex items-center justify-between gap-3 bg-zinc-950/95",
+										collapsedColumns[column.value]
+											? "px-3 py-3"
+											: "mb-3 px-1 py-1",
+									)}
+								>
+									<div
+										className="flex items-center gap-2 cursor-pointer"
+										onClick={() => toggleColumn(column.value)}
+									>
+										<button
+											type="button"
+											className="text-zinc-500 hover:text-zinc-300"
+										>
+											{collapsedColumns[column.value] ? (
+												<ChevronRight className="h-4 w-4" />
+											) : (
+												<ChevronDown className="h-4 w-4" />
+											)}
+										</button>
 										<Badge tone={column.tone}>
 											<Icon className="h-3 w-3" />
 											{column.label}
@@ -243,35 +299,49 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 									)}
 								</div>
 
-								<div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
-									{columnTasks.length === 0 ? (
-										<div className="flex h-28 items-center justify-center rounded-xl border border-dashed border-zinc-900 bg-zinc-950/30 text-xs font-medium text-zinc-600">
-											Drop tasks here
-										</div>
-									) : (
-										columnTasks.map((task) => (
-											<TaskCard
-												key={task.id}
-												title={task.title}
-												description={task.description}
-												assigneeName={task.assignee?.name}
-												assigneeEmail={task.assignee?.email}
-												priority={task.priority}
-												dueDate={task.dueDate}
-												createdAt={task.createdAt}
-												onClick={() => onTaskClick(task.id)}
-												draggable
-												onDragStart={(event) => handleDragStart(event, task.id)}
-												onDragEnd={() => {
-													setDraggedTaskId(null);
-													setActiveDragOverColumn(null);
-												}}
-												isDragging={draggedTaskId === task.id}
-												accentClassName={column.accentClassName}
-											/>
-										))
-									)}
-								</div>
+								{!collapsedColumns[column.value] && (
+									<div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+										{columnTasks.length === 0 ? (
+											<div className="flex h-28 items-center justify-center rounded-xl border border-dashed border-zinc-900 bg-zinc-950/30 text-xs font-medium text-zinc-600">
+												Drop tasks here
+											</div>
+										) : (
+											columnTasks.map((task) => {
+												const isReporter = task.reporterId === currentUserId;
+												const isAssignee = task.assigneeId === currentUserId;
+												const canEditProgress =
+													currentUserRole === "OWNER" ||
+													currentUserRole === "ADMIN" ||
+													isReporter ||
+													isAssignee;
+
+												return (
+													<TaskCard
+														key={task.id}
+														title={task.title}
+														description={task.description}
+														assigneeName={task.assignee?.name}
+														assigneeEmail={task.assignee?.email}
+														priority={task.priority}
+														dueDate={task.dueDate}
+														createdAt={task.createdAt}
+														onClick={() => onTaskClick(task.id)}
+														draggable={canEditProgress}
+														onDragStart={(event) =>
+															handleDragStart(event, task.id)
+														}
+														onDragEnd={() => {
+															setDraggedTaskId(null);
+															setActiveDragOverColumn(null);
+														}}
+														isDragging={draggedTaskId === task.id}
+														accentClassName={column.accentClassName}
+													/>
+												);
+											})
+										)}
+									</div>
+								)}
 							</section>
 						);
 					})}

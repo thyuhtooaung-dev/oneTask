@@ -92,4 +92,7 @@ export class Task {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  archivedAt?: Date | null;
 }

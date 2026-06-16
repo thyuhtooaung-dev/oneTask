@@ -13,6 +13,7 @@ import { Task } from './tasks/entities/task.entity';
 import { Comment } from './comments/entities/comment.entity';
 import { ActivityEvent } from './activities/entities/activity-event.entity';
 import { Notification } from './notifications/entities/notification.entity';
+import { DailyReport } from './reports/entities/daily-report.entity';
 import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
@@ -31,6 +32,7 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { SearchModule } from './search/search.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -62,6 +64,7 @@ import { SearchModule } from './search/search.module';
           Comment,
           ActivityEvent,
           Notification,
+          DailyReport,
         ],
         synchronize: configService.get<string>('NODE_ENV') !== 'production', // Disabled in production; use migrations instead
         ssl:
@@ -83,6 +86,7 @@ import { SearchModule } from './search/search.module';
     NotificationsModule,
     AnalyticsModule,
     SearchModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

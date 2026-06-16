@@ -1,12 +1,12 @@
 # Product Vision & Architectural Manifesto: oneTask 🚀
 
-This document serves as the North Star for the design, architecture, and implementation of **oneTask**—a production-minded internal collaboration platform inspired by Linear, Slack, GitHub Activity, and Notion.
+This document serves as the North Star for the design, architecture, and implementation of **oneTask**—an all-in-one internal collaboration platform explicitly built to replace fragmented office tools (Excel, PowerPoint, and Google Drive).
 
 ---
 
 ## 💡 Core Philosophy: "Everything in the system is an event"
 
-The app is not meant to be a clone of existing project management tools. Instead, it focuses on a single event-driven loop:
+The app is not meant to be a generic SaaS. Instead, it focuses on being the singular hub for our office's workflow, driven by an event loop:
 
 ```
 User Action ➔ DB Mutation ➔ Activity Event ➔ Realtime Broadcaster ➔ UI Refresh
@@ -116,12 +116,16 @@ shared/
 
 ---
 
-## 🔮 What's Next
+## 🔮 What's Next (Office Hub Initiatives)
+
+Our immediate roadmap focuses on replacing our office's reliance on Excel, PowerPoint, and Google Drive:
 
 | Priority  | Feature                         | Scope              | Details                                                                                                                                                                                              |
 | :-------- | :------------------------------ | :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔴 High   | **User Profile & Settings**     | Backend + Frontend | Allow users to update their display name, avatar, and password. Add a profile page accessible from the sidebar.                                                                                      |
-| 🟡 Medium | **Session Report Emails**       | Backend            | Automated email summaries of workspace activity (daily/weekly digest) sent to members via the existing Gmail SMTP service.                                                                           |
+| 🔴 High   | **Central Report Viewer & Daily Standups** | Backend + Frontend | **(Replaces Excel)** In-app dashboard for PMs to see who is doing what and task time bottlenecks. Members can write daily end-of-day reports directly in the app. |
+| 🔴 High   | **File & Attachment Hub**       | Backend + Frontend | **(Replaces Google Drive)** Allow file uploads on tasks/comments and create a centralized "Files" tab per project.                                                                                   |
+| 🟡 Medium | **Presentation & Timeline View**| Frontend           | **(Replaces PPT)** Add a full-screen Timeline (Gantt) view for projects to visually present roadmaps and assign tasks during meetings.                                                               |
+| 🟡 Medium | **Rich Text Project Briefs**    | Backend + Frontend | **(Replaces PPT)** Notion-style documents inside projects for rich text briefs with embedded images and task mentions.                                                                               |
+| 🟡 Medium | **Time Tracking**               | Backend + Frontend | **(Replaces Excel)** Allow users to log time on tasks to provide analytics on estimated vs. actual time spent.                                                                                       |
+| 🟢 Low    | **User Profile & Settings**     | Backend + Frontend | Allow users to update their display name, avatar, and password. Add a profile page accessible from the sidebar.                                                                                      |
 | 🟢 Low    | **Global Search**               | Backend + Frontend | Full-text search across tasks, comments, and activity events within a workspace. Add a search bar to the sidebar or top nav.                                                                         |
-| 🟢 Low    | **Task Labels & Tags**          | Backend + Frontend | Customizable color-coded labels that can be attached to tasks for categorization beyond status. Filter tasks by label in list and board views.                                                       |
-| 🟢 Low    | **File Attachments**            | Backend + Frontend | Allow file uploads on tasks and comments. Store in S3-compatible storage with download links in the task detail drawer.                                                                              |

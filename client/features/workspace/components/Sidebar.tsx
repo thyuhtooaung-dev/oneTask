@@ -13,6 +13,7 @@ import {
 	BarChart3,
 	Briefcase,
 	ChevronDown,
+	ClipboardList,
 	Folder,
 	Inbox,
 	Loader2,
@@ -101,12 +102,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		showSettings,
 		showActivityExplorer,
 		showAnalytics,
+		showReports,
 		isCreateProjectModalOpen,
 		setActiveWorkspaceId,
 		setActiveProjectId,
 		setShowSettings,
 		setShowActivityExplorer,
 		setShowAnalytics,
+		setShowReports,
 		openCreateProjectModal,
 		closeCreateProjectModal,
 		setUserProfileModalOpen,
@@ -265,7 +268,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 										!activeProjectId &&
 										!showSettings &&
 										!showActivityExplorer &&
-										!showAnalytics
+										!showAnalytics &&
+										!showReports
 									}
 									icon={Inbox}
 									label="Workspace overview"
@@ -277,6 +281,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 									icon={BarChart3}
 									label="Insights"
 									onClick={() => handleNavigate(() => setShowAnalytics(true))}
+									collapsed
+								/>
+								<NavItem
+									active={showReports}
+									icon={ClipboardList}
+									label="Reports"
+									onClick={() => handleNavigate(() => setShowReports(true))}
 									collapsed
 								/>
 								<NavItem
@@ -426,7 +437,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 											!activeProjectId &&
 											!showSettings &&
 											!showActivityExplorer &&
-											!showAnalytics
+											!showAnalytics &&
+											!showReports
 										}
 										icon={Inbox}
 										label="Workspace overview"
@@ -439,6 +451,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 										icon={BarChart3}
 										label="Insights"
 										onClick={() => handleNavigate(() => setShowAnalytics(true))}
+									/>
+									<NavItem
+										active={showReports}
+										icon={ClipboardList}
+										label="Reports"
+										onClick={() => handleNavigate(() => setShowReports(true))}
 									/>
 									<NavItem
 										active={showActivityExplorer}

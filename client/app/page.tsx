@@ -10,6 +10,7 @@ import {
 } from "@/features/notifications/hooks/useNotifications";
 import { ProjectSettingsModal } from "@/features/projects/components/ProjectSettingsModal";
 import { usePresenceStore } from "@/features/realtime/store/presenceStore";
+import { WorkspaceReports } from "@/features/reports/pages/WorkspaceReports";
 import { ActivityTimeline } from "@/features/workspace/components/ActivityTimeline";
 import { DashboardLayout } from "@/features/workspace/components/DashboardLayout";
 import { KanbanBoard } from "@/features/workspace/components/KanbanBoard";
@@ -589,6 +590,7 @@ export default function Home() {
 		showSettings,
 		showActivityExplorer,
 		showAnalytics,
+		showReports,
 		openTaskModal,
 		closeTaskModal,
 		openCreateTaskModal,
@@ -687,6 +689,8 @@ export default function Home() {
 					<WorkspaceEventExplorer workspaceId={activeWorkspaceId} />
 				) : showAnalytics ? (
 					<WorkspaceAnalytics workspaceId={activeWorkspaceId} />
+				) : showReports ? (
+					<WorkspaceReports workspaceId={activeWorkspaceId} />
 				) : !activeProjectId ? (
 					<WorkspaceHome
 						workspaceId={activeWorkspaceId}

@@ -12,6 +12,7 @@ interface UIState {
 	showSettings: boolean;
 	showActivityExplorer: boolean;
 	showAnalytics: boolean;
+	showReports: boolean;
 	isNotificationsOpen: boolean;
 	isUserProfileModalOpen: boolean;
 	setActiveWorkspaceId: (id: string | null) => void;
@@ -28,6 +29,7 @@ interface UIState {
 	setShowSettings: (show: boolean) => void;
 	setShowActivityExplorer: (show: boolean) => void;
 	setShowAnalytics: (show: boolean) => void;
+	setShowReports: (show: boolean) => void;
 	setNotificationsOpen: (open: boolean) => void;
 	setUserProfileModalOpen: (open: boolean) => void;
 }
@@ -44,6 +46,7 @@ export const useUIStore = create<UIState>((set) => ({
 	showSettings: false,
 	showActivityExplorer: false,
 	showAnalytics: false,
+	showReports: false,
 	isNotificationsOpen: false,
 	isUserProfileModalOpen: false,
 	setActiveWorkspaceId: (id) =>
@@ -58,6 +61,7 @@ export const useUIStore = create<UIState>((set) => ({
 			showSettings: false,
 			showActivityExplorer: false,
 			showAnalytics: false,
+			showReports: false,
 			isNotificationsOpen: false,
 		}),
 	setActiveProjectId: (id) =>
@@ -66,6 +70,7 @@ export const useUIStore = create<UIState>((set) => ({
 			showSettings: false,
 			showActivityExplorer: false,
 			showAnalytics: false,
+			showReports: false,
 			isProjectSettingsModalOpen: false,
 		}),
 	openTaskModal: (taskId) =>
@@ -93,6 +98,7 @@ export const useUIStore = create<UIState>((set) => ({
 			activeProjectId: null,
 			showActivityExplorer: false,
 			showAnalytics: false,
+			showReports: false,
 		}),
 	setShowActivityExplorer: (show) =>
 		set({
@@ -100,6 +106,7 @@ export const useUIStore = create<UIState>((set) => ({
 			activeProjectId: null,
 			showSettings: false,
 			showAnalytics: false,
+			showReports: false,
 		}),
 	setShowAnalytics: (show) =>
 		set({
@@ -107,6 +114,15 @@ export const useUIStore = create<UIState>((set) => ({
 			activeProjectId: null,
 			showSettings: false,
 			showActivityExplorer: false,
+			showReports: false,
+		}),
+	setShowReports: (show) =>
+		set({
+			showReports: show,
+			activeProjectId: null,
+			showSettings: false,
+			showActivityExplorer: false,
+			showAnalytics: false,
 		}),
 	setNotificationsOpen: (open) => set({ isNotificationsOpen: open }),
 	setUserProfileModalOpen: (open) => set({ isUserProfileModalOpen: open }),

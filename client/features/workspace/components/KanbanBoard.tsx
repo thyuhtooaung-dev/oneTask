@@ -265,13 +265,11 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 											: "mb-3 px-1 py-1",
 									)}
 								>
-									<div
-										className="flex items-center gap-2 cursor-pointer"
-										onClick={() => toggleColumn(column.value)}
-									>
+									<div className="flex items-center gap-2">
 										<button
 											type="button"
-											className="text-zinc-500 hover:text-zinc-300"
+											onClick={() => toggleColumn(column.value)}
+											className="text-zinc-500 hover:text-zinc-300 flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-violet-500 rounded"
 										>
 											{collapsedColumns[column.value] ? (
 												<ChevronRight className="h-4 w-4" />

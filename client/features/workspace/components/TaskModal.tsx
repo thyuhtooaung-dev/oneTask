@@ -1,5 +1,15 @@
 "use client";
 
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import {
+	type Task,
+	type TaskPriority,
+	type TaskStatus,
+	useArchiveTask,
+	useCreateTask,
+	useDeleteTask,
+	useUpdateTask,
+} from "@/features/workspace/hooks/useTaskData";
 import { Badge } from "@/shared/ui/badge/Badge";
 import { Button } from "@/shared/ui/button/Button";
 import { ConfirmDialog } from "@/shared/ui/dialog/ConfirmDialog";
@@ -8,6 +18,7 @@ import { Drawer } from "@/shared/ui/drawer/Drawer";
 import { DropdownMenu } from "@/shared/ui/dropdown-menu/DropdownMenu";
 import {
 	AlertOctagon,
+	Archive,
 	ChevronDown,
 	Loader2,
 	Minus,
@@ -17,19 +28,9 @@ import {
 	SignalLow,
 	SignalMedium,
 	Trash2,
-	Archive,
 } from "lucide-react";
-import React, { useMemo, useState } from "react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import {
-	type Task,
-	type TaskPriority,
-	type TaskStatus,
-	useCreateTask,
-	useDeleteTask,
-	useArchiveTask,
-	useUpdateTask,
-} from "@/features/workspace/hooks/useTaskData";
+import type React from "react";
+import { useMemo, useState } from "react";
 import { useWorkspaceDetail } from "../hooks/useWorkspaceData";
 import { TaskComments } from "./TaskComments";
 

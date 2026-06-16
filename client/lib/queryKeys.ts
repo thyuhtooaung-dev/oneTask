@@ -26,4 +26,10 @@ export const queryKeys = {
 		summary: (workspaceId: string) =>
 			["workspaces", workspaceId, "reports", "summary"] as const,
 	},
+	files: {
+		all: (workspaceId: string, projectId: string) =>
+			["files", workspaceId, projectId] as const,
+		byTask: (workspaceId: string, taskId: string) =>
+			["files", workspaceId, "task", taskId] as const,
+	},
 };

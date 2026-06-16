@@ -8,7 +8,7 @@ interface UIState {
 	isCreateTaskModalOpen: boolean;
 	isCreateProjectModalOpen: boolean;
 	isProjectSettingsModalOpen: boolean;
-	viewMode: "list" | "board";
+	viewMode: "list" | "board" | "files";
 	showSettings: boolean;
 	showActivityExplorer: boolean;
 	showAnalytics: boolean;
@@ -25,7 +25,7 @@ interface UIState {
 	closeCreateProjectModal: () => void;
 	openProjectSettingsModal: () => void;
 	closeProjectSettingsModal: () => void;
-	setViewMode: (mode: "list" | "board") => void;
+	setViewMode: (mode: "list" | "board" | "files") => void;
 	setShowSettings: (show: boolean) => void;
 	setShowActivityExplorer: (show: boolean) => void;
 	setShowAnalytics: (show: boolean) => void;

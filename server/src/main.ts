@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
+import * as express from 'express';
+import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -19,6 +21,9 @@ async function bootstrap() {
 
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
+
+  // Serve the uploads directory statically
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
   await app.listen(process.env.PORT ?? 5000);
 }

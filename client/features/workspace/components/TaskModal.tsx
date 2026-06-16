@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { TaskFiles } from "@/features/files/components/TaskFiles";
 import {
 	type Task,
 	type TaskPriority,
@@ -485,9 +486,18 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	const editContent = (
 		<div className="min-h-full space-y-4">
 			{taskDetailsForm}
-			{task && (
-				<section className="mx-4 mb-4 rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 sm:mx-6 sm:mb-6 sm:p-5">
-					<TaskComments taskId={task.id} workspaceId={workspaceId} />
+			{task && workspaceId && (
+				<section className="mx-4 mb-4 space-y-4 sm:mx-6 sm:mb-6">
+					<div className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 sm:p-5">
+						<TaskFiles
+							workspaceId={workspaceId}
+							projectId={task.projectId}
+							taskId={task.id}
+						/>
+					</div>
+					<div className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 sm:p-5">
+						<TaskComments taskId={task.id} workspaceId={workspaceId} />
+					</div>
 				</section>
 			)}
 		</div>

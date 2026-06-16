@@ -3,6 +3,7 @@
 import { WorkspaceAnalytics } from "@/features/analytics/pages/WorkspaceAnalytics";
 import { AuthGuard } from "@/features/auth/components/AuthGuard";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { WorkspaceFiles } from "@/features/files/components/WorkspaceFiles";
 import {
 	type Notification,
 	useMarkNotificationAsRead,
@@ -49,8 +50,9 @@ import {
 	CheckCircle2,
 	Circle,
 	Clock3,
+	FileIcon,
 	Inbox,
-	Kanban,
+	LayoutDashboard,
 	List,
 	Loader2,
 	Minus,
@@ -586,7 +588,6 @@ export default function Home() {
 		selectedTaskId,
 		isTaskModalOpen,
 		isCreateTaskModalOpen,
-		viewMode,
 		showSettings,
 		showActivityExplorer,
 		showAnalytics,
@@ -595,6 +596,7 @@ export default function Home() {
 		closeTaskModal,
 		openCreateTaskModal,
 		closeCreateTaskModal,
+		viewMode,
 		setViewMode,
 		setActiveProjectId,
 		openProjectSettingsModal,
@@ -728,7 +730,7 @@ export default function Home() {
 									</Button>
 								)}
 
-								<div className="grid grid-cols-2 rounded-lg border border-zinc-800 bg-zinc-950 p-1 sm:flex sm:items-center">
+								<div className="grid grid-cols-3 rounded-lg border border-zinc-800 bg-zinc-950 p-1 sm:flex sm:items-center">
 									<button
 										type="button"
 										onClick={() => setViewMode("list")}
@@ -752,8 +754,21 @@ export default function Home() {
 												: "text-zinc-500 hover:text-zinc-200",
 										)}
 									>
-										<Kanban className="h-3.5 w-3.5" />
+										<LayoutDashboard className="h-3.5 w-3.5" />
 										Board
+									</button>
+									<button
+										type="button"
+										onClick={() => setViewMode("files")}
+										className={cn(
+											"flex min-h-10 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors",
+											viewMode === "files"
+												? "bg-zinc-800 text-zinc-100"
+												: "text-zinc-500 hover:text-zinc-200",
+										)}
+									>
+										<FileIcon className="h-3.5 w-3.5" />
+										Files
 									</button>
 								</div>
 
@@ -823,6 +838,11 @@ export default function Home() {
 									Create first task
 								</Button>
 							</div>
+						) : viewMode === "files" && activeWorkspace && activeProject ? (
+							<WorkspaceFiles
+								workspaceId={activeWorkspace.id}
+								projectId={activeProject.id}
+							/>
 						) : viewMode === "board" ? (
 							<KanbanBoard
 								tasks={projectTasks}

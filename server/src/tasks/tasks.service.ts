@@ -42,6 +42,7 @@ export class TasksService {
     assigneeId?: string,
     priority?: TaskPriority,
     dueDate?: string,
+    startDate?: string,
   ): Promise<Task> {
     await this.policyService.assertAction(
       reporterId,
@@ -72,6 +73,7 @@ export class TasksService {
       reporterId,
       assigneeId,
       priority: priority || TaskPriority.NONE,
+      startDate: startDate ? new Date(startDate) : null,
       dueDate: dueDate ? new Date(dueDate) : null,
     });
     const savedTask = await this.taskRepository.save(task);
@@ -190,6 +192,7 @@ export class TasksService {
       status?: TaskStatus;
       assigneeId?: string | null;
       priority?: TaskPriority;
+      startDate?: string | null;
       dueDate?: string | null;
     },
   ): Promise<Task> {
@@ -268,6 +271,18 @@ export class TasksService {
     if (body.priority !== undefined && body.priority !== task.priority) {
       changes.priority = { from: task.priority, to: body.priority };
       task.priority = body.priority;
+    }
+
+    if (
+      body.startDate !== undefined &&
+      (body.startDate ? new Date(body.startDate).toISOString() : null) !==
+        (task.startDate ? task.startDate.toISOString() : null)
+    ) {
+      changes.startDate = {
+        from: task.startDate ? task.startDate.toISOString() : null,
+        to: body.startDate ? new Date(body.startDate).toISOString() : null,
+      };
+      task.startDate = body.startDate ? new Date(body.startDate) : null;
     }
 
     if (

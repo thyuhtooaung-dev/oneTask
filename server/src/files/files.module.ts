@@ -14,9 +14,8 @@ import { Task } from '../tasks/entities/task.entity';
   imports: [
     TypeOrmModule.forFeature([FileAttachment, WorkspaceMember, Project, Task]),
     MulterModule.register({
-      dest: './uploads',
       limits: {
-        fileSize: 50 * 1024 * 1024, // 50MB max file size
+        fileSize: 10 * 1024 * 1024,
       },
     }),
     RealtimeModule,

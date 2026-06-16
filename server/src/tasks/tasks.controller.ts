@@ -35,6 +35,7 @@ export class TasksController {
       body.assigneeId,
       body.priority,
       body.dueDate,
+      body.startDate,
     );
   }
 

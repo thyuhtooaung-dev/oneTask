@@ -18,6 +18,7 @@ export interface Task {
 	priority: TaskPriority;
 	assigneeId?: string | null;
 	reporterId?: string | null;
+	startDate?: string | null;
 	dueDate?: string | null;
 	createdAt: string;
 	updatedAt: string;
@@ -31,6 +32,7 @@ interface TaskPayload {
 	description?: string;
 	status?: TaskStatus;
 	priority?: TaskPriority;
+	startDate?: string | null;
 	dueDate?: string | null;
 	projectId: string;
 	assigneeId?: string | null;
@@ -42,6 +44,7 @@ interface UpdateTaskPayload {
 	description?: string | null;
 	status?: TaskStatus;
 	priority?: TaskPriority;
+	startDate?: string | null;
 	dueDate?: string | null;
 	assigneeId?: string | null;
 }

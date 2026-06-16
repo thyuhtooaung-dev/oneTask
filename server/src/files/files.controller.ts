@@ -34,6 +34,14 @@ export class FilesController {
     @Body('commentId') commentId?: string,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
+    if (!file.mimetype.startsWith('image/')) {
+      throw new BadRequestException(
+        'Only image files are allowed for task attachments.',
+      );
+    }
+
+    const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+    const filename = `${Date.now()}-${file.originalname}`;
 
     return this.filesService.create({
       workspaceId,
@@ -43,9 +51,10 @@ export class FilesController {
       folder,
       uploaderId: user.id,
       originalName: file.originalname,
-      filename: file.filename,
+      filename,
       mimetype: file.mimetype,
       size: file.size,
+      dataUrl,
     });
   }
 

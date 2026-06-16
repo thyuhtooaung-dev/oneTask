@@ -15,6 +15,7 @@ import { WorkspaceReports } from "@/features/reports/pages/WorkspaceReports";
 import { ActivityTimeline } from "@/features/workspace/components/ActivityTimeline";
 import { DashboardLayout } from "@/features/workspace/components/DashboardLayout";
 import { KanbanBoard } from "@/features/workspace/components/KanbanBoard";
+import { ProjectTimeline } from "@/features/workspace/components/ProjectTimeline";
 import { TaskModal } from "@/features/workspace/components/TaskModal";
 import { WorkspaceSettings } from "@/features/workspace/components/WorkspaceSettings";
 import {
@@ -770,6 +771,19 @@ export default function Home() {
 										<FileIcon className="h-3.5 w-3.5" />
 										Files
 									</button>
+									<button
+										type="button"
+										onClick={() => setViewMode("timeline")}
+										className={cn(
+											"flex min-h-10 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors",
+											viewMode === "timeline"
+												? "bg-zinc-800 text-zinc-100"
+												: "text-zinc-500 hover:text-zinc-200",
+										)}
+									>
+										<Calendar className="h-3.5 w-3.5" />
+										Timeline
+									</button>
 								</div>
 
 								<Button
@@ -842,6 +856,11 @@ export default function Home() {
 							<WorkspaceFiles
 								workspaceId={activeWorkspace.id}
 								projectId={activeProject.id}
+							/>
+						) : viewMode === "timeline" ? (
+							<ProjectTimeline
+								tasks={projectTasks}
+								onTaskClick={openTaskModal}
 							/>
 						) : viewMode === "board" ? (
 							<KanbanBoard

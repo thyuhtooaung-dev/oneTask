@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { TaskFiles } from "@/features/files/components/TaskFiles";
+import { useUploadFile } from "@/features/files/hooks/useFilesData";
 import {
 	type Task,
 	type TaskPriority,
@@ -29,9 +30,12 @@ import {
 	SignalLow,
 	SignalMedium,
 	Trash2,
+	UploadCloud,
+	X,
 } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { useWorkspaceDetail } from "../hooks/useWorkspaceData";
 import { TaskComments } from "./TaskComments";
 
@@ -88,7 +92,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 }) => {
 	const { data: workspace } = useWorkspaceDetail(workspaceId);
 	const { user } = useAuth();
-	const createTask = useCreateTask(workspaceId);
+	const workspaceId_ = workspace?.id;
+	const uploadFile = useUploadFile(workspaceId_ || "", projectId || "");
+	const createTask = useCreateTask(workspaceId_ || null);
 	const updateTask = useUpdateTask(workspaceId);
 	const deleteTask = useDeleteTask(workspaceId);
 	const archiveTask = useArchiveTask(workspaceId);
@@ -98,9 +104,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 	const [status, setStatus] = useState<TaskStatus>("todo");
 	const [assigneeId, setAssigneeId] = useState("");
 	const [priority, setPriority] = useState<TaskPriority>("none");
+	const [startDate, setStartDate] = useState<string>("");
 	const [dueDate, setDueDate] = useState<string>("");
 	const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 	const [isControlsModalOpen, setIsControlsModalOpen] = useState(false);
+	const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
 	const [prevTask, setPrevTask] = useState<Task | undefined>(undefined);
 	const [prevIsOpen, setPrevIsOpen] = useState(false);
@@ -114,9 +122,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 			setStatus(task?.status || "todo");
 			setAssigneeId(task?.assigneeId || "");
 			setPriority(task?.priority || "none");
+			setStartDate(task?.startDate ? task.startDate.split("T")[0] : "");
 			setDueDate(task?.dueDate ? task.dueDate.split("T")[0] : "");
 			setIsDeleteConfirmOpen(false);
 			setIsControlsModalOpen(false);
+			setPendingFiles([]);
 		}
 	}
 
@@ -140,8 +150,21 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 		currentUserRole === "OWNER" || currentUserRole === "ADMIN" || isReporter;
 
 	const isPending =
-		createTask.isPending || updateTask.isPending || deleteTask.isPending;
+		createTask.isPending ||
+		updateTask.isPending ||
+		deleteTask.isPending ||
+		uploadFile.isPending;
 	const activeStatus = STATUS_OPTIONS.find((option) => option.value === status);
+
+	const onDrop = (acceptedFiles: File[]) => {
+		setPendingFiles((prev) => [...prev, ...acceptedFiles]);
+	};
+
+	const { getRootProps, getInputProps, isDragActive } = useDropzone({
+		onDrop,
+		maxSize: 10 * 1024 * 1024,
+		accept: { "image/*": [] },
+	});
 
 	if (!isOpen) return null;
 	if (mode === "edit" && !task) return null;
@@ -152,15 +175,27 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
 		if (mode === "create") {
 			if (!projectId) return;
-			await createTask.mutateAsync({
+			const newTask = await createTask.mutateAsync({
 				title: title.trim(),
 				description: description.trim() || undefined,
 				status,
 				priority,
+				startDate: startDate || null,
 				dueDate: dueDate || null,
 				projectId,
 				assigneeId: assigneeId || null,
 			});
+			if (pendingFiles.length > 0) {
+				await Promise.all(
+					pendingFiles.map((file) =>
+						uploadFile.mutateAsync({
+							file,
+							taskId: newTask.id,
+							folder: "tasks",
+						}),
+					),
+				);
+			}
 		} else if (task) {
 			await updateTask.mutateAsync({
 				taskId: task.id,
@@ -168,6 +203,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 				description: description.trim() || null,
 				status,
 				priority,
+				startDate: startDate || null,
 				dueDate: dueDate || null,
 				assigneeId: assigneeId || null,
 			});
@@ -230,6 +266,52 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 						placeholder="Add context, constraints, acceptance notes, or links."
 					/>
 				</div>
+
+				{mode === "create" && (
+					<div className="space-y-2">
+						<span className="ot-label block">Attachments</span>
+						{pendingFiles.length > 0 && (
+							<div className="flex flex-wrap gap-2 mb-2">
+								{pendingFiles.map((f, i) => (
+									<div key={`${f.name}-${i}`} className="relative group">
+										<img
+											src={URL.createObjectURL(f)}
+											className="h-16 w-16 object-cover rounded-md border border-zinc-800"
+											alt={f.name}
+										/>
+										<button
+											type="button"
+											onClick={() =>
+												setPendingFiles((prev) =>
+													prev.filter((_, idx) => idx !== i),
+												)
+											}
+											className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 shadow-md"
+										>
+											<X className="w-3 h-3 text-white" />
+										</button>
+									</div>
+								))}
+							</div>
+						)}
+						<div
+							{...getRootProps()}
+							className={`ot-input flex cursor-pointer flex-col items-center justify-center border-dashed border-2 py-6 transition-colors ${
+								isDragActive
+									? "border-violet-500 bg-violet-500/10"
+									: "border-zinc-800 bg-zinc-950/50 hover:border-zinc-700 hover:bg-zinc-900/50"
+							}`}
+						>
+							<input {...getInputProps()} />
+							<UploadCloud
+								className={`mb-2 h-5 w-5 ${isDragActive ? "text-violet-400" : "text-zinc-600"}`}
+							/>
+							<p className="text-xs font-medium text-zinc-300">
+								{isDragActive ? "Drop image here" : "Attach image"}
+							</p>
+						</div>
+					</div>
+				)}
 
 				<div className="mt-auto flex flex-col-reverse gap-3 border-t border-zinc-900 pt-4 sm:flex-row sm:items-center sm:justify-end">
 					{mode === "edit" && canDelete ? (
@@ -429,6 +511,20 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 					</div>
 
 					<div className="space-y-2">
+						<label htmlFor={`${mode}-task-startdate`} className="ot-label">
+							Start Date
+						</label>
+						<input
+							id={`${mode}-task-startdate`}
+							type="date"
+							value={startDate}
+							onChange={(e) => setStartDate(e.target.value)}
+							disabled={!canEditProgress}
+							className="ot-input flex min-h-10 w-full px-3 text-sm font-medium text-zinc-100 scheme-dark disabled:opacity-50"
+						/>
+					</div>
+
+					<div className="space-y-2">
 						<label htmlFor={`${mode}-task-duedate`} className="ot-label">
 							Due Date
 						</label>
@@ -493,6 +589,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 							workspaceId={workspaceId}
 							projectId={task.projectId}
 							taskId={task.id}
+							canEdit={canDelete}
 						/>
 					</div>
 					<div className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 sm:p-5">

@@ -14,6 +14,7 @@ export interface FileAttachment {
 	filename: string;
 	mimetype: string;
 	size: string; // BigInt comes as string
+	dataUrl?: string;
 	createdAt: string;
 	updatedAt: string;
 	uploader?: {

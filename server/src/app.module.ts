@@ -69,7 +69,7 @@ import { FilesModule } from './files/files.module';
           DailyReport,
           FileAttachment,
         ],
-        synchronize: configService.get<string>('NODE_ENV') !== 'production', // Disabled in production; use migrations instead
+        synchronize: true, // TEMPORARY: re-sync production schema, then revert to: configService.get<string>('NODE_ENV') !== 'production'
         ssl:
           configService.get<string>('DATABASE_URL')?.includes('sslmode=') ||
           configService.get<string>('DATABASE_URL')?.includes('neon.tech')

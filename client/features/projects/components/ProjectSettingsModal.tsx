@@ -27,8 +27,8 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
 		closeProjectSettingsModal,
 		setActiveProjectId,
 	} = useUIStore();
-	const [name, setName] = useState(initialName);
-	const [description, setDescription] = useState(initialDescription);
+	const [name, setName] = useState(initialName || "");
+	const [description, setDescription] = useState(initialDescription || "");
 	const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
 
 	const updateProject = useUpdateProject(workspaceId);
@@ -110,8 +110,8 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
 							variant="primary"
 							disabled={
 								updateProject.isPending ||
-								(name.trim() === initialName &&
-									description.trim() === initialDescription)
+								(name.trim() === (initialName || "") &&
+									description.trim() === (initialDescription || ""))
 							}
 						>
 							{updateProject.isPending && (

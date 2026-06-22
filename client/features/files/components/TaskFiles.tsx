@@ -2,6 +2,7 @@ import { formatBytes } from "@/lib/utils/format";
 import { Button } from "@/shared/ui/button/Button";
 import { ConfirmDialog } from "@/shared/ui/dialog/ConfirmDialog";
 import {
+	Download,
 	FileArchive,
 	FileAudio,
 	FileIcon,
@@ -18,6 +19,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useDropzone } from "react-dropzone";
 import {
+	type FileAttachment,
 	useDeleteFile,
 	useTaskFiles,
 	useUploadFile,
@@ -60,19 +62,49 @@ export function TaskFiles({
 	const deleteFile = useDeleteFile(workspaceId, projectId);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const [fileToDelete, setFileToDelete] = useState<string | null>(null);
+	const [isUploading, setIsUploading] = useState(false);
+	const [uploadProgress, setUploadProgress] = useState(0);
 
 	const onDrop = async (acceptedFiles: File[]) => {
-		for (const file of acceptedFiles) {
-			await uploadFile.mutateAsync({ file, taskId, folder: "tasks" });
+		setIsUploading(true);
+		for (let i = 0; i < acceptedFiles.length; i++) {
+			await uploadFile.mutateAsync({
+				file: acceptedFiles[i],
+				taskId,
+				folder: "tasks",
+				onProgress: (p) => {
+					const fileProgress = p / acceptedFiles.length;
+					const previousFilesProgress = (i / acceptedFiles.length) * 100;
+					setUploadProgress(previousFilesProgress + fileProgress);
+				},
+			});
+		}
+		setIsUploading(false);
+		setUploadProgress(0);
+	};
+
+	const handleDownload = async (file: FileAttachment) => {
+		if (!file.fileUrl) return;
+		try {
+			const response = await fetch(file.fileUrl);
+			const blob = await response.blob();
+			const blobUrl = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = blobUrl;
+			a.download = file.originalName;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(blobUrl);
+		} catch {
+			// Fallback: open directly
+			window.open(file.fileUrl, "_blank");
 		}
 	};
 
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({
 		onDrop,
-		maxSize: 10 * 1024 * 1024, // 10MB limit for images
-		accept: {
-			"image/*": [],
-		},
+		maxSize: 50 * 1024 * 1024, // 50MB limit
 	});
 
 	if (isLoading) {
@@ -91,9 +123,7 @@ export function TaskFiles({
 				<div className="flex flex-wrap gap-3">
 					{files.map((file) => {
 						const Icon = getFileIcon(file.mimetype);
-						const fileUrl =
-							file.dataUrl ||
-							`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/uploads/${file.filename}`;
+						const fileUrl = file.fileUrl || "";
 
 						return (
 							<div key={file.id} className="w-full sm:w-auto">
@@ -114,7 +144,18 @@ export function TaskFiles({
 												<Maximize2 className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
 											</div>
 										</button>
-										<div className="absolute -top-1 -right-1 opacity-0 transition-opacity group-hover:opacity-100">
+										<div className="absolute -top-1 -right-1 opacity-0 transition-opacity group-hover:opacity-100 flex gap-1">
+											<button
+												type="button"
+												className="bg-violet-500 rounded-full p-1 text-white shadow-md hover:bg-violet-600 transition-colors m-2"
+												onClick={(e) => {
+													e.stopPropagation();
+													handleDownload(file);
+												}}
+												title="Download"
+											>
+												<Download className="h-3 w-3" />
+											</button>
 											{canEdit && (
 												<button
 													type="button"
@@ -149,6 +190,15 @@ export function TaskFiles({
 											</div>
 										</div>
 										<div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-6 w-6 text-zinc-400 hover:text-violet-400"
+												onClick={() => handleDownload(file)}
+												title="Download"
+											>
+												<Download className="h-3 w-3" />
+											</Button>
 											{canEdit && (
 												<Button
 													variant="ghost"
@@ -183,8 +233,22 @@ export function TaskFiles({
 						className={`mb-2 h-5 w-5 ${isDragActive ? "text-violet-400" : "text-zinc-600"}`}
 					/>
 					<p className="text-xs font-medium text-zinc-300">
-						{isDragActive ? "Drop image here" : "Attach image"}
+						{isDragActive ? "Drop file here" : "Attach file"}
 					</p>
+					{isUploading && (
+						<div className="w-full max-w-xs mt-4">
+							<div className="flex justify-between text-xs text-zinc-400 mb-1">
+								<span>Uploading...</span>
+								<span>{Math.round(uploadProgress)}%</span>
+							</div>
+							<div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+								<div
+									className="h-full bg-violet-500 transition-all duration-300"
+									style={{ width: `${uploadProgress}%` }}
+								/>
+							</div>
+						</div>
+					)}
 				</div>
 			)}
 

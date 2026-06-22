@@ -10,6 +10,8 @@ import {
   Body,
   UseGuards,
   BadRequestException,
+  ParseFilePipe,
+  MaxFileSizeValidator,
 } from '@nestjs/common';
 import 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -27,35 +29,36 @@ export class FilesController {
   async uploadFile(
     @Param('workspaceId') workspaceId: string,
     @Param('projectId') projectId: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 50 * 1024 * 1024 })],
+      }),
+    )
+    file: Express.Multer.File,
     @CurrentUser() user: { id: string },
     @Body('folder') folder: string = '/',
     @Body('taskId') taskId?: string,
     @Body('commentId') commentId?: string,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
-    if (!file.mimetype.startsWith('image/')) {
-      throw new BadRequestException(
-        'Only image files are allowed for task attachments.',
-      );
-    }
 
-    const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     const filename = `${Date.now()}-${file.originalname}`;
 
-    return this.filesService.create({
-      workspaceId,
-      projectId,
-      taskId,
-      commentId,
-      folder,
-      uploaderId: user.id,
-      originalName: file.originalname,
-      filename,
-      mimetype: file.mimetype,
-      size: file.size,
-      dataUrl,
-    });
+    return this.filesService.create(
+      {
+        workspaceId,
+        projectId,
+        taskId,
+        commentId,
+        folder,
+        uploaderId: user.id,
+        originalName: file.originalname,
+        filename,
+        mimetype: file.mimetype,
+        size: file.size,
+      },
+      file.buffer,
+    );
   }
 
   @Get()

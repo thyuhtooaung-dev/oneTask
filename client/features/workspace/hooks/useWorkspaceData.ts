@@ -16,6 +16,7 @@ export interface WorkspaceUser {
 	id: string;
 	email: string;
 	name?: string;
+	avatarUrl?: string;
 }
 
 export interface WorkspaceMember {

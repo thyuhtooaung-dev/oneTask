@@ -13,8 +13,9 @@ export interface FileAttachment {
 	originalName: string;
 	filename: string;
 	mimetype: string;
-	size: string; // BigInt comes as string
-	dataUrl?: string;
+	size: string;
+	fileUrl?: string;
+	filePath?: string;
 	createdAt: string;
 	updatedAt: string;
 	uploader?: {
@@ -64,6 +65,7 @@ export function useUploadFile(workspaceId: string, projectId: string) {
 			folder?: string;
 			taskId?: string;
 			commentId?: string;
+			onProgress?: (progress: number) => void;
 		}) => {
 			const formData = new FormData();
 			formData.append("file", data.file);
@@ -76,6 +78,14 @@ export function useUploadFile(workspaceId: string, projectId: string) {
 				formData,
 				{
 					headers: { "Content-Type": "multipart/form-data" },
+					onUploadProgress: (progressEvent) => {
+						if (progressEvent.total && data.onProgress) {
+							const percentCompleted = Math.round(
+								(progressEvent.loaded * 100) / progressEvent.total,
+							);
+							data.onProgress(percentCompleted);
+						}
+					},
 				},
 			);
 			return res.data;

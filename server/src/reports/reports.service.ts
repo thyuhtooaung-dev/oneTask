@@ -102,8 +102,8 @@ export class ReportsService {
   /**
    * PM dashboard summary: who submitted today, who hasn't, task workload per member, bottleneck tasks.
    */
-  async getReportSummary(workspaceId: string) {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  async getReportSummary(workspaceId: string, requestedDate?: string) {
+    const targetDate = requestedDate || new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
     // Get all workspace members
     const members = await this.memberRepository.find({
@@ -113,7 +113,7 @@ export class ReportsService {
 
     // Get today's reports
     const todaysReports = await this.reportRepository.find({
-      where: { workspaceId, reportDate: today },
+      where: { workspaceId, reportDate: targetDate },
       relations: ['author'],
     });
 
@@ -135,86 +135,83 @@ export class ReportsService {
         role: m.role,
       }));
 
-    // Task workload per member (from tasks table)
-    const tasks = await this.taskRepository.find({
-      where: { workspaceId },
-      relations: ['assignee'],
+    // Task workload per member (aggregated via DB)
+    const rawWorkload = await this.taskRepository
+      .createQueryBuilder('task')
+      .select('task.assigneeId', 'assigneeId')
+      .addSelect(
+        `SUM(CASE WHEN task.status = 'todo' THEN 1 ELSE 0 END)`,
+        'todo',
+      )
+      .addSelect(
+        `SUM(CASE WHEN task.status = 'in_progress' THEN 1 ELSE 0 END)`,
+        'inProgress',
+      )
+      .addSelect(
+        `SUM(CASE WHEN task.status = 'done' THEN 1 ELSE 0 END)`,
+        'done',
+      )
+      .addSelect(
+        `SUM(CASE WHEN task.dueDate < NOW() AND task.status NOT IN ('done', 'canceled') THEN 1 ELSE 0 END)`,
+        'overdue',
+      )
+      .where('task.workspaceId = :workspaceId', { workspaceId })
+      .andWhere('task.assigneeId IS NOT NULL')
+      .andWhere('task.archivedAt IS NULL')
+      .groupBy('task.assigneeId')
+      .getRawMany();
+
+    const typedRawWorkload = rawWorkload as Array<{
+      assigneeId: string;
+      todo: string;
+      inProgress: string;
+      done: string;
+      overdue: string;
+    }>;
+
+    const memberMap = new Map(members.map((m) => [m.userId, m.user]));
+    const memberWorkload = typedRawWorkload.map((row) => {
+      const user = memberMap.get(row.assigneeId);
+      return {
+        userId: row.assigneeId,
+        name: user?.name || user?.email || 'Unknown',
+        email: user?.email,
+        todo: parseInt(row.todo, 10) || 0,
+        inProgress: parseInt(row.inProgress, 10) || 0,
+        done: parseInt(row.done, 10) || 0,
+        overdue: parseInt(row.overdue, 10) || 0,
+      };
     });
 
-    const memberWorkload: Record<
-      string,
-      {
-        userId: string;
-        name: string;
-        email?: string;
-        inProgress: number;
-        done: number;
-        overdue: number;
-        todo: number;
-      }
-    > = {};
+    // Bottleneck tasks: in_progress longest (by updatedAt ascending)
+    const rawBottlenecks = await this.taskRepository
+      .createQueryBuilder('task')
+      .leftJoinAndSelect('task.assignee', 'assignee')
+      .where('task.workspaceId = :workspaceId', { workspaceId })
+      .andWhere('task.status = :status', { status: TaskStatus.IN_PROGRESS })
+      .andWhere('task.archivedAt IS NULL')
+      .orderBy('task.updatedAt', 'ASC')
+      .take(5)
+      .getMany();
 
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-
-    for (const task of tasks) {
-      if (!task.assigneeId) continue;
-      if (!memberWorkload[task.assigneeId]) {
-        memberWorkload[task.assigneeId] = {
-          userId: task.assigneeId,
-          name: task.assignee?.name || task.assignee?.email || 'Unknown',
-          email: task.assignee?.email,
-          inProgress: 0,
-          done: 0,
-          overdue: 0,
-          todo: 0,
-        };
-      }
-      const entry = memberWorkload[task.assigneeId];
-      if (task.status === TaskStatus.IN_PROGRESS) entry.inProgress++;
-      else if (task.status === TaskStatus.DONE) entry.done++;
-      else if (task.status === TaskStatus.TODO) entry.todo++;
-
-      if (
-        task.dueDate &&
-        task.status !== TaskStatus.DONE &&
-        task.status !== TaskStatus.CANCELED
-      ) {
-        const dueDate = new Date(task.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
-        if (dueDate.getTime() < now.getTime()) {
-          entry.overdue++;
-        }
-      }
-    }
-
-    // Bottleneck tasks: in_progress longest (by updatedAt ascending, i.e. not touched for longest)
-    const bottleneckTasks = tasks
-      .filter((t) => t.status === TaskStatus.IN_PROGRESS)
-      .sort(
-        (a, b) =>
-          new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
-      )
-      .slice(0, 5)
-      .map((t) => ({
-        id: t.id,
-        title: t.title,
-        assignee: t.assignee
-          ? { name: t.assignee.name, email: t.assignee.email }
-          : null,
-        dueDate: t.dueDate,
-        updatedAt: t.updatedAt,
-        daysSinceUpdate: Math.floor(
-          (Date.now() - new Date(t.updatedAt).getTime()) /
-            (1000 * 60 * 60 * 24),
-        ),
-      }));
+    const bottleneckTasks = rawBottlenecks.map((t) => ({
+      id: t.id,
+      title: t.title,
+      assignee: t.assignee
+        ? { name: t.assignee.name, email: t.assignee.email }
+        : null,
+      dueDate: t.dueDate,
+      updatedAt: t.updatedAt,
+      daysSinceUpdate: Math.floor(
+        (Date.now() - new Date(t.updatedAt).getTime()) / (1000 * 60 * 60 * 24),
+      ),
+    }));
 
     return {
-      date: today,
+      date: targetDate,
       submitted,
       notSubmitted,
-      memberWorkload: Object.values(memberWorkload),
+      memberWorkload,
       bottleneckTasks,
     };
   }

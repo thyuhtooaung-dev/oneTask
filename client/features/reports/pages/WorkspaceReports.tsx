@@ -8,7 +8,10 @@ import { cn } from "@/shared/ui/cn";
 import {
 	AlertCircle,
 	AlertTriangle,
+	CalendarIcon,
 	CheckCircle2,
+	ChevronLeft,
+	ChevronRight,
 	ClipboardList,
 	Clock3,
 	FileText,
@@ -45,7 +48,27 @@ function formatRelativeDay(dateStr: string) {
 
 // ─── Dashboard Tab ────────────────────────────────────────────────
 function DashboardView({ workspaceId }: { workspaceId: string }) {
-	const { data: summary, isLoading, error } = useReportSummary(workspaceId);
+	const todayStr = new Date().toISOString().split("T")[0];
+	const [selectedDate, setSelectedDate] = useState(todayStr);
+	const {
+		data: summary,
+		isLoading,
+		error,
+	} = useReportSummary(workspaceId, selectedDate);
+
+	const handlePrevDay = () => {
+		const prev = new Date(selectedDate);
+		prev.setDate(prev.getDate() - 1);
+		setSelectedDate(prev.toISOString().split("T")[0]);
+	};
+
+	const handleNextDay = () => {
+		const next = new Date(selectedDate);
+		next.setDate(next.getDate() + 1);
+		setSelectedDate(next.toISOString().split("T")[0]);
+	};
+
+	const isToday = selectedDate === todayStr;
 
 	if (isLoading) {
 		return (
@@ -72,12 +95,40 @@ function DashboardView({ workspaceId }: { workspaceId: string }) {
 
 	return (
 		<div className="space-y-6">
+			{/* Date Navigator */}
+			<div className="flex items-center justify-between rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-4 shadow-sm backdrop-blur-xl">
+				<div className="flex items-center gap-2">
+					<CalendarIcon className="h-4 w-4 text-violet-400" />
+					<h3 className="text-sm font-medium text-zinc-300">Report Date</h3>
+				</div>
+				<div className="flex items-center gap-2">
+					<Button variant="secondary" onClick={handlePrevDay} className="px-2">
+						<ChevronLeft className="h-4 w-4" />
+					</Button>
+					<input
+						type="date"
+						value={selectedDate}
+						max={todayStr}
+						onChange={(e) => setSelectedDate(e.target.value)}
+						className="ot-input w-36 px-3 py-1.5 text-sm font-medium"
+					/>
+					<Button
+						variant="secondary"
+						onClick={handleNextDay}
+						disabled={isToday}
+						className="px-2"
+					>
+						<ChevronRight className="h-4 w-4" />
+					</Button>
+				</div>
+			</div>
+
 			{/* Overview Cards */}
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				<div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5 shadow-sm backdrop-blur-xl transition-all hover:bg-zinc-900/60">
 					<div className="mb-4 flex items-center justify-between">
 						<h3 className="text-sm font-medium text-zinc-400">
-							Submitted Today
+							{isToday ? "Submitted Today" : "Submitted"}
 						</h3>
 						<div className="rounded-lg bg-emerald-500/10 p-2">
 							<CheckCircle2 className="h-4 w-4 text-emerald-400" />
@@ -141,16 +192,18 @@ function DashboardView({ workspaceId }: { workspaceId: string }) {
 			</div>
 
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-				{/* Today's Submissions */}
+				{/* Selected Date's Submissions */}
 				<div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5 backdrop-blur-xl">
 					<h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-200">
 						<CheckCircle2 className="h-4 w-4 text-emerald-400" />
-						Today&apos;s Reports
+						{isToday
+							? "Today's Reports"
+							: `Reports for ${formatRelativeDay(selectedDate)}`}
 					</h3>
 					<div className="max-h-80 space-y-3 overflow-y-auto pr-1">
 						{summary.submitted.length === 0 ? (
 							<p className="rounded-lg border border-dashed border-zinc-800 px-4 py-8 text-center text-xs font-medium text-zinc-600">
-								No reports submitted today yet.
+								No reports submitted for this date.
 							</p>
 						) : (
 							summary.submitted.map((entry) => (
@@ -212,7 +265,8 @@ function DashboardView({ workspaceId }: { workspaceId: string }) {
 					<div className="space-y-3">
 						{summary.notSubmitted.length === 0 ? (
 							<p className="rounded-lg border border-dashed border-emerald-800/30 bg-emerald-500/5 px-4 py-8 text-center text-xs font-medium text-emerald-400">
-								🎉 Everyone has submitted their report today!
+								🎉 Everyone has submitted their report{" "}
+								{isToday ? "today!" : "on this date!"}
 							</p>
 						) : (
 							summary.notSubmitted.map((member) => (

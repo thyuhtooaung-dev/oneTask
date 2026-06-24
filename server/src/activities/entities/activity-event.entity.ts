@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Workspace } from '../../workspaces/entities/workspace.entity';
 import { User } from '../../users/entities/user.entity';
@@ -28,6 +29,7 @@ export class ActivityEvent {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column()
   workspaceId: string;
 
@@ -57,6 +59,7 @@ export class ActivityEvent {
   @Column({ type: 'jsonb', nullable: true })
   metadata?: Record<string, any>;
 
+  @Index()
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }

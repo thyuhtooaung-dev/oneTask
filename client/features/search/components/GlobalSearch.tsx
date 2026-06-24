@@ -517,7 +517,7 @@ export function GlobalSearch({
 				variant="secondary"
 				onClick={() => setIsOpen(true)}
 				disabled={disabled || !workspaceId}
-				className="hidden h-10 min-w-[14rem] justify-between px-3 text-zinc-500 md:inline-flex"
+				className="hidden h-10 min-w-56 justify-between px-3 text-zinc-500 lg:inline-flex"
 			>
 				<span className="flex min-w-0 items-center gap-2">
 					<Command className="h-4 w-4 shrink-0" />
@@ -533,7 +533,7 @@ export function GlobalSearch({
 				onClick={() => setIsOpen(true)}
 				disabled={disabled || !workspaceId}
 				title="Command menu"
-				className="md:hidden"
+				className="lg:hidden"
 			>
 				<Command className="h-4 w-4" />
 			</Button>

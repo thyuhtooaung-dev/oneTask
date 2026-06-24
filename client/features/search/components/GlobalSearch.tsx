@@ -244,7 +244,8 @@ function ResultGroups({
 						</div>
 						<div className="space-y-1">
 							{group.items.map((item, itemIndex) => {
-								const currentIndex = startIndex + previousItemsCount + itemIndex;
+								const currentIndex =
+									startIndex + previousItemsCount + itemIndex;
 
 								return (
 									<SearchResultRow
@@ -300,7 +301,6 @@ export function GlobalSearch({
 		[commands, flatResults],
 	);
 	const hasQuery = query.trim().length > 0;
-
 
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {

@@ -225,13 +225,16 @@ function ResultGroups({
 	startIndex?: number;
 	onSelect: (item: SearchResultItem) => void;
 }) {
-	let cursor = startIndex;
+	const activeGroups = groups.filter((group) => group.items.length > 0);
 
 	return (
 		<div className="space-y-4">
-			{groups
-				.filter((group) => group.items.length > 0)
-				.map((group) => (
+			{activeGroups.map((group, groupIndex) => {
+				const previousItemsCount = activeGroups
+					.slice(0, groupIndex)
+					.reduce((sum, g) => sum + g.items.length, 0);
+
+				return (
 					<section key={group.type} className="space-y-1.5">
 						<div className="flex items-center justify-between px-1">
 							<p className="ot-label">{group.label}</p>
@@ -240,9 +243,8 @@ function ResultGroups({
 							</span>
 						</div>
 						<div className="space-y-1">
-							{group.items.map((item) => {
-								const currentIndex = cursor;
-								cursor += 1;
+							{group.items.map((item, itemIndex) => {
+								const currentIndex = startIndex + previousItemsCount + itemIndex;
 
 								return (
 									<SearchResultRow
@@ -255,7 +257,8 @@ function ResultGroups({
 							})}
 						</div>
 					</section>
-				))}
+				);
+			})}
 		</div>
 	);
 }
@@ -270,7 +273,9 @@ export function GlobalSearch({
 	const [isOpen, setIsOpen] = useState(false);
 	const [query, setQuery] = useState("");
 	const [activeIndex, setActiveIndex] = useState(0);
-	const [recentSearches, setRecentSearches] = useState<string[]>([]);
+	const [recentSearches, setRecentSearches] = useState<string[]>(() =>
+		loadRecentSearches(),
+	);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 	const debouncedQuery = useDebouncedValue(query, 180);
 	const { data, isFetching } = useWorkspaceSearch(workspaceId, debouncedQuery);
@@ -282,7 +287,7 @@ export function GlobalSearch({
 		setShowActivityExplorer,
 	} = useUIStore();
 
-	const visibleGroups = data?.groups || [];
+	const visibleGroups = useMemo(() => data?.groups || [], [data?.groups]);
 	const flatResults = useMemo(
 		() => visibleGroups.flatMap((group) => group.items),
 		[visibleGroups],
@@ -296,9 +301,6 @@ export function GlobalSearch({
 	);
 	const hasQuery = query.trim().length > 0;
 
-	useEffect(() => {
-		setRecentSearches(loadRecentSearches());
-	}, []);
 
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
@@ -514,26 +516,12 @@ export function GlobalSearch({
 	return (
 		<>
 			<Button
-				variant="secondary"
-				onClick={() => setIsOpen(true)}
-				disabled={disabled || !workspaceId}
-				className="hidden h-10 min-w-56 justify-between px-3 text-zinc-500 lg:inline-flex"
-			>
-				<span className="flex min-w-0 items-center gap-2">
-					<Command className="h-4 w-4 shrink-0" />
-					<span className="truncate">Command menu</span>
-				</span>
-				<kbd className="rounded border border-zinc-800 bg-zinc-950 px-1.5 py-0.5 text-[10px] font-bold text-zinc-600">
-					Ctrl K
-				</kbd>
-			</Button>
-			<Button
 				variant="ghost"
 				size="icon"
 				onClick={() => setIsOpen(true)}
 				disabled={disabled || !workspaceId}
-				title="Command menu"
-				className="lg:hidden"
+				title="Command menu (Ctrl+K)"
+				className="text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
 			>
 				<Command className="h-4 w-4" />
 			</Button>

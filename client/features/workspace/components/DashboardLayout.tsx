@@ -68,14 +68,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 						<ChevronRight className="hidden h-3.5 w-3.5 text-zinc-700 sm:block" />
 						<span
 							className={cn(
-								"max-w-[36vw] truncate sm:max-w-none",
+								"hidden truncate sm:block",
 								activeWorkspace ? "text-zinc-300" : "text-zinc-600",
 							)}
 						>
 							{activeWorkspace?.name || "No workspace"}
 						</span>
-						<ChevronRight className="h-3.5 w-3.5 shrink-0 text-zinc-700" />
-						<span className="max-w-[34vw] truncate font-semibold text-violet-300 sm:max-w-none">
+						<ChevronRight className="hidden h-3.5 w-3.5 shrink-0 text-zinc-700 sm:block" />
+						<span className="max-w-[45vw] truncate font-semibold text-violet-300 sm:max-w-none">
 							{surfaceLabel}
 						</span>
 					</nav>
@@ -83,7 +83,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 					<div className="flex shrink-0 items-center gap-2 sm:gap-3">
 						<GlobalSearch workspaceId={activeWorkspaceId} />
 						<NotificationBell />
-						<Badge tone={isConnected ? "success" : "neutral"}>
+						<Badge
+							tone={isConnected ? "success" : "neutral"}
+							className="hidden sm:inline-flex"
+						>
 							<Radio className="h-3 w-3" />
 							<span className="hidden sm:inline">
 								{isConnected ? "Realtime" : "Offline"}

@@ -59,7 +59,10 @@ export class ReportsController {
 
   @Get('workspaces/:workspaceId/reports/summary')
   @UseGuards(WorkspaceMemberGuard)
-  async getReportSummary(@Param('workspaceId') workspaceId: string) {
-    return this.reportsService.getReportSummary(workspaceId);
+  async getReportSummary(
+    @Param('workspaceId') workspaceId: string,
+    @Query('date') date?: string,
+  ) {
+    return this.reportsService.getReportSummary(workspaceId, date);
   }
 }

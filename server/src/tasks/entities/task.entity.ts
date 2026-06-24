@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { Workspace } from '../../workspaces/entities/workspace.entity';
 import { Project } from '../../projects/entities/project.entity';
@@ -33,9 +34,11 @@ export class Task {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column()
   workspaceId: string;
 
+  @Index()
   @Column()
   projectId: string;
 
@@ -53,6 +56,7 @@ export class Task {
   @Column({ nullable: true, type: 'text' })
   description?: string | null;
 
+  @Index()
   @Column({
     type: 'enum',
     enum: TaskStatus,
@@ -67,6 +71,7 @@ export class Task {
   })
   priority: TaskPriority;
 
+  @Index()
   @Column({ nullable: true })
   assigneeId?: string | null;
 

@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Task } from '../../tasks/entities/task.entity';
 import { User } from '../../users/entities/user.entity';
@@ -22,6 +23,7 @@ export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column()
   taskId: string;
 

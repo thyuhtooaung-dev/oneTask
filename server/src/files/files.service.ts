@@ -2,19 +2,68 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import { FileAttachment } from './entities/file-attachment.entity';
-import * as fs from 'fs';
-import * as path from 'path';
+import { createClient } from '@supabase/supabase-js';
+
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class FilesService {
+  private supabase: ReturnType<typeof createClient>;
+  private bucketName: string;
+
   constructor(
     @InjectRepository(FileAttachment)
     private fileRepository: Repository<FileAttachment>,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    this.supabase = createClient(
+      this.configService.get<string>('SUPABASE_URL') ||
+        'https://placeholder.supabase.co',
+      this.configService.get<string>('SUPABASE_KEY') || 'placeholder-key',
+    );
+    this.bucketName =
+      this.configService.get<string>('SUPABASE_BUCKET') || 'attachments';
+  }
 
-  async create(data: Partial<FileAttachment>): Promise<FileAttachment> {
+  async create(
+    data: Partial<FileAttachment>,
+    fileBuffer?: Buffer,
+  ): Promise<FileAttachment> {
+    if (fileBuffer) {
+      const folderPath = `workspaces/${data.workspaceId}/projects/${data.projectId}${data.folder !== '/' ? data.folder : ''}`;
+      const filePath = `${folderPath}/${data.filename}`;
+
+      const { error } = await this.supabase.storage
+        .from(this.bucketName)
+        .upload(filePath, fileBuffer, {
+          contentType: data.mimetype,
+          upsert: false,
+        });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const { data: publicUrlData } = this.supabase.storage
+        .from(this.bucketName)
+        .getPublicUrl(filePath);
+
+      data.fileUrl = publicUrlData.publicUrl;
+      data.filePath = filePath;
+    }
+
     const file = this.fileRepository.create(data);
-    return this.fileRepository.save(file);
+    try {
+      return await this.fileRepository.save(file);
+    } catch (e) {
+      if (data.filePath) {
+        // Attempt to clean up orphaned Supabase file silently
+        await this.supabase.storage
+          .from(this.bucketName)
+          .remove([data.filePath]);
+      }
+      throw e;
+    }
   }
 
   async findAllByProject(
@@ -39,19 +88,34 @@ export class FilesService {
     });
   }
 
+  async findOne(id: string, workspaceId: string): Promise<FileAttachment> {
+    const file = await this.fileRepository.findOne({
+      where: { id, workspaceId },
+    });
+    if (!file) throw new NotFoundException('File not found');
+    return file;
+  }
+
   async remove(id: string, workspaceId: string): Promise<void> {
     const file = await this.fileRepository.findOne({
       where: { id, workspaceId },
     });
     if (!file) throw new NotFoundException('File not found');
 
-    // Delete from DB
+    // Delete from DB first
     await this.fileRepository.remove(file);
 
-    // Delete physical file
-    const filePath = path.join(process.cwd(), 'uploads', file.filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Delete from Supabase if exists
+    if (file.filePath) {
+      const { error } = await this.supabase.storage
+        .from(this.bucketName)
+        .remove([file.filePath]);
+
+      if (error) {
+        console.warn(
+          `Supabase remove returned error for filePath="${file.filePath}": ${error.message}`,
+        );
+      }
     }
   }
 }

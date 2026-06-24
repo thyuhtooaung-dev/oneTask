@@ -20,7 +20,7 @@ async function bootstrap() {
   );
 
   app.use(json({ limit: '10mb' }));
-  app.use(urlencoded({ extended: true, limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '55mb' }));
 
   // Serve the uploads directory statically
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));

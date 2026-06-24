@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  Index,
 } from 'typeorm';
 import { Workspace } from '../../workspaces/entities/workspace.entity';
 import { User } from '../../users/entities/user.entity';
@@ -31,6 +32,7 @@ export class DailyReport {
   @JoinColumn({ name: 'authorId' })
   author: User;
 
+  @Index()
   @Column({ type: 'date' })
   reportDate: string;
 

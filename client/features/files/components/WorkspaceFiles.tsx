@@ -2,6 +2,7 @@ import { formatBytes } from "@/lib/utils/format";
 import { Avatar } from "@/shared/ui/avatar/Avatar";
 import { Badge } from "@/shared/ui/badge/Badge";
 import { Button } from "@/shared/ui/button/Button";
+import { ConfirmDialog } from "@/shared/ui/dialog/ConfirmDialog";
 import {
 	Download,
 	FileArchive,
@@ -56,10 +57,43 @@ export function WorkspaceFiles({
 	const deleteFile = useDeleteFile(workspaceId, projectId);
 
 	const [folderInput, setFolderInput] = useState("/");
+	const [fileToDelete, setFileToDelete] = useState<string | null>(null);
+	const [isUploading, setIsUploading] = useState(false);
+	const [uploadProgress, setUploadProgress] = useState(0);
 
 	const onDrop = async (acceptedFiles: File[]) => {
-		for (const file of acceptedFiles) {
-			await uploadFile.mutateAsync({ file, folder: folderInput });
+		setIsUploading(true);
+		for (let i = 0; i < acceptedFiles.length; i++) {
+			await uploadFile.mutateAsync({
+				file: acceptedFiles[i],
+				folder: folderInput,
+				onProgress: (p) => {
+					const fileProgress = p / acceptedFiles.length;
+					const previousFilesProgress = (i / acceptedFiles.length) * 100;
+					setUploadProgress(previousFilesProgress + fileProgress);
+				},
+			});
+		}
+		setIsUploading(false);
+		setUploadProgress(0);
+	};
+
+	const handleDownload = async (file: FileAttachment) => {
+		if (!file.fileUrl) return;
+		try {
+			const response = await fetch(file.fileUrl);
+			const blob = await response.blob();
+			const blobUrl = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = blobUrl;
+			a.download = file.originalName;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(blobUrl);
+		} catch {
+			// Fallback: open directly
+			window.open(file.fileUrl, "_blank");
 		}
 	};
 
@@ -129,6 +163,20 @@ export function WorkspaceFiles({
 							: "Click or drag files to upload"}
 					</p>
 					<p className="mt-1 text-xs text-zinc-500">Max size 50MB</p>
+					{isUploading && (
+						<div className="w-full max-w-xs mt-4">
+							<div className="flex justify-between text-xs text-zinc-400 mb-1">
+								<span>Uploading...</span>
+								<span>{Math.round(uploadProgress)}%</span>
+							</div>
+							<div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+								<div
+									className="h-full bg-violet-500 transition-all duration-300"
+									style={{ width: `${uploadProgress}%` }}
+								/>
+							</div>
+						</div>
+					)}
 				</div>
 			</div>
 
@@ -152,9 +200,6 @@ export function WorkspaceFiles({
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 							{folderFiles.map((file) => {
 								const Icon = getFileIcon(file.mimetype);
-								// Assuming the server is running on localhost:5000 in dev
-								// A proper production setup would use a dynamic base URL
-								const fileUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/uploads/${file.filename}`;
 
 								return (
 									<div
@@ -196,7 +241,7 @@ export function WorkspaceFiles({
 													variant="ghost"
 													size="icon"
 													className="h-7 w-7 text-zinc-400 hover:text-violet-400"
-													onClick={() => window.open(fileUrl, "_blank")}
+													onClick={() => handleDownload(file)}
 													title="Download"
 												>
 													<Download className="h-3.5 w-3.5" />
@@ -205,15 +250,7 @@ export function WorkspaceFiles({
 													variant="ghost"
 													size="icon"
 													className="h-7 w-7 text-zinc-400 hover:text-red-400"
-													onClick={() => {
-														if (
-															confirm(
-																"Are you sure you want to delete this file?",
-															)
-														) {
-															deleteFile.mutate(file.id);
-														}
-													}}
+													onClick={() => setFileToDelete(file.id)}
 													title="Delete"
 												>
 													<Trash2 className="h-3.5 w-3.5" />
@@ -227,6 +264,24 @@ export function WorkspaceFiles({
 					</div>
 				))
 			)}
+
+			<ConfirmDialog
+				open={!!fileToDelete}
+				title="Delete attachment"
+				description="This attachment will be permanently removed from the workspace."
+				confirmLabel="Delete"
+				isDanger
+				isLoading={deleteFile.isPending}
+				confirmIcon={<Trash2 className="h-4 w-4" />}
+				onConfirm={() => {
+					if (fileToDelete) {
+						deleteFile.mutate(fileToDelete, {
+							onSuccess: () => setFileToDelete(null),
+						});
+					}
+				}}
+				onClose={() => setFileToDelete(null)}
+			/>
 		</div>
 	);
 }

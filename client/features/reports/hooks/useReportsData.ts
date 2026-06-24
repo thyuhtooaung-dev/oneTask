@@ -89,13 +89,14 @@ export function useReports(
 	});
 }
 
-export function useReportSummary(workspaceId: string | null) {
-	return useQuery<ReportSummary>({
-		queryKey: queryKeys.reports.summary(workspaceId || ""),
+export function useReportSummary(workspaceId: string | null, date?: string) {
+	return useQuery<ReportSummary | null>({
+		queryKey: [...queryKeys.reports.summary(workspaceId || ""), date],
 		queryFn: async () => {
-			if (!workspaceId) throw new Error("Workspace ID is required");
+			if (!workspaceId) return null;
+			const queryParam = date ? `?date=${date}` : "";
 			const { data } = await axiosClient.get<ReportSummary>(
-				`/workspaces/${workspaceId}/reports/summary`,
+				`/workspaces/${workspaceId}/reports/summary${queryParam}`,
 			);
 			return data;
 		},

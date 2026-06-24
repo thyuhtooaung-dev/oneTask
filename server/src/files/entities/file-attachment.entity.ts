@@ -66,7 +66,10 @@ export class FileAttachment {
   mimetype: string;
 
   @Column('text', { nullable: true })
-  dataUrl?: string;
+  fileUrl?: string;
+
+  @Column({ nullable: true })
+  filePath?: string;
 
   @Column('bigint')
   size: number;

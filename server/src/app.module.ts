@@ -69,7 +69,9 @@ import { FilesModule } from './files/files.module';
           DailyReport,
           FileAttachment,
         ],
-        synchronize: configService.get<string>('NODE_ENV') !== 'production', // Disabled in production; use migrations instead
+        synchronize:
+          configService.get<string>('DB_SYNCHRONIZE') === 'true' ||
+          configService.get<string>('NODE_ENV') !== 'production', // Set DB_SYNCHRONIZE=true in Render to apply schema changes
         ssl:
           configService.get<string>('DATABASE_URL')?.includes('sslmode=') ||
           configService.get<string>('DATABASE_URL')?.includes('neon.tech')

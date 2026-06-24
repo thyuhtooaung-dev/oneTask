@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import { FileAttachment } from './entities/file-attachment.entity';
@@ -41,7 +45,10 @@ export class FilesService {
         });
 
       if (error) {
-        throw new Error(error.message);
+        console.error('Supabase upload error:', error);
+        throw new InternalServerErrorException(
+          `Supabase upload failed: ${error.message}`,
+        );
       }
 
       const { data: publicUrlData } = this.supabase.storage

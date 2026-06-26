@@ -213,10 +213,10 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
 			<div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
 				<div className="min-w-0">
 					<p className="ot-label">Live event stream</p>
-					<h2 className="mt-1 wrap-break-word text-xl font-semibold tracking-tight text-zinc-100">
+					<h2 className="mt-1 wrap-break-word text-xl font-semibold tracking-tight text-surface-100">
 						{workspaceName || "Workspace"} activity
 					</h2>
-					<p className="mt-1 text-sm leading-6 text-zinc-500">
+					<p className="mt-1 text-sm leading-6 text-surface-500">
 						Every mutation becomes shared context for the team.
 					</p>
 				</div>
@@ -227,17 +227,17 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
 			</div>
 
 			{isLoading ? (
-				<div className="flex items-center gap-2 rounded-xl border border-zinc-900 bg-zinc-950/60 px-4 py-8 text-sm font-medium text-zinc-500">
+				<div className="flex items-center gap-2 rounded-xl border border-surface-900 bg-surface-950/60 px-4 py-8 text-sm font-medium text-surface-500">
 					<Loader2 className="h-4 w-4 animate-spin" />
 					Loading activity
 				</div>
 			) : activities.length === 0 ? (
-				<div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 px-6 py-10 text-center">
-					<CheckCircle2 className="mx-auto mb-3 h-6 w-6 text-zinc-700" />
-					<p className="text-sm font-semibold text-zinc-300">
+				<div className="rounded-xl border border-dashed border-surface-800 bg-surface-950/40 px-6 py-10 text-center">
+					<CheckCircle2 className="mx-auto mb-3 h-6 w-6 text-surface-700" />
+					<p className="text-sm font-semibold text-surface-300">
 						No activity recorded yet
 					</p>
-					<p className="mt-1 text-xs text-zinc-600">
+					<p className="mt-1 text-xs text-surface-600">
 						Create a task, project, comment, or invite to start the stream.
 					</p>
 				</div>
@@ -249,7 +249,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
 
 						return (
 							<div key={groupName} className="space-y-4">
-								<h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 pl-[34px] sm:pl-[43px]">
+								<h3 className="text-xs font-semibold uppercase tracking-wider text-surface-500 pl-[34px] sm:pl-[43px]">
 									{groupName}
 								</h3>
 								<div className="space-y-4">

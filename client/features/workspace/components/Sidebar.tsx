@@ -56,8 +56,8 @@ function NavItem({
 				"flex min-h-10 w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
 				collapsed && "justify-center px-0",
 				active
-					? "bg-violet-500/10 text-violet-200 shadow-[inset_2px_0_0_var(--ot-accent)]"
-					: "text-zinc-400 hover:bg-zinc-900/70 hover:text-zinc-100",
+					? "bg-primary-500/10 text-primary-200 shadow-[inset_2px_0_0_var(--ot-accent)]"
+					: "text-surface-400 hover:bg-surface-900/70 hover:text-surface-100",
 			)}
 		>
 			<Icon className="h-4 w-4 shrink-0" />
@@ -177,14 +177,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	return (
 		<aside
 			className={cn(
-				"fixed inset-y-0 left-0 z-50 flex h-dvh shrink-0 flex-col border-r border-zinc-900 bg-zinc-950 text-zinc-300 shadow-(--ot-shadow-panel) transition-[transform,width] duration-200 ease-out md:static md:z-auto md:translate-x-0 md:bg-zinc-950/82 md:shadow-none",
+				"fixed inset-y-0 left-0 z-50 flex h-dvh shrink-0 flex-col border-r border-surface-900 bg-surface-950 text-surface-300 shadow-(--ot-shadow-panel) transition-[transform,width] duration-200 ease-out md:static md:z-auto md:translate-x-0 md:bg-surface-950/82 md:shadow-none",
 				isMobileOpen ? "translate-x-0" : "-translate-x-full",
 				isSidebarCompact ? "w-16" : "w-[min(20rem,calc(100vw-1rem))]",
 			)}
 		>
 			<div
 				className={cn(
-					"flex h-14 shrink-0 items-center border-b border-zinc-900 px-3",
+					"flex h-14 shrink-0 items-center border-b border-surface-900 px-3",
 					isSidebarCompact ? "justify-center" : "gap-3",
 				)}
 			>
@@ -201,7 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 								<PanelLeftOpen className="h-4 w-4" />
 							</Button>
 						)}
-						<div className="relative flex h-8 w-8 overflow-hidden rounded-lg shadow-[0_10px_30px_rgba(124,58,237,0.24)] lg:hidden">
+						<div className="relative flex h-8 w-8 overflow-hidden rounded-lg shadow-[0_10px_30px_color-mix(in srgb, var(--color-primary-600) 24%, transparent)] lg:hidden">
 							<Image
 								src="/logo.jpg"
 								alt="oneTask Logo"
@@ -213,7 +213,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					</>
 				) : (
 					<>
-						<div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-[0_10px_30px_rgba(124,58,237,0.28)]">
+						<div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-[0_10px_30px_color-mix(in srgb, var(--color-primary-600) 28%, transparent)]">
 							<Image
 								src="/logo.jpg"
 								alt="oneTask Logo"
@@ -222,10 +222,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 							/>
 						</div>
 						<div className="min-w-0 flex-1">
-							<h1 className="text-sm font-semibold tracking-tight text-zinc-100">
+							<h1 className="text-sm font-semibold tracking-tight text-surface-100">
 								oneTask
 							</h1>
-							<p className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+							<p className="text-[10px] font-bold uppercase tracking-[0.14em] text-surface-600">
 								Event OS
 							</p>
 						</div>
@@ -306,7 +306,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 									onClick={() => handleNavigate(() => setShowSettings(true))}
 									collapsed
 								/>
-								<div className="my-3 h-px bg-zinc-900" />
+								<div className="my-3 h-px bg-surface-900" />
 								<Button
 									variant="ghost"
 									size="icon"
@@ -330,7 +330,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 								))}
 							</>
 						) : (
-							<div className="flex h-9 items-center justify-center text-zinc-700">
+							<div className="flex h-9 items-center justify-center text-surface-700">
 								<Briefcase className="h-4 w-4" />
 							</div>
 						)}
@@ -353,7 +353,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 							</div>
 
 							{isLoadingWorkspaces ? (
-								<div className="flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-950 px-3 py-2 text-sm text-zinc-500">
+								<div className="flex items-center gap-2 rounded-lg border border-surface-900 bg-surface-950 px-3 py-2 text-sm text-surface-500">
 									<Loader2 className="h-4 w-4 animate-spin" />
 									Loading
 								</div>
@@ -368,12 +368,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 											<span
 												className={cn(
 													"truncate",
-													activeWorkspace ? "text-zinc-100" : "text-zinc-500",
+													activeWorkspace
+														? "text-surface-100"
+														: "text-surface-500",
 												)}
 											>
 												{activeWorkspace?.name || "Select workspace"}
 											</span>
-											<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+											<ChevronDown className="h-4 w-4 shrink-0 text-surface-600" />
 										</button>
 									</DropdownMenu.Trigger>
 									<DropdownMenu.Content
@@ -424,9 +426,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 							</div>
 
 							{!activeWorkspaceId ? (
-								<div className="rounded-xl border border-dashed border-zinc-900 bg-zinc-950/60 px-4 py-8 text-center">
-									<Briefcase className="mx-auto mb-2 h-5 w-5 text-zinc-700" />
-									<p className="text-xs font-medium leading-5 text-zinc-600">
+								<div className="rounded-xl border border-dashed border-surface-900 bg-surface-950/60 px-4 py-8 text-center">
+									<Briefcase className="mx-auto mb-2 h-5 w-5 text-surface-700" />
+									<p className="text-xs font-medium leading-5 text-surface-600">
 										Choose a workspace to load projects and activity.
 									</p>
 								</div>
@@ -472,20 +474,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
 										label="Members & settings"
 										onClick={() => handleNavigate(() => setShowSettings(true))}
 									/>
-									<div className="my-3 h-px bg-zinc-900" />
+									<div className="my-3 h-px bg-surface-900" />
 									{isLoadingProjects ? (
-										<div className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-500">
+										<div className="flex items-center gap-2 px-3 py-2 text-sm text-surface-500">
 											<Loader2 className="h-4 w-4 animate-spin" />
 											Loading projects
 										</div>
 									) : projects.length === 0 ? (
-										<div className="rounded-xl border border-dashed border-zinc-900 bg-zinc-950/50 px-4 py-6 text-center">
-											<Folder className="mx-auto mb-2 h-5 w-5 text-zinc-700" />
-											<p className="text-xs text-zinc-600">No projects yet.</p>
+										<div className="rounded-xl border border-dashed border-surface-900 bg-surface-950/50 px-4 py-6 text-center">
+											<Folder className="mx-auto mb-2 h-5 w-5 text-surface-700" />
+											<p className="text-xs text-surface-600">
+												No projects yet.
+											</p>
 											<button
 												type="button"
 												onClick={openCreateProjectModal}
-												className="mt-2 text-xs font-semibold text-violet-300 hover:text-violet-200"
+												className="mt-2 text-xs font-semibold text-primary-300 hover:text-primary-200"
 											>
 												Create project
 											</button>
@@ -513,13 +517,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			{user && (
 				<div
 					className={cn(
-						"border-t border-zinc-900",
+						"border-t border-surface-900",
 						isSidebarCompact ? "p-2" : "p-3",
 					)}
 				>
 					<div
 						className={cn(
-							"flex items-center rounded-xl border border-zinc-900 bg-zinc-950/80 p-2",
+							"flex items-center rounded-xl border border-surface-900 bg-surface-950/80 p-2",
 							isSidebarCompact ? "flex-col gap-2" : "justify-between",
 						)}
 					>
@@ -532,10 +536,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 							/>
 							{!isSidebarCompact && (
 								<div className="min-w-0">
-									<p className="truncate text-xs font-semibold text-zinc-100">
+									<p className="truncate text-xs font-semibold text-surface-100">
 										{user.name || "Anonymous User"}
 									</p>
-									<p className="truncate text-[10px] text-zinc-600">
+									<p className="truncate text-[10px] text-surface-600">
 										{user.email}
 									</p>
 								</div>
@@ -674,7 +678,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 						/>
 						<label
 							htmlFor="project-is-private"
-							className="text-sm font-medium text-zinc-300"
+							className="text-sm font-medium text-surface-300"
 						>
 							Make project private
 						</label>

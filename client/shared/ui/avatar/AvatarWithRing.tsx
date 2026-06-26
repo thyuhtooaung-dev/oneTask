@@ -41,7 +41,7 @@ export function AvatarWithRing({
 	if (total === 0) {
 		// Just a gray ring
 		segments.push({
-			color: "text-zinc-700",
+			color: "text-surface-700",
 			dasharray: `${circumference} ${circumference}`,
 			offset: 0,
 		});
@@ -63,9 +63,9 @@ export function AvatarWithRing({
 			}
 		};
 
-		addSegment(tasks?.todo || 0, "text-zinc-500");
-		addSegment(tasks?.inProgress || 0, "text-violet-400");
-		addSegment(tasks?.done || 0, "text-emerald-400");
+		addSegment(tasks?.todo || 0, "text-surface-500");
+		addSegment(tasks?.inProgress || 0, "text-primary-400");
+		addSegment(tasks?.done || 0, "text-success-400");
 	}
 
 	return (
@@ -114,7 +114,7 @@ export function AvatarWithRing({
 					email={email}
 					size={size}
 					isOnline={isOnline}
-					className="border-0 bg-zinc-950"
+					className="border-0 bg-surface-950"
 				/>
 			</div>
 		</div>

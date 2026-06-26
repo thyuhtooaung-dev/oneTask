@@ -110,14 +110,14 @@ export function TaskFiles({
 	if (isLoading) {
 		return (
 			<div className="flex h-20 items-center justify-center">
-				<Loader2 className="h-5 w-5 animate-spin text-violet-500" />
+				<Loader2 className="h-5 w-5 animate-spin text-primary-500" />
 			</div>
 		);
 	}
 
 	return (
 		<div className="space-y-4">
-			<h4 className="text-sm font-semibold text-zinc-100">Attachments</h4>
+			<h4 className="text-sm font-semibold text-surface-100">Attachments</h4>
 
 			{files.length > 0 && (
 				<div className="flex flex-wrap gap-3">
@@ -128,7 +128,7 @@ export function TaskFiles({
 						return (
 							<div key={file.id} className="w-full sm:w-auto">
 								{file.mimetype.startsWith("image/") ? (
-									<div className="group relative overflow-hidden rounded-md border border-zinc-800/80 bg-zinc-950/60 w-24 h-24 shrink-0">
+									<div className="group relative overflow-hidden rounded-md border border-surface-800/80 bg-surface-950/60 w-24 h-24 shrink-0">
 										<button
 											type="button"
 											onClick={() => setSelectedImage(fileUrl)}
@@ -138,7 +138,7 @@ export function TaskFiles({
 											<img
 												src={fileUrl}
 												alt={file.originalName}
-												className="w-full h-full object-cover bg-zinc-900"
+												className="w-full h-full object-cover bg-surface-900"
 											/>
 											<div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20 flex items-center justify-center">
 												<Maximize2 className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
@@ -147,7 +147,7 @@ export function TaskFiles({
 										<div className="absolute -top-1 -right-1 opacity-0 transition-opacity group-hover:opacity-100 flex gap-1">
 											<button
 												type="button"
-												className="bg-violet-500 rounded-full p-1 text-white shadow-md hover:bg-violet-600 transition-colors m-2"
+												className="bg-primary-500 rounded-full p-1 text-white shadow-md hover:bg-primary-600 transition-colors m-2"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDownload(file);
@@ -159,7 +159,7 @@ export function TaskFiles({
 											{canEdit && (
 												<button
 													type="button"
-													className="bg-red-500 rounded-full p-1 text-white shadow-md hover:bg-red-600 transition-colors m-2"
+													className="bg-danger-500 rounded-full p-1 text-white shadow-md hover:bg-danger-600 transition-colors m-2"
 													onClick={(e) => {
 														e.stopPropagation();
 														setFileToDelete(file.id);
@@ -172,19 +172,19 @@ export function TaskFiles({
 										</div>
 									</div>
 								) : (
-									<div className="group flex items-center justify-between rounded-md border border-zinc-800/80 bg-zinc-950/60 p-2 transition-colors hover:border-zinc-700 w-full">
+									<div className="group flex items-center justify-between rounded-md border border-surface-800/80 bg-surface-950/60 p-2 transition-colors hover:border-surface-700 w-full">
 										<div className="flex min-w-0 flex-1 items-center gap-3">
-											<div className="rounded-md bg-zinc-900 p-1.5">
-												<Icon className="h-4 w-4 text-violet-400" />
+											<div className="rounded-md bg-surface-900 p-1.5">
+												<Icon className="h-4 w-4 text-primary-400" />
 											</div>
 											<div className="min-w-0 flex-1">
 												<p
-													className="truncate text-xs font-medium text-zinc-200"
+													className="truncate text-xs font-medium text-surface-200"
 													title={file.originalName}
 												>
 													{file.originalName}
 												</p>
-												<p className="text-[10px] text-zinc-500">
+												<p className="text-[10px] text-surface-500">
 													{formatBytes(Number(file.size))}
 												</p>
 											</div>
@@ -193,7 +193,7 @@ export function TaskFiles({
 											<Button
 												variant="ghost"
 												size="icon"
-												className="h-6 w-6 text-zinc-400 hover:text-violet-400"
+												className="h-6 w-6 text-surface-400 hover:text-primary-400"
 												onClick={() => handleDownload(file)}
 												title="Download"
 											>
@@ -203,7 +203,7 @@ export function TaskFiles({
 												<Button
 													variant="ghost"
 													size="icon"
-													className="h-6 w-6 text-zinc-400 hover:bg-red-500/10 hover:text-red-400"
+													className="h-6 w-6 text-surface-400 hover:bg-danger-500/10 hover:text-danger-400"
 													onClick={() => setFileToDelete(file.id)}
 													title="Delete"
 												>
@@ -224,26 +224,26 @@ export function TaskFiles({
 					{...getRootProps()}
 					className={`flex cursor-pointer flex-col items-center justify-center rounded-md border border-dashed p-4 transition-colors ${
 						isDragActive
-							? "border-violet-500 bg-violet-500/10"
-							: "border-zinc-800 bg-zinc-950/50 hover:border-zinc-700 hover:bg-zinc-900/50"
+							? "border-primary-500 bg-primary-500/10"
+							: "border-surface-800 bg-surface-950/50 hover:border-surface-700 hover:bg-surface-900/50"
 					}`}
 				>
 					<input {...getInputProps()} />
 					<UploadCloud
-						className={`mb-2 h-5 w-5 ${isDragActive ? "text-violet-400" : "text-zinc-600"}`}
+						className={`mb-2 h-5 w-5 ${isDragActive ? "text-primary-400" : "text-surface-600"}`}
 					/>
-					<p className="text-xs font-medium text-zinc-300">
+					<p className="text-xs font-medium text-surface-300">
 						{isDragActive ? "Drop file here" : "Attach file"}
 					</p>
 					{isUploading && (
 						<div className="w-full max-w-xs mt-4">
-							<div className="flex justify-between text-xs text-zinc-400 mb-1">
+							<div className="flex justify-between text-xs text-surface-400 mb-1">
 								<span>Uploading...</span>
 								<span>{Math.round(uploadProgress)}%</span>
 							</div>
-							<div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+							<div className="h-1.5 w-full bg-surface-800 rounded-full overflow-hidden">
 								<div
-									className="h-full bg-violet-500 transition-all duration-300"
+									className="h-full bg-primary-500 transition-all duration-300"
 									style={{ width: `${uploadProgress}%` }}
 								/>
 							</div>
@@ -274,7 +274,7 @@ export function TaskFiles({
 							<button
 								type="button"
 								onClick={() => setSelectedImage(null)}
-								className="absolute -top-12 right-0 rounded-full bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 hover:text-white transition-colors pointer-events-auto"
+								className="absolute -top-12 right-0 rounded-full bg-surface-800/80 p-2 text-surface-400 hover:bg-surface-700 hover:text-white transition-colors pointer-events-auto"
 								aria-label="Close viewer"
 							>
 								<X className="h-5 w-5" />

@@ -25,10 +25,10 @@ interface ActivityEventCardProps {
 }
 
 const toneClasses = {
-	neutral: "text-zinc-500 bg-zinc-900 border-zinc-800",
-	accent: "text-violet-300 bg-violet-950/50 border-violet-900/50",
-	success: "text-emerald-300 bg-emerald-950/50 border-emerald-900/50",
-	danger: "text-red-300 bg-red-950/50 border-red-900/50",
+	neutral: "text-surface-500 bg-surface-900 border-surface-800",
+	accent: "text-primary-300 bg-primary-950/50 border-primary-900/50",
+	success: "text-success-300 bg-success-950/50 border-success-900/50",
+	danger: "text-danger-300 bg-danger-950/50 border-danger-900/50",
 };
 
 function getStatusTone(
@@ -63,7 +63,7 @@ export function ActivityEventCard({
 	return (
 		<div className="group relative flex items-start gap-3 sm:gap-4">
 			{/* Timeline line connector */}
-			<div className="absolute bottom-[-24px] left-[23px] top-[46px] w-px bg-zinc-900 group-last:hidden" />
+			<div className="absolute bottom-[-24px] left-[23px] top-[46px] w-px bg-surface-900 group-last:hidden" />
 
 			<div className="relative shrink-0">
 				<AvatarWithRing
@@ -71,11 +71,11 @@ export function ActivityEventCard({
 					email={actorEmail}
 					size="md"
 					tasks={tasks}
-					className="z-10 bg-zinc-950"
+					className="z-10 bg-surface-950"
 				/>
 				<div
 					className={cn(
-						"absolute -bottom-0.5 -right-0.5 z-20 flex h-4 w-4 items-center justify-center rounded-full border ring-2 ring-zinc-950 sm:h-5 sm:w-5",
+						"absolute -bottom-0.5 -right-0.5 z-20 flex h-4 w-4 items-center justify-center rounded-full border ring-2 ring-surface-950 sm:h-5 sm:w-5",
 						toneClasses[iconTone],
 					)}
 					title="Event type"
@@ -86,9 +86,9 @@ export function ActivityEventCard({
 
 			<div
 				className={cn(
-					"min-w-0 flex-1 rounded-xl border border-zinc-900/90 bg-zinc-950/55 p-3 transition-all duration-200",
+					"min-w-0 flex-1 rounded-xl border border-surface-900/90 bg-surface-950/55 p-3 transition-all duration-200",
 					isClickable &&
-						"cursor-pointer hover:-translate-y-0.5 hover:border-zinc-800 hover:bg-zinc-900/70 hover:shadow-(--ot-shadow-soft)",
+						"cursor-pointer hover:-translate-y-0.5 hover:border-surface-800 hover:bg-surface-900/70 hover:shadow-(--ot-shadow-soft)",
 				)}
 				onClick={onClick}
 				onKeyDown={(e) => {
@@ -102,18 +102,18 @@ export function ActivityEventCard({
 			>
 				<div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
 					<div className="min-w-0 flex-1">
-						<p className="line-clamp-2 wrap-break-word text-sm font-medium text-zinc-100">
+						<p className="line-clamp-2 wrap-break-word text-sm font-medium text-surface-100">
 							{title}
 						</p>
 						{detail && (
-							<p className="mt-1 line-clamp-3 wrap-break-word text-xs leading-5 text-zinc-500 sm:line-clamp-2">
+							<p className="mt-1 line-clamp-3 wrap-break-word text-xs leading-5 text-surface-500 sm:line-clamp-2">
 								{detail}
 							</p>
 						)}
 					</div>
 
 					<div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end sm:gap-1.5">
-						<span className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600">
+						<span className="text-[10px] font-bold uppercase tracking-[0.14em] text-surface-600">
 							{time}
 						</span>
 
@@ -128,7 +128,7 @@ export function ActivityEventCard({
 									</Badge>
 								)}
 								{statusTransition.from && statusTransition.to && (
-									<ArrowRight className="h-3 w-3 text-zinc-600" />
+									<ArrowRight className="h-3 w-3 text-surface-600" />
 								)}
 								{statusTransition.to && (
 									<Badge

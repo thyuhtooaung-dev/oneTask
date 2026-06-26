@@ -14,8 +14,8 @@ export class MailService {
     if (user && pass) {
       this.transporter = createTransport({
         host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // use SSL
+        port: 587,
+        secure: false, // true for 465, false for other ports
         auth: {
           user,
           pass,
@@ -42,8 +42,9 @@ export class MailService {
     }
 
     try {
+      const senderEmail = this.configService.get<string>('SMTP_USER');
       const info = await this.transporter.sendMail({
-        from: '"oneTask" <onboarding@onetask.app>',
+        from: `"oneTask" <${senderEmail}>`,
         to,
         subject: `You've been invited to join ${workspaceName} on oneTask`,
         html: `

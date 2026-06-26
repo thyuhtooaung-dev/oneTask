@@ -39,28 +39,28 @@ const STATUS_COLUMNS: Array<{
 		label: "Todo",
 		icon: Circle,
 		tone: "neutral",
-		accentClassName: "bg-zinc-600",
+		accentClassName: "bg-surface-600",
 	},
 	{
 		value: "in_progress",
 		label: "In progress",
 		icon: Clock3,
 		tone: "accent",
-		accentClassName: "bg-violet-400",
+		accentClassName: "bg-primary-400",
 	},
 	{
 		value: "done",
 		label: "Done",
 		icon: CheckCircle2,
 		tone: "success",
-		accentClassName: "bg-emerald-400",
+		accentClassName: "bg-success-400",
 	},
 	{
 		value: "canceled",
 		label: "Canceled",
 		icon: XCircle,
 		tone: "danger",
-		accentClassName: "bg-red-400",
+		accentClassName: "bg-danger-400",
 	},
 ];
 
@@ -133,7 +133,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 					return (
 						<section
 							key={column.value}
-							className="rounded-2xl border border-zinc-900 bg-zinc-950/35 p-3"
+							className="rounded-2xl border border-surface-900 bg-surface-950/35 p-3"
 						>
 							<div className="mb-3 flex items-center justify-between gap-3">
 								<div className="flex items-center gap-2">
@@ -141,7 +141,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 										<Icon className="h-3 w-3" />
 										{column.label}
 									</Badge>
-									<span className="text-[11px] font-bold text-zinc-600">
+									<span className="text-[11px] font-bold text-surface-600">
 										{columnTasks.length}
 									</span>
 								</div>
@@ -159,7 +159,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
 							<div className="space-y-3">
 								{columnTasks.length === 0 ? (
-									<div className="flex min-h-24 items-center justify-center rounded-xl border border-dashed border-zinc-900 bg-zinc-950/30 px-4 text-center text-xs font-medium text-zinc-600">
+									<div className="flex min-h-24 items-center justify-center rounded-xl border border-dashed border-surface-900 bg-surface-950/30 px-4 text-center text-xs font-medium text-surface-600">
 										No tasks
 									</div>
 								) : (
@@ -195,7 +195,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 																<span className="truncate">
 																	Move to {column.label}
 																</span>
-																<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+																<ChevronDown className="h-4 w-4 shrink-0 text-surface-600" />
 															</button>
 														</DropdownMenu.Trigger>
 														<DropdownMenu.Content
@@ -250,16 +250,16 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								className={cn(
 									"flex flex-col rounded-2xl border transition-all duration-150",
 									collapsedColumns[column.value]
-										? "h-14 overflow-hidden bg-zinc-950/20"
-										: "min-h-[520px] bg-zinc-950/35 p-3",
+										? "h-14 overflow-hidden bg-surface-950/20"
+										: "min-h-[520px] bg-surface-950/35 p-3",
 									isActiveDrop && !collapsedColumns[column.value]
-										? "border-violet-500/35 bg-violet-500/5"
-										: "border-zinc-900",
+										? "border-primary-500/35 bg-primary-500/5"
+										: "border-surface-900",
 								)}
 							>
 								<div
 									className={cn(
-										"sticky top-0 z-10 flex items-center justify-between gap-3 bg-zinc-950/95",
+										"sticky top-0 z-10 flex items-center justify-between gap-3 bg-surface-950/95",
 										collapsedColumns[column.value]
 											? "px-3 py-3"
 											: "mb-3 px-1 py-1",
@@ -269,7 +269,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 										<button
 											type="button"
 											onClick={() => toggleColumn(column.value)}
-											className="text-zinc-500 hover:text-zinc-300 flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-violet-500 rounded"
+											className="text-surface-500 hover:text-surface-300 flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
 										>
 											{collapsedColumns[column.value] ? (
 												<ChevronRight className="h-4 w-4" />
@@ -281,7 +281,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 											<Icon className="h-3 w-3" />
 											{column.label}
 										</Badge>
-										<span className="text-[11px] font-bold text-zinc-600">
+										<span className="text-[11px] font-bold text-surface-600">
 											{columnTasks.length}
 										</span>
 									</div>
@@ -300,7 +300,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								{!collapsedColumns[column.value] && (
 									<div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
 										{columnTasks.length === 0 ? (
-											<div className="flex h-28 items-center justify-center rounded-xl border border-dashed border-zinc-900 bg-zinc-950/30 text-xs font-medium text-zinc-600">
+											<div className="flex h-28 items-center justify-center rounded-xl border border-dashed border-surface-900 bg-surface-950/30 text-xs font-medium text-surface-600">
 												Drop tasks here
 											</div>
 										) : (

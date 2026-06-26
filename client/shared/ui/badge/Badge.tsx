@@ -8,11 +8,11 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const toneClasses: Record<BadgeTone, string> = {
-	neutral: "border-zinc-800 bg-zinc-900/60 text-zinc-400",
-	accent: "border-violet-500/20 bg-violet-500/10 text-violet-300",
-	success: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
-	warning: "border-amber-500/20 bg-amber-500/10 text-amber-300",
-	danger: "border-red-500/20 bg-red-500/10 text-red-300",
+	neutral: "border-surface-800 bg-surface-900/60 text-surface-400",
+	accent: "border-primary-500/20 bg-primary-500/10 text-primary-300",
+	success: "border-success-500/20 bg-success-500/10 text-success-300",
+	warning: "border-warning-500/20 bg-warning-500/10 text-warning-300",
+	danger: "border-danger-500/20 bg-danger-500/10 text-danger-300",
 };
 
 export function Badge({ tone = "neutral", className, ...props }: BadgeProps) {

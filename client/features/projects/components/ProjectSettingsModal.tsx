@@ -122,23 +122,25 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
 					</div>
 				</form>
 
-				<div className="my-6 h-px bg-zinc-900" />
+				<div className="my-6 h-px bg-surface-900" />
 
 				<div className="space-y-4">
 					<div>
-						<h4 className="text-sm font-semibold text-zinc-100">Danger Zone</h4>
-						<p className="mt-1 text-xs text-zinc-500">
+						<h4 className="text-sm font-semibold text-surface-100">
+							Danger Zone
+						</h4>
+						<p className="mt-1 text-xs text-surface-500">
 							Archiving a project hides it from the sidebar but keeps its tasks
 							intact.
 						</p>
 					</div>
 
-					<div className="flex items-center justify-between rounded-lg border border-red-500/20 bg-red-500/5 p-4">
+					<div className="flex items-center justify-between rounded-lg border border-danger-500/20 bg-danger-500/5 p-4">
 						<div>
-							<p className="text-sm font-medium text-red-300">
+							<p className="text-sm font-medium text-danger-300">
 								Archive project
 							</p>
-							<p className="text-xs text-red-400/80">
+							<p className="text-xs text-danger-400/80">
 								This action will move the project out of the active workspace.
 							</p>
 						</div>

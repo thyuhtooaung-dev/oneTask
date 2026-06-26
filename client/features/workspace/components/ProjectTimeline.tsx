@@ -26,7 +26,7 @@ interface ProjectTimelineProps {
 const PriorityIcon = ({ priority }: { priority: TaskPriority }) => {
 	switch (priority) {
 		case "urgent":
-			return <AlertCircle className="w-3 h-3 text-red-500" />;
+			return <AlertCircle className="w-3 h-3 text-danger-500" />;
 		case "high":
 			return <ArrowUp className="w-3 h-3 text-orange-500" />;
 		case "medium":
@@ -128,12 +128,12 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 
 	if (tasks.length === 0) {
 		return (
-			<div className="flex h-[400px] flex-col items-center justify-center rounded-2xl border border-zinc-900 bg-zinc-950/45 text-center">
-				<CalendarIcon className="mb-4 h-8 w-8 text-zinc-600" />
-				<h3 className="text-lg font-semibold text-zinc-300">
+			<div className="flex h-[400px] flex-col items-center justify-center rounded-2xl border border-surface-900 bg-surface-950/45 text-center">
+				<CalendarIcon className="mb-4 h-8 w-8 text-surface-600" />
+				<h3 className="text-lg font-semibold text-surface-300">
 					No tasks to display
 				</h3>
-				<p className="mt-2 text-sm text-zinc-500">
+				<p className="mt-2 text-sm text-surface-500">
 					Create tasks with start and due dates to see them on the timeline.
 				</p>
 			</div>
@@ -141,13 +141,13 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 	}
 
 	return (
-		<div className="rounded-2xl border border-zinc-900 bg-zinc-950/45 overflow-hidden flex flex-col h-[calc(100vh-220px)] animate-fade-in relative">
+		<div className="rounded-2xl border border-surface-900 bg-surface-950/45 overflow-hidden flex flex-col h-[calc(100vh-220px)] animate-fade-in relative">
 			{/* Scroll to Today Button */}
 			<div className="absolute top-3 right-4 z-40">
 				<button
 					type="button"
 					onClick={scrollToToday}
-					className="bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 text-xs px-3 py-1.5 rounded-full border border-zinc-700 shadow-sm backdrop-blur-md transition-all hover:shadow-md flex items-center gap-1.5 cursor-pointer"
+					className="bg-surface-800/80 hover:bg-surface-700 text-surface-300 text-xs px-3 py-1.5 rounded-full border border-surface-700 shadow-sm backdrop-blur-md transition-all hover:shadow-md flex items-center gap-1.5 cursor-pointer"
 				>
 					<CalendarIcon className="w-3.5 h-3.5" />
 					Today
@@ -166,25 +166,25 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 					}}
 				>
 					{/* Header Row: Months */}
-					<div className="sticky top-0 left-0 z-40 bg-zinc-950/90 backdrop-blur-sm border-b border-r border-zinc-900 p-3 flex items-end">
-						<span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+					<div className="sticky top-0 left-0 z-40 bg-surface-950/90 backdrop-blur-sm border-b border-r border-surface-900 p-3 flex items-end">
+						<span className="text-xs font-semibold text-surface-500 uppercase tracking-wider">
 							Tasks
 						</span>
 					</div>
 					{months.map((m, i) => (
 						<div
 							key={`${m.monthYear}-${i}`}
-							className="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-900 p-2 border-r"
+							className="sticky top-0 z-30 bg-surface-950/90 backdrop-blur-sm border-b border-surface-900 p-2 border-r"
 							style={{ gridColumn: `span ${m.colSpan}` }}
 						>
-							<span className="text-xs font-semibold text-zinc-300">
+							<span className="text-xs font-semibold text-surface-300">
 								{m.monthYear}
 							</span>
 						</div>
 					))}
 
 					{/* Sub-Header Row: Days */}
-					<div className="sticky top-[45px] left-0 z-40 bg-zinc-950/90 backdrop-blur-sm border-b border-r border-zinc-900" />
+					<div className="sticky top-[45px] left-0 z-40 bg-surface-950/90 backdrop-blur-sm border-b border-r border-surface-900" />
 					{days.map((day) => {
 						const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 						const isCurrentDay = isToday(day);
@@ -193,15 +193,15 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 								key={`day-${day.toISOString()}`}
 								ref={isCurrentDay ? todayColumnRef : null}
 								className={cn(
-									"sticky top-[45px] z-30 border-b border-zinc-900 p-2 text-center border-r flex flex-col items-center justify-center gap-1",
-									isWeekend ? "bg-zinc-900/20" : "bg-zinc-950/90",
-									isCurrentDay && "bg-violet-500/10",
+									"sticky top-[45px] z-30 border-b border-surface-900 p-2 text-center border-r flex flex-col items-center justify-center gap-1",
+									isWeekend ? "bg-surface-900/20" : "bg-surface-950/90",
+									isCurrentDay && "bg-primary-500/10",
 								)}
 							>
 								<span
 									className={cn(
 										"text-[10px] uppercase font-semibold",
-										isCurrentDay ? "text-violet-400" : "text-zinc-500",
+										isCurrentDay ? "text-primary-400" : "text-surface-500",
 									)}
 								>
 									{format(day, "Eee")}
@@ -209,14 +209,16 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 								<span
 									className={cn(
 										"text-xs font-medium flex h-6 w-6 items-center justify-center rounded-full",
-										isCurrentDay ? "bg-violet-500 text-white" : "text-zinc-300",
+										isCurrentDay
+											? "bg-primary-500 text-white"
+											: "text-surface-300",
 									)}
 								>
 									{format(day, "d")}
 								</span>
 								{/* Vertical Today Line */}
 								{isCurrentDay && (
-									<div className="absolute top-full left-1/2 w-[2px] h-[2000px] bg-violet-500/50 shadow-[0_0_8px_rgba(139,92,246,0.8)] -translate-x-1/2 z-10 pointer-events-none" />
+									<div className="absolute top-full left-1/2 w-[2px] h-[2000px] bg-primary-500/50 shadow-[0_0_8px_rgba(139,92,246,0.8)] -translate-x-1/2 z-10 pointer-events-none" />
 								)}
 							</div>
 						);
@@ -238,7 +240,7 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 						return (
 							<React.Fragment key={task.id}>
 								{/* Task List Column (Sticky) */}
-								<div className="sticky left-0 z-20 border-b border-r border-zinc-900 bg-zinc-950/90 p-3 hover:bg-zinc-900/50 transition-colors group flex items-center justify-between">
+								<div className="sticky left-0 z-20 border-b border-r border-surface-900 bg-surface-950/90 p-3 hover:bg-surface-900/50 transition-colors group flex items-center justify-between">
 									<button
 										type="button"
 										onClick={() => onTaskClick(task.id)}
@@ -246,11 +248,11 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 									>
 										<div className="flex items-center gap-1.5 w-full">
 											<PriorityIcon priority={task.priority} />
-											<span className="text-sm font-medium text-zinc-200 truncate group-hover:text-violet-300 transition-colors">
+											<span className="text-sm font-medium text-surface-200 truncate group-hover:text-primary-300 transition-colors">
 												{task.title}
 											</span>
 										</div>
-										<span className="text-[10px] text-zinc-500 mt-1 ml-4 truncate w-full">
+										<span className="text-[10px] text-surface-500 mt-1 ml-4 truncate w-full">
 											{format(taskStart, "MMM d")} - {format(taskEnd, "MMM d")}
 										</span>
 									</button>
@@ -259,7 +261,7 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 									<div className="shrink-0">
 										{task.assignee ? (
 											<div
-												className="h-6 w-6 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-700"
+												className="h-6 w-6 rounded-full bg-surface-800 flex items-center justify-center overflow-hidden border border-surface-700"
 												title={task.assignee.name}
 											>
 												{task.assignee.avatarUrl ? (
@@ -269,17 +271,17 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 														className="h-full w-full object-cover"
 													/>
 												) : (
-													<span className="text-[9px] font-medium text-zinc-300">
+													<span className="text-[9px] font-medium text-surface-300">
 														{task.assignee?.name?.slice(0, 2).toUpperCase()}
 													</span>
 												)}
 											</div>
 										) : (
 											<div
-												className="h-6 w-6 rounded-full bg-zinc-900/50 flex items-center justify-center border border-zinc-800 border-dashed"
+												className="h-6 w-6 rounded-full bg-surface-900/50 flex items-center justify-center border border-surface-800 border-dashed"
 												title="Unassigned"
 											>
-												<User className="h-3 w-3 text-zinc-600" />
+												<User className="h-3 w-3 text-surface-600" />
 											</div>
 										)}
 									</div>
@@ -292,9 +294,9 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 										<div
 											key={`cell-${task.id}-${dayIndex}`}
 											className={cn(
-												"border-b border-r border-zinc-900/30",
-												isWeekend ? "bg-zinc-900/20" : "",
-												isToday(day) && "bg-violet-500/5",
+												"border-b border-r border-surface-900/30",
+												isWeekend ? "bg-surface-900/20" : "",
+												isToday(day) && "bg-primary-500/5",
 											)}
 										/>
 									);
@@ -316,12 +318,12 @@ export function ProjectTimeline({ tasks, onTaskClick }: ProjectTimelineProps) {
 										className={cn(
 											"h-8 w-full rounded-md shadow-sm transition-all flex items-center px-2 min-w-[20px] ml-1 border backdrop-blur-md group-hover:scale-[1.01] group-hover:-translate-y-px group-hover:shadow-lg relative overflow-hidden",
 											task.status === "done"
-												? "bg-linear-to-r from-emerald-500/20 to-emerald-400/5 text-emerald-300 border-emerald-500/30 shadow-emerald-900/10"
+												? "bg-linear-to-r from-success-500/20 to-success-400/5 text-success-300 border-success-500/30 shadow-success-900/10"
 												: task.status === "in_progress"
 													? "bg-linear-to-r from-blue-500/20 to-blue-400/5 text-blue-300 border-blue-500/30 shadow-blue-900/10"
 													: task.status === "todo"
-														? "bg-linear-to-r from-zinc-700/50 to-zinc-800/30 text-zinc-300 border-zinc-600 shadow-black/20"
-														: "bg-linear-to-r from-amber-500/20 to-amber-400/5 text-amber-300 border-amber-500/30 shadow-amber-900/10",
+														? "bg-linear-to-r from-surface-700/50 to-surface-800/30 text-surface-300 border-surface-600 shadow-black/20"
+														: "bg-linear-to-r from-warning-500/20 to-warning-400/5 text-warning-300 border-warning-500/30 shadow-warning-900/10",
 										)}
 									>
 										<span className="truncate text-xs font-semibold z-10">

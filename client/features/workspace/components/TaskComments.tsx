@@ -76,7 +76,7 @@ function AttachmentGrid({
 			{attachments.map((attachment, index) => (
 				<div
 					key={`${attachment.name}-${attachment.size}-${index}`}
-					className="group/image relative overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950"
+					className="group/image relative overflow-hidden rounded-lg border border-surface-800 bg-surface-950"
 				>
 					<Image
 						src={attachment.dataUrl}
@@ -85,8 +85,8 @@ function AttachmentGrid({
 						height={1200}
 						className="max-h-64 w-full object-contain"
 					/>
-					<div className="flex items-center justify-between gap-2 border-t border-zinc-900 px-2 py-1.5">
-						<span className="min-w-0 truncate text-[11px] font-medium text-zinc-500">
+					<div className="flex items-center justify-between gap-2 border-t border-surface-900 px-2 py-1.5">
+						<span className="min-w-0 truncate text-[11px] font-medium text-surface-500">
 							{attachment.name}
 						</span>
 						{onRemove && (
@@ -155,7 +155,7 @@ function renderCommentContent(content: string, members: WorkspaceMember[]) {
 			nodes.push(
 				<span
 					key={`${match[0]}-${index}`}
-					className="rounded bg-violet-500/10 px-1 font-semibold text-violet-200"
+					className="rounded bg-primary-500/10 px-1 font-semibold text-primary-200"
 				>
 					@{displayName}
 				</span>,
@@ -323,22 +323,22 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div className="min-w-0">
 					<p className="ot-label">Conversation</p>
-					<h3 className="mt-1 flex items-center gap-2 text-sm font-semibold text-zinc-100">
-						<MessageSquare className="h-4 w-4 shrink-0 text-violet-300" />
+					<h3 className="mt-1 flex items-center gap-2 text-sm font-semibold text-surface-100">
+						<MessageSquare className="h-4 w-4 shrink-0 text-primary-300" />
 						<span className="truncate">Task comments</span>
 					</h3>
 				</div>
 				<Badge className="self-start sm:self-auto">{comments.length}</Badge>
 			</div>
 
-			<div className="max-h-[42dvh] space-y-4 overflow-y-auto rounded-xl border border-zinc-900 bg-zinc-950/55 p-3 md:max-h-72">
+			<div className="max-h-[42dvh] space-y-4 overflow-y-auto rounded-xl border border-surface-900 bg-surface-950/55 p-3 md:max-h-72">
 				{isLoading ? (
-					<div className="flex items-center gap-2 py-5 text-xs font-medium text-zinc-500">
+					<div className="flex items-center gap-2 py-5 text-xs font-medium text-surface-500">
 						<Loader2 className="h-4 w-4 animate-spin" />
 						Loading comments
 					</div>
 				) : comments.length === 0 ? (
-					<p className="py-6 text-center text-xs font-medium text-zinc-600">
+					<p className="py-6 text-center text-xs font-medium text-surface-600">
 						No comments yet. Start the thread without leaving context.
 					</p>
 				) : (
@@ -366,24 +366,24 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 									email={comment.author?.email}
 									size="md"
 								/>
-								<article className="relative min-w-0 flex-1 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/80">
-									<header className="border-b border-zinc-900 bg-zinc-900/35 px-3 py-2">
+								<article className="relative min-w-0 flex-1 overflow-hidden rounded-lg border border-surface-800 bg-surface-950/80">
+									<header className="border-b border-surface-900 bg-surface-900/35 px-3 py-2">
 										<div className="flex min-w-0 flex-wrap items-center gap-2">
-											<span className="text-xs font-semibold text-zinc-200">
+											<span className="text-xs font-semibold text-surface-200">
 												{author}
 											</span>
-											<span className="text-[10px] font-medium text-zinc-600">
+											<span className="text-[10px] font-medium text-surface-600">
 												{new Date(comment.createdAt).toLocaleString()}
 											</span>
 											{comment.updatedAt !== comment.createdAt && (
-												<span className="text-[10px] font-medium text-zinc-700">
+												<span className="text-[10px] font-medium text-surface-700">
 													Edited
 												</span>
 											)}
 										</div>
 
 										{canManage && (
-											<div className="absolute right-2 top-2 flex items-center gap-1 rounded-md border border-zinc-800 bg-zinc-950/95 opacity-100 shadow-[0_8px_24px_rgba(0,0,0,0.28)] transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+											<div className="absolute right-2 top-2 flex items-center gap-1 rounded-md border border-surface-800 bg-surface-950/95 opacity-100 shadow-[0_8px_24px_rgba(0,0,0,0.28)] transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
 												<Button
 													type="button"
 													variant="ghost"
@@ -406,7 +406,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 													size="icon"
 													onClick={() => setDeleteTarget(comment)}
 													title="Delete comment"
-													className="h-8 w-8 text-red-300 hover:text-red-200"
+													className="h-8 w-8 text-danger-300 hover:text-danger-200"
 													disabled={deleteComment.isPending}
 												>
 													<Trash2 className="h-3.5 w-3.5" />
@@ -463,7 +463,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 										) : (
 											<>
 												{comment.content && (
-													<p className="whitespace-pre-wrap wrap-break-word text-sm leading-6 text-zinc-400">
+													<p className="whitespace-pre-wrap wrap-break-word text-sm leading-6 text-surface-400">
 														{renderCommentContent(comment.content, members)}
 													</p>
 												)}
@@ -478,7 +478,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 				)}
 			</div>
 
-			<div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/80 focus-within:border-violet-500/60 focus-within:ring-2 focus-within:ring-violet-500/10">
+			<div className="relative overflow-hidden rounded-xl border border-surface-800 bg-surface-950/80 focus-within:border-primary-500/60 focus-within:ring-2 focus-within:ring-primary-500/10">
 				<textarea
 					ref={composerRef}
 					value={commentContent}
@@ -489,25 +489,25 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 					onKeyDown={handleComposerKeyDown}
 					onKeyUp={syncComposerCursor}
 					onSelect={syncComposerCursor}
-					className="min-h-24 w-full resize-y bg-transparent px-3 py-3 text-sm leading-6 text-zinc-200 outline-none placeholder:text-zinc-600"
+					className="min-h-24 w-full resize-y bg-transparent px-3 py-3 text-sm leading-6 text-surface-200 outline-none placeholder:text-surface-600"
 					placeholder="Write a comment. Use @ to mention a teammate."
 				/>
 
 				{activeMention && mentionMatches.length > 0 && (
-					<div className="absolute left-3 right-3 top-12 z-10 max-h-56 overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-950 p-1 shadow-[0_16px_44px_rgba(0,0,0,0.36)]">
+					<div className="absolute left-3 right-3 top-12 z-10 max-h-56 overflow-y-auto rounded-xl border border-surface-800 bg-surface-950 p-1 shadow-[0_16px_44px_rgba(0,0,0,0.36)]">
 						{mentionMatches.map((member) => (
 							<button
 								key={member.userId}
 								type="button"
 								onClick={() => insertMention(member)}
-								className="flex min-h-10 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors hover:bg-zinc-900"
+								className="flex min-h-10 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors hover:bg-surface-900"
 							>
-								<AtSign className="h-4 w-4 shrink-0 text-violet-300" />
+								<AtSign className="h-4 w-4 shrink-0 text-primary-300" />
 								<span className="min-w-0">
-									<span className="block truncate text-sm font-semibold text-zinc-200">
+									<span className="block truncate text-sm font-semibold text-surface-200">
 										{member.user?.name || member.user?.email || "Member"}
 									</span>
-									<span className="block truncate text-[11px] font-medium text-zinc-600">
+									<span className="block truncate text-[11px] font-medium text-surface-600">
 										{member.user?.email}
 									</span>
 								</span>
@@ -517,7 +517,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 				)}
 
 				{attachments.length > 0 && (
-					<div className="border-t border-zinc-900 px-3 py-3">
+					<div className="border-t border-surface-900 px-3 py-3">
 						<AttachmentGrid
 							attachments={attachments}
 							onRemove={removeAttachment}
@@ -525,7 +525,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 					</div>
 				)}
 
-				<div className="flex items-center justify-between gap-3 border-t border-zinc-900 bg-zinc-900/30 px-2 py-2">
+				<div className="flex items-center justify-between gap-3 border-t border-surface-900 bg-surface-900/30 px-2 py-2">
 					<div className="flex min-w-0 items-center gap-2">
 						<input
 							ref={fileInputRef}
@@ -546,7 +546,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 							<Plus className="h-4 w-4" />
 						</Button>
 						<div className="min-w-0">
-							<div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-600">
+							<div className="flex items-center gap-1.5 text-[11px] font-medium text-surface-600">
 								<ImageIcon className="h-3.5 w-3.5 shrink-0" />
 								<span className="truncate">
 									{attachments.length > 0
@@ -557,7 +557,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
 								</span>
 							</div>
 							{attachmentError && (
-								<p className="mt-0.5 text-[11px] font-medium text-red-300">
+								<p className="mt-0.5 text-[11px] font-medium text-danger-300">
 									{attachmentError}
 								</p>
 							)}

@@ -45,7 +45,7 @@ export function Avatar({
 		<div className="relative inline-flex shrink-0">
 			<div
 				className={cn(
-					"inline-flex shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 font-bold text-violet-300 overflow-hidden",
+					"inline-flex shrink-0 items-center justify-center rounded-lg border border-surface-800 bg-surface-900 font-bold text-primary-300 overflow-hidden",
 					sizeClasses[size],
 					className,
 				)}
@@ -60,12 +60,12 @@ export function Avatar({
 						className="h-full w-full object-cover"
 					/>
 				) : (
-					initials || <User className="h-3.5 w-3.5 text-zinc-600" />
+					initials || <User className="h-3.5 w-3.5 text-surface-600" />
 				)}
 			</div>
 			{isOnline && (
 				<div
-					className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-zinc-950 bg-emerald-500"
+					className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface-950 bg-success-500"
 					title="Online"
 				/>
 			)}

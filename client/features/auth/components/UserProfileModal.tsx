@@ -107,14 +107,14 @@ export const UserProfileModal: React.FC = () => {
 			description="Manage your account details and security preferences."
 			onClose={() => setUserProfileModalOpen(false)}
 		>
-			<div className="flex border-b border-zinc-900 px-5 pt-4">
+			<div className="flex border-b border-surface-900 px-5 pt-4">
 				<button
 					type="button"
 					onClick={() => setActiveTab("general")}
 					className={`flex items-center gap-2 border-b-2 pb-3 px-1 text-sm font-medium transition-colors ${
 						activeTab === "general"
-							? "border-violet-500 text-violet-200"
-							: "border-transparent text-zinc-500 hover:text-zinc-300"
+							? "border-primary-500 text-primary-200"
+							: "border-transparent text-surface-500 hover:text-surface-300"
 					}`}
 				>
 					<UserIcon className="h-4 w-4" />
@@ -125,8 +125,8 @@ export const UserProfileModal: React.FC = () => {
 					onClick={() => setActiveTab("security")}
 					className={`ml-6 flex items-center gap-2 border-b-2 pb-3 px-1 text-sm font-medium transition-colors ${
 						activeTab === "security"
-							? "border-violet-500 text-violet-200"
-							: "border-transparent text-zinc-500 hover:text-zinc-300"
+							? "border-primary-500 text-primary-200"
+							: "border-transparent text-surface-500 hover:text-surface-300"
 					}`}
 				>
 					<Lock className="h-4 w-4" />
@@ -145,17 +145,17 @@ export const UserProfileModal: React.FC = () => {
 										alt="Avatar preview"
 										width={64}
 										height={64}
-										className="h-16 w-16 rounded-full object-cover border border-zinc-800"
+										className="h-16 w-16 rounded-full object-cover border border-surface-800"
 									/>
 								) : (
 									<Avatar name={user?.name} email={user?.email} size="lg" />
 								)}
 							</div>
 							<div className="space-y-1">
-								<p className="text-sm font-medium text-zinc-200">
+								<p className="text-sm font-medium text-surface-200">
 									Profile picture
 								</p>
-								<p className="text-xs text-zinc-500">
+								<p className="text-xs text-surface-500">
 									Supported formats: JPG, PNG, WebP
 								</p>
 								<div className="mt-2 flex items-center gap-2">
@@ -241,7 +241,7 @@ export const UserProfileModal: React.FC = () => {
 							/>
 						</div>
 
-						<div className="my-4 h-px bg-zinc-900" />
+						<div className="my-4 h-px bg-surface-900" />
 
 						<div className="space-y-2">
 							<label htmlFor="new-password" className="ot-label">
@@ -272,12 +272,12 @@ export const UserProfileModal: React.FC = () => {
 						</div>
 
 						{passwordError && (
-							<p className="text-sm font-medium text-red-400">
+							<p className="text-sm font-medium text-danger-400">
 								{passwordError}
 							</p>
 						)}
 						{passwordSuccess && (
-							<p className="text-sm font-medium text-emerald-400">
+							<p className="text-sm font-medium text-success-400">
 								{passwordSuccess}
 							</p>
 						)}

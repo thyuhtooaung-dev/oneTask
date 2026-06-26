@@ -56,8 +56,13 @@ const PRIORITY_OPTIONS: Array<{
 	icon: React.ElementType;
 	color: string;
 }> = [
-	{ value: "none", label: "No priority", icon: Minus, color: "text-zinc-500" },
-	{ value: "low", label: "Low", icon: SignalLow, color: "text-zinc-400" },
+	{
+		value: "none",
+		label: "No priority",
+		icon: Minus,
+		color: "text-surface-500",
+	},
+	{ value: "low", label: "Low", icon: SignalLow, color: "text-surface-400" },
 	{
 		value: "medium",
 		label: "Medium",
@@ -69,7 +74,7 @@ const PRIORITY_OPTIONS: Array<{
 		value: "urgent",
 		label: "Urgent",
 		icon: AlertOctagon,
-		color: "text-red-500",
+		color: "text-danger-500",
 	},
 ];
 
@@ -276,7 +281,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 									<div key={`${f.name}-${i}`} className="relative group">
 										<img
 											src={URL.createObjectURL(f)}
-											className="h-16 w-16 object-cover rounded-md border border-zinc-800"
+											className="h-16 w-16 object-cover rounded-md border border-surface-800"
 											alt={f.name}
 										/>
 										<button
@@ -286,7 +291,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 													prev.filter((_, idx) => idx !== i),
 												)
 											}
-											className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 shadow-md"
+											className="absolute -top-2 -right-2 bg-danger-500 rounded-full p-1 opacity-0 group-hover:opacity-100 shadow-md"
 										>
 											<X className="w-3 h-3 text-white" />
 										</button>
@@ -298,22 +303,22 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 							{...getRootProps()}
 							className={`ot-input flex cursor-pointer flex-col items-center justify-center border-dashed border-2 py-6 transition-colors ${
 								isDragActive
-									? "border-violet-500 bg-violet-500/10"
-									: "border-zinc-800 bg-zinc-950/50 hover:border-zinc-700 hover:bg-zinc-900/50"
+									? "border-primary-500 bg-primary-500/10"
+									: "border-surface-800 bg-surface-950/50 hover:border-surface-700 hover:bg-surface-900/50"
 							}`}
 						>
 							<input {...getInputProps()} />
 							<UploadCloud
-								className={`mb-2 h-5 w-5 ${isDragActive ? "text-violet-400" : "text-zinc-600"}`}
+								className={`mb-2 h-5 w-5 ${isDragActive ? "text-primary-400" : "text-surface-600"}`}
 							/>
-							<p className="text-xs font-medium text-zinc-300">
+							<p className="text-xs font-medium text-surface-300">
 								{isDragActive ? "Drop image here" : "Attach image"}
 							</p>
 						</div>
 					</div>
 				)}
 
-				<div className="mt-auto flex flex-col-reverse gap-3 border-t border-zinc-900 pt-4 sm:flex-row sm:items-center sm:justify-end">
+				<div className="mt-auto flex flex-col-reverse gap-3 border-t border-surface-900 pt-4 sm:flex-row sm:items-center sm:justify-end">
 					{mode === "edit" && canDelete ? (
 						<Button
 							type="button"
@@ -369,11 +374,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 									disabled={!canEditProgress}
 									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium disabled:opacity-50"
 								>
-									<span className="truncate text-zinc-100">
+									<span className="truncate text-surface-100">
 										{STATUS_OPTIONS.find((opt) => opt.value === status)
 											?.label || "Select status"}
 									</span>
-									<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+									<ChevronDown className="h-4 w-4 shrink-0 text-surface-600" />
 								</button>
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content
@@ -413,7 +418,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 									disabled={!canEditCore}
 									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium disabled:opacity-50"
 								>
-									<span className="truncate text-zinc-100">
+									<span className="truncate text-surface-100">
 										{assigneeId === ""
 											? "Unassigned"
 											: members.find((m) => m.userId === assigneeId)?.user
@@ -422,7 +427,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 													?.email ||
 												assigneeId}
 									</span>
-									<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+									<ChevronDown className="h-4 w-4 shrink-0 text-surface-600" />
 								</button>
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content
@@ -466,7 +471,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 									disabled={!canEditProgress}
 									className="ot-input flex min-h-10 w-full items-center justify-between gap-3 px-3 text-left text-sm font-medium disabled:opacity-50"
 								>
-									<div className="flex items-center gap-2 text-zinc-100">
+									<div className="flex items-center gap-2 text-surface-100">
 										{(() => {
 											const option = PRIORITY_OPTIONS.find(
 												(opt) => opt.value === priority,
@@ -482,7 +487,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 											}
 										</span>
 									</div>
-									<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+									<ChevronDown className="h-4 w-4 shrink-0 text-surface-600" />
 								</button>
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content
@@ -520,7 +525,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 							value={startDate}
 							onChange={(e) => setStartDate(e.target.value)}
 							disabled={!canEditProgress}
-							className="ot-input flex min-h-10 w-full px-3 text-sm font-medium text-zinc-100 scheme-dark disabled:opacity-50"
+							className="ot-input flex min-h-10 w-full px-3 text-sm font-medium text-surface-100 scheme-dark disabled:opacity-50"
 						/>
 					</div>
 
@@ -534,11 +539,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 							value={dueDate}
 							onChange={(e) => setDueDate(e.target.value)}
 							disabled={!canEditProgress}
-							className="ot-input flex min-h-10 w-full px-3 text-sm font-medium text-zinc-100 scheme-dark disabled:opacity-50"
+							className="ot-input flex min-h-10 w-full px-3 text-sm font-medium text-surface-100 scheme-dark disabled:opacity-50"
 						/>
 					</div>
 
-					<div className="flex justify-between border-t border-zinc-900 pt-4">
+					<div className="flex justify-between border-t border-surface-900 pt-4">
 						{mode === "edit" && status === "done" && canEditCore ? (
 							<Button
 								type="button"
@@ -554,7 +559,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 									}
 								}}
 								disabled={archiveTask.isPending}
-								className="text-amber-500 hover:text-amber-400"
+								className="text-warning-500 hover:text-warning-400"
 							>
 								{archiveTask.isPending ? (
 									<Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -584,7 +589,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 			{taskDetailsForm}
 			{task && workspaceId && (
 				<section className="mx-4 mb-4 space-y-4 sm:mx-6 sm:mb-6">
-					<div className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 sm:p-5">
+					<div className="rounded-2xl border border-surface-900 bg-surface-950/45 p-4 sm:p-5">
 						<TaskFiles
 							workspaceId={workspaceId}
 							projectId={task.projectId}
@@ -592,7 +597,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 							canEdit={canDelete}
 						/>
 					</div>
-					<div className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 sm:p-5">
+					<div className="rounded-2xl border border-surface-900 bg-surface-950/45 p-4 sm:p-5">
 						<TaskComments taskId={task.id} workspaceId={workspaceId} />
 					</div>
 				</section>

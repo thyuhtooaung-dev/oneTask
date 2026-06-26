@@ -105,7 +105,7 @@ export function WorkspaceFiles({
 	if (isLoading) {
 		return (
 			<div className="flex h-64 items-center justify-center">
-				<Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+				<Loader2 className="h-8 w-8 animate-spin text-primary-500" />
 			</div>
 		);
 	}
@@ -124,16 +124,16 @@ export function WorkspaceFiles({
 	return (
 		<div className="space-y-6">
 			{/* Upload Section */}
-			<div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5 backdrop-blur-xl">
+			<div className="rounded-xl border border-surface-800/60 bg-surface-900/40 p-5 backdrop-blur-xl">
 				<div className="mb-4">
 					<label
 						htmlFor="folder-input"
-						className="text-xs font-semibold text-zinc-400"
+						className="text-xs font-semibold text-surface-400"
 					>
 						Upload to Folder
 					</label>
 					<div className="mt-1 flex items-center gap-2">
-						<Folder className="h-4 w-4 text-violet-400" />
+						<Folder className="h-4 w-4 text-primary-400" />
 						<input
 							id="folder-input"
 							type="text"
@@ -149,29 +149,29 @@ export function WorkspaceFiles({
 					{...getRootProps()}
 					className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
 						isDragActive
-							? "border-violet-500 bg-violet-500/10"
-							: "border-zinc-800 bg-zinc-950/50 hover:border-zinc-700 hover:bg-zinc-900/50"
+							? "border-primary-500 bg-primary-500/10"
+							: "border-surface-800 bg-surface-950/50 hover:border-surface-700 hover:bg-surface-900/50"
 					}`}
 				>
 					<input {...getInputProps()} />
 					<UploadCloud
-						className={`mb-3 h-10 w-10 ${isDragActive ? "text-violet-400" : "text-zinc-600"}`}
+						className={`mb-3 h-10 w-10 ${isDragActive ? "text-primary-400" : "text-surface-600"}`}
 					/>
-					<p className="text-sm font-medium text-zinc-200">
+					<p className="text-sm font-medium text-surface-200">
 						{isDragActive
 							? "Drop files here..."
 							: "Click or drag files to upload"}
 					</p>
-					<p className="mt-1 text-xs text-zinc-500">Max size 50MB</p>
+					<p className="mt-1 text-xs text-surface-500">Max size 50MB</p>
 					{isUploading && (
 						<div className="w-full max-w-xs mt-4">
-							<div className="flex justify-between text-xs text-zinc-400 mb-1">
+							<div className="flex justify-between text-xs text-surface-400 mb-1">
 								<span>Uploading...</span>
 								<span>{Math.round(uploadProgress)}%</span>
 							</div>
-							<div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+							<div className="h-1.5 w-full bg-surface-800 rounded-full overflow-hidden">
 								<div
-									className="h-full bg-violet-500 transition-all duration-300"
+									className="h-full bg-primary-500 transition-all duration-300"
 									style={{ width: `${uploadProgress}%` }}
 								/>
 							</div>
@@ -182,16 +182,16 @@ export function WorkspaceFiles({
 
 			{/* File List */}
 			{Object.keys(groupedFiles).length === 0 ? (
-				<div className="rounded-xl border border-dashed border-zinc-800 py-12 text-center">
-					<p className="text-sm font-medium text-zinc-500">
+				<div className="rounded-xl border border-dashed border-surface-800 py-12 text-center">
+					<p className="text-sm font-medium text-surface-500">
 						No files uploaded yet.
 					</p>
 				</div>
 			) : (
 				Object.entries(groupedFiles).map(([folder, folderFiles]) => (
 					<div key={folder} className="space-y-3">
-						<h3 className="flex items-center gap-2 font-semibold text-zinc-100">
-							<Folder className="h-5 w-5 text-violet-400" />
+						<h3 className="flex items-center gap-2 font-semibold text-surface-100">
+							<Folder className="h-5 w-5 text-primary-400" />
 							{folder}
 							<Badge tone="neutral" className="ml-2">
 								{folderFiles.length}
@@ -204,20 +204,20 @@ export function WorkspaceFiles({
 								return (
 									<div
 										key={file.id}
-										className="group flex flex-col justify-between rounded-lg border border-zinc-800/80 bg-zinc-950/60 p-4 transition-colors hover:border-zinc-700"
+										className="group flex flex-col justify-between rounded-lg border border-surface-800/80 bg-surface-950/60 p-4 transition-colors hover:border-surface-700"
 									>
 										<div className="flex items-start gap-3">
-											<div className="rounded-lg bg-zinc-900 p-2">
-												<Icon className="h-6 w-6 text-violet-400" />
+											<div className="rounded-lg bg-surface-900 p-2">
+												<Icon className="h-6 w-6 text-primary-400" />
 											</div>
 											<div className="min-w-0 flex-1">
 												<p
-													className="truncate text-sm font-medium text-zinc-200"
+													className="truncate text-sm font-medium text-surface-200"
 													title={file.originalName}
 												>
 													{file.originalName}
 												</p>
-												<p className="mt-0.5 text-xs text-zinc-500">
+												<p className="mt-0.5 text-xs text-surface-500">
 													{formatBytes(Number(file.size))} •{" "}
 													{new Date(file.createdAt).toLocaleDateString()}
 												</p>
@@ -232,7 +232,7 @@ export function WorkspaceFiles({
 														size="sm"
 													/>
 												)}
-												<span className="truncate text-xs text-zinc-500">
+												<span className="truncate text-xs text-surface-500">
 													{file.uploader?.name || "Unknown"}
 												</span>
 											</div>
@@ -240,7 +240,7 @@ export function WorkspaceFiles({
 												<Button
 													variant="ghost"
 													size="icon"
-													className="h-7 w-7 text-zinc-400 hover:text-violet-400"
+													className="h-7 w-7 text-surface-400 hover:text-primary-400"
 													onClick={() => handleDownload(file)}
 													title="Download"
 												>
@@ -249,7 +249,7 @@ export function WorkspaceFiles({
 												<Button
 													variant="ghost"
 													size="icon"
-													className="h-7 w-7 text-zinc-400 hover:text-red-400"
+													className="h-7 w-7 text-surface-400 hover:text-danger-400"
 													onClick={() => setFileToDelete(file.id)}
 													title="Delete"
 												>

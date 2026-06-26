@@ -18,13 +18,17 @@
 	--ot-surface-raised: #16161a;
 	--ot-surface-hover: #1b1b20;
 	--ot-line: #27272a;
-	--ot-line-soft: rgba(63, 63, 70, 0.5);
+	--ot-line-soft: color-mix(in srgb, var(--color-surface-600) 50%, transparent);
 	--ot-text: #f4f4f5;
 	--ot-text-muted: #a1a1aa;
 	--ot-text-subtle: #71717a;
 	--ot-accent: #7c3aed;
 	--ot-accent-strong: #8b5cf6;
-	--ot-accent-soft: rgba(124, 58, 237, 0.12);
+	--ot-accent-soft: color-mix(
+		in srgb,
+		var(--color-primary-600) 12%,
+		transparent
+	);
 	--ot-success: #34d399;
 	--ot-warning: #fbbf24;
 	--ot-danger: #f87171;

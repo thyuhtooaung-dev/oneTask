@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" className={`${firaSans.variable} h-full antialiased`}>
-			<body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
+			<body className="min-h-full flex flex-col bg-surface-950 text-surface-100">
 				<Providers>{children}</Providers>
 				<Toaster position="bottom-right" duration={5000} />
 			</body>

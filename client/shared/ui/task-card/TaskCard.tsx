@@ -34,11 +34,11 @@ function formatDate(value?: string) {
 }
 
 const PRIORITY_ICONS = {
-	none: { icon: Minus, color: "text-zinc-500" },
-	low: { icon: SignalLow, color: "text-zinc-400" },
+	none: { icon: Minus, color: "text-surface-500" },
+	low: { icon: SignalLow, color: "text-surface-400" },
 	medium: { icon: SignalMedium, color: "text-yellow-400" },
 	high: { icon: SignalHigh, color: "text-orange-400" },
-	urgent: { icon: AlertOctagon, color: "text-red-500" },
+	urgent: { icon: AlertOctagon, color: "text-danger-500" },
 };
 
 export function TaskCard({
@@ -54,7 +54,7 @@ export function TaskCard({
 	onDragStart,
 	onDragEnd,
 	isDragging,
-	accentClassName = "bg-violet-400",
+	accentClassName = "bg-primary-400",
 }: TaskCardProps) {
 	return (
 		<button
@@ -64,9 +64,9 @@ export function TaskCard({
 			onDragEnd={onDragEnd}
 			onClick={onClick}
 			className={cn(
-				"group relative min-h-28 w-full overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/70 p-3 text-left shadow-(--ot-shadow-soft) transition-all duration-150 hover:border-zinc-700 hover:bg-zinc-900/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+				"group relative min-h-28 w-full overflow-hidden rounded-xl border border-surface-800/80 bg-surface-950/70 p-3 text-left shadow-(--ot-shadow-soft) transition-all duration-150 hover:border-surface-700 hover:bg-surface-900/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
 				draggable && "cursor-grab active:cursor-grabbing",
-				isDragging && "scale-[0.98] border-violet-500/40 opacity-45",
+				isDragging && "scale-[0.98] border-primary-500/40 opacity-45",
 			)}
 		>
 			<div
@@ -75,16 +75,16 @@ export function TaskCard({
 					accentClassName,
 				)}
 			/>
-			<h4 className="line-clamp-2 text-sm font-semibold leading-5 text-zinc-100 transition-colors group-hover:text-violet-300">
+			<h4 className="line-clamp-2 text-sm font-semibold leading-5 text-surface-100 transition-colors group-hover:text-primary-300">
 				{title}
 			</h4>
-			<p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-500">
+			<p className="mt-1 line-clamp-2 text-xs leading-5 text-surface-500">
 				{description || "No description"}
 			</p>
-			<div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-2 border-t border-zinc-900 pt-3">
+			<div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-2 border-t border-surface-900 pt-3">
 				<div className="flex min-w-0 items-center gap-2">
 					<Avatar name={assigneeName} email={assigneeEmail} size="sm" />
-					<span className="truncate text-[11px] font-medium text-zinc-500">
+					<span className="truncate text-[11px] font-medium text-surface-500">
 						{assigneeName || assigneeEmail || "Unassigned"}
 					</span>
 				</div>
@@ -108,7 +108,7 @@ export function TaskCard({
 								<span
 									className={cn(
 										"inline-flex items-center gap-1 text-[10px] font-medium",
-										isOverdue ? "text-red-400" : "text-zinc-600",
+										isOverdue ? "text-danger-400" : "text-surface-600",
 									)}
 								>
 									<Calendar className="h-3 w-3" />

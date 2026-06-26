@@ -20,9 +20,9 @@ export const AuthGuard: React.FC<{ children: React.ReactNode }> = ({
 
 	if (isLoading) {
 		return (
-			<div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-slate-900 via-zinc-900 to-black text-white gap-4">
-				<Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
-				<span className="text-zinc-400 font-medium tracking-wide animate-pulse">
+			<div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-slate-900 via-surface-900 to-black text-white gap-4">
+				<Loader2 className="h-10 w-10 animate-spin text-primary-500" />
+				<span className="text-surface-400 font-medium tracking-wide animate-pulse">
 					Hydrating collaboration context...
 				</span>
 			</div>

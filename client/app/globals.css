@@ -1,6 +1,37 @@
 @import "tailwindcss";
 @import "../shared/styles/tokens.css";
 
+@theme {
+	--color-surface-50: #fafafa;
+	--color-surface-100: #f4f4f5;
+	--color-surface-200: #e4e4e7;
+	--color-surface-300: #d4d4d8;
+	--color-surface-400: #a1a1aa;
+	--color-surface-500: #71717a;
+	--color-surface-600: #52525b;
+	--color-surface-700: #3f3f46;
+	--color-surface-800: #27272a;
+	--color-surface-900: #18181b;
+	--color-surface-950: #09090b;
+
+	--color-primary-300: #c4b5fd;
+	--color-primary-400: #a78bfa;
+	--color-primary-500: #8b5cf6;
+	--color-primary-600: #7c3aed;
+
+	--color-success-300: #6ee7b7;
+	--color-success-400: #34d399;
+	--color-success-500: #10b981;
+
+	--color-warning-300: #fcd34d;
+	--color-warning-400: #fbbf24;
+	--color-warning-500: #f59e0b;
+
+	--color-danger-300: #fca5a5;
+	--color-danger-400: #f87171;
+	--color-danger-500: #ef4444;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 * {
@@ -16,7 +47,7 @@ body {
 	min-height: 100%;
 	background: radial-gradient(
 			circle at 18% 0%,
-			rgba(124, 58, 237, 0.12),
+			color-mix(in srgb, var(--color-primary-600) 12%, transparent),
 			transparent 28rem
 		), linear-gradient(180deg, #0c0c10 0%, var(--ot-bg) 34rem);
 	color: var(--ot-text);
@@ -37,7 +68,7 @@ button {
 }
 
 ::selection {
-	background: rgba(124, 58, 237, 0.35);
+	background: color-mix(in srgb, var(--color-primary-600) 35%, transparent);
 	color: white;
 }
 
@@ -51,14 +82,14 @@ button {
 }
 
 ::-webkit-scrollbar-thumb {
-	background: rgba(63, 63, 70, 0.72);
+	background: color-mix(in srgb, var(--color-surface-600) 72%, transparent);
 	border: 3px solid transparent;
 	border-radius: 999px;
 	background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: rgba(82, 82, 91, 0.9);
+	background: color-mix(in srgb, var(--color-surface-500) 90%, transparent);
 	border: 3px solid transparent;
 	background-clip: content-box;
 }
@@ -66,7 +97,7 @@ button {
 @layer utilities {
 	.ot-panel {
 		border: 1px solid var(--ot-line-soft);
-		background: rgba(17, 17, 20, 0.72);
+		background: color-mix(in srgb, var(--color-surface-900) 72%, transparent);
 		box-shadow: var(--ot-shadow-soft);
 	}
 
@@ -81,8 +112,8 @@ button {
 	.ot-input {
 		width: 100%;
 		border-radius: var(--ot-radius-lg);
-		border: 1px solid rgb(39 39 42);
-		background: rgba(9, 9, 11, 0.72);
+		border: 1px solid var(--color-surface-800);
+		background: color-mix(in srgb, var(--color-surface-950) 72%, transparent);
 		color: var(--ot-text);
 		outline: none;
 		transition: border-color var(--ot-motion-fast) var(--ot-ease), background
@@ -91,8 +122,9 @@ button {
 	}
 
 	.ot-input:focus {
-		border-color: rgba(124, 58, 237, 0.68);
-		box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+		border-color: color-mix(in srgb, var(--color-primary-600) 68%, transparent);
+		box-shadow: 0 0 0 3px
+			color-mix(in srgb, var(--color-primary-600) 12%, transparent);
 	}
 }
 

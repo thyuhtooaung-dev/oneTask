@@ -68,7 +68,7 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 	if (isLoadingWorkspace) {
 		return (
 			<div className="flex min-h-[50vh] items-center justify-center">
-				<Loader2 className="h-6 w-6 animate-spin text-violet-400" />
+				<Loader2 className="h-6 w-6 animate-spin text-primary-400" />
 			</div>
 		);
 	}
@@ -97,31 +97,36 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 	return (
 		<>
 			<div className="mx-auto max-w-5xl space-y-5 pb-12 animate-fade-in sm:space-y-6">
-				<div className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 sm:p-5">
+				<div className="rounded-2xl border border-surface-900 bg-surface-950/45 p-4 sm:p-5">
 					<p className="ot-label">Workspace system</p>
-					<h2 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-100">
+					<h2 className="mt-1 text-2xl font-semibold tracking-tight text-surface-100">
 						Members & settings
 					</h2>
-					<p className="mt-1 text-sm leading-6 text-zinc-500">
+					<p className="mt-1 text-sm leading-6 text-surface-500">
 						Manage access and pending invitations for{" "}
-						<span className="font-medium text-zinc-300">{workspace.name}</span>.
+						<span className="font-medium text-surface-300">
+							{workspace.name}
+						</span>
+						.
 					</p>
 				</div>
 
-				<section className="overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950/45">
-					<div className="flex items-center justify-between gap-3 border-b border-zinc-900 px-4 py-4 sm:px-5">
+				<section className="overflow-hidden rounded-2xl border border-surface-900 bg-surface-950/45">
+					<div className="flex items-center justify-between gap-3 border-b border-surface-900 px-4 py-4 sm:px-5">
 						<div className="flex items-center gap-2">
-							<User className="h-4 w-4 text-violet-300" />
-							<h3 className="text-sm font-semibold text-zinc-100">Members</h3>
+							<User className="h-4 w-4 text-primary-300" />
+							<h3 className="text-sm font-semibold text-surface-100">
+								Members
+							</h3>
 						</div>
 						<Badge>{workspace.members.length} members</Badge>
 					</div>
 
-					<div className="divide-y divide-zinc-900">
+					<div className="divide-y divide-surface-900">
 						{workspace.members.map((member) => (
 							<div
 								key={member.id}
-								className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-zinc-900/35 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+								className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-surface-900/35 sm:flex-row sm:items-center sm:justify-between sm:px-5"
 							>
 								<div className="flex min-w-0 items-center gap-3">
 									<Avatar
@@ -131,14 +136,14 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 									/>
 									<div className="min-w-0">
 										<div className="flex min-w-0 flex-wrap items-center gap-2">
-											<p className="truncate text-sm font-medium text-zinc-100">
+											<p className="truncate text-sm font-medium text-surface-100">
 												{member.user.name || "Anonymous User"}
 											</p>
 											{member.userId === user?.id && (
 												<Badge tone="accent">You</Badge>
 											)}
 										</div>
-										<p className="truncate text-xs text-zinc-500">
+										<p className="truncate text-xs text-surface-500">
 											{member.user.email}
 										</p>
 									</div>
@@ -159,7 +164,7 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 															className="ot-input flex min-h-10 w-32 items-center justify-between gap-2 px-2 text-left text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
 														>
 															<span>{roleLabel(member.role)}</span>
-															<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+															<ChevronDown className="h-4 w-4 shrink-0 text-surface-600" />
 														</button>
 													</DropdownMenu.Trigger>
 													<DropdownMenu.Content align="end" className="w-36">
@@ -199,7 +204,7 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 												disabled={removeMemberMutation.isPending}
 												title="Remove member"
 											>
-												<Trash2 className="h-4 w-4 text-red-400" />
+												<Trash2 className="h-4 w-4 text-danger-400" />
 											</Button>
 										</div>
 									) : (
@@ -214,11 +219,11 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 				</section>
 
 				{canInviteMembers && (
-					<section className="overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950/45">
-						<div className="border-b border-zinc-900 px-4 py-4 sm:px-5">
+					<section className="overflow-hidden rounded-2xl border border-surface-900 bg-surface-950/45">
+						<div className="border-b border-surface-900 px-4 py-4 sm:px-5">
 							<div className="mb-4 flex items-center gap-2">
-								<Shield className="h-4 w-4 text-violet-300" />
-								<h3 className="text-sm font-semibold text-zinc-100">
+								<Shield className="h-4 w-4 text-primary-300" />
+								<h3 className="text-sm font-semibold text-surface-100">
 									Pending invites
 								</h3>
 							</div>
@@ -242,7 +247,7 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 											className="ot-input flex min-h-10 items-center justify-between gap-3 px-3 text-left text-sm font-medium"
 										>
 											<span>{roleLabel(inviteRole)}</span>
-											<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+											<ChevronDown className="h-4 w-4 shrink-0 text-surface-600" />
 										</button>
 									</DropdownMenu.Trigger>
 									<DropdownMenu.Content
@@ -279,28 +284,28 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 							</form>
 						</div>
 
-						<div className="divide-y divide-zinc-900">
+						<div className="divide-y divide-surface-900">
 							{isLoadingInvites ? (
 								<div className="flex justify-center p-8">
-									<Loader2 className="h-5 w-5 animate-spin text-zinc-500" />
+									<Loader2 className="h-5 w-5 animate-spin text-surface-500" />
 								</div>
 							) : invites.length === 0 ? (
-								<div className="p-8 text-center text-sm text-zinc-500">
+								<div className="p-8 text-center text-sm text-surface-500">
 									No pending invites.
 								</div>
 							) : (
 								invites.map((invite) => (
 									<div
 										key={invite.id}
-										className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-zinc-900/35 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+										className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-surface-900/35 sm:flex-row sm:items-center sm:justify-between sm:px-5"
 									>
 										<div className="min-w-0">
-											<p className="truncate text-sm font-medium text-zinc-100">
+											<p className="truncate text-sm font-medium text-surface-100">
 												{invite.email}
 											</p>
 											<div className="mt-1 flex items-center gap-2">
 												<Badge>{invite.role}</Badge>
-												<span className="text-[10px] font-medium text-zinc-600">
+												<span className="text-[10px] font-medium text-surface-600">
 													Expires{" "}
 													{new Date(invite.expiresAt).toLocaleDateString()}
 												</span>
@@ -314,7 +319,7 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 												className="flex-1 sm:flex-none"
 											>
 												{copiedToken === invite.token ? (
-													<Check className="h-3.5 w-3.5 text-emerald-300" />
+													<Check className="h-3.5 w-3.5 text-success-300" />
 												) : (
 													<Copy className="h-3.5 w-3.5" />
 												)}
@@ -327,7 +332,7 @@ export const WorkspaceSettings: React.FC<{ workspaceId: string }> = ({
 												disabled={revokeInviteMutation.isPending}
 												title="Revoke invite"
 											>
-												<X className="h-4 w-4 text-red-300" />
+												<X className="h-4 w-4 text-danger-300" />
 											</Button>
 										</div>
 									</div>

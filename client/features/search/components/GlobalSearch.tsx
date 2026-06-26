@@ -105,16 +105,16 @@ function CommandResultRow({
 			className={cn(
 				"grid w-full grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-45",
 				active
-					? "bg-zinc-800/80 text-zinc-100"
-					: "text-zinc-300 hover:bg-zinc-900/70",
+					? "bg-surface-800/80 text-surface-100"
+					: "text-surface-300 hover:bg-surface-900/70",
 			)}
 		>
 			<span
 				className={cn(
 					"flex h-9 w-9 items-center justify-center rounded-lg border",
 					active
-						? "border-violet-500/30 bg-violet-500/10 text-violet-200"
-						: "border-zinc-800 bg-zinc-950 text-zinc-500",
+						? "border-primary-500/30 bg-primary-500/10 text-primary-200"
+						: "border-surface-800 bg-surface-950 text-surface-500",
 				)}
 			>
 				<Icon className="h-4 w-4" />
@@ -123,7 +123,7 @@ function CommandResultRow({
 				<span className="block truncate text-sm font-semibold">
 					{command.title}
 				</span>
-				<span className="mt-0.5 block truncate text-xs text-zinc-500">
+				<span className="mt-0.5 block truncate text-xs text-surface-500">
 					{command.disabledReason || command.subtitle}
 				</span>
 			</span>
@@ -152,16 +152,16 @@ function SearchResultRow({
 			className={cn(
 				"grid w-full grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors",
 				active
-					? "bg-zinc-800/80 text-zinc-100"
-					: "text-zinc-300 hover:bg-zinc-900/70",
+					? "bg-surface-800/80 text-surface-100"
+					: "text-surface-300 hover:bg-surface-900/70",
 			)}
 		>
 			<span
 				className={cn(
 					"flex h-9 w-9 items-center justify-center rounded-lg border",
 					active
-						? "border-violet-500/30 bg-violet-500/10 text-violet-200"
-						: "border-zinc-800 bg-zinc-950 text-zinc-500",
+						? "border-primary-500/30 bg-primary-500/10 text-primary-200"
+						: "border-surface-800 bg-surface-950 text-surface-500",
 				)}
 			>
 				<Icon className="h-4 w-4" />
@@ -170,7 +170,7 @@ function SearchResultRow({
 				<span className="block truncate text-sm font-semibold">
 					{item.title}
 				</span>
-				<span className="mt-0.5 block truncate text-xs text-zinc-500">
+				<span className="mt-0.5 block truncate text-xs text-surface-500">
 					{item.subtitle || item.description || item.type}
 				</span>
 			</span>
@@ -196,7 +196,7 @@ function CommandGroup({
 		<section className="space-y-1.5">
 			<div className="flex items-center justify-between px-1">
 				<p className="ot-label">Commands</p>
-				<span className="text-[11px] font-bold text-zinc-600">
+				<span className="text-[11px] font-bold text-surface-600">
 					{commands.length}
 				</span>
 			</div>
@@ -238,7 +238,7 @@ function ResultGroups({
 					<section key={group.type} className="space-y-1.5">
 						<div className="flex items-center justify-between px-1">
 							<p className="ot-label">{group.label}</p>
-							<span className="text-[11px] font-bold text-zinc-600">
+							<span className="text-[11px] font-bold text-surface-600">
 								{group.items.length}
 							</span>
 						</div>
@@ -414,19 +414,19 @@ export function GlobalSearch({
 		isOpen && typeof document !== "undefined" && document.body
 			? createPortal(
 					<div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 px-3 py-[8dvh] sm:px-4">
-						<div className="flex max-h-[84dvh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-(--ot-shadow-panel) animate-scale-in">
-							<div className="flex items-center gap-3 border-b border-zinc-900 px-4 py-3">
-								<Search className="h-4 w-4 shrink-0 text-violet-300" />
+						<div className="flex max-h-[84dvh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-surface-800 bg-surface-950 shadow-(--ot-shadow-panel) animate-scale-in">
+							<div className="flex items-center gap-3 border-b border-surface-900 px-4 py-3">
+								<Search className="h-4 w-4 shrink-0 text-primary-300" />
 								<input
 									ref={inputRef}
 									value={query}
 									onChange={(event) => updateQuery(event.target.value)}
 									onKeyDown={handleKeyDown}
 									placeholder="Search or run a command"
-									className="min-h-11 min-w-0 flex-1 bg-transparent text-sm font-medium text-zinc-100 outline-none placeholder:text-zinc-600"
+									className="min-h-11 min-w-0 flex-1 bg-transparent text-sm font-medium text-surface-100 outline-none placeholder:text-surface-600"
 								/>
 								{isFetching ? (
-									<Loader2 className="h-4 w-4 animate-spin text-zinc-500" />
+									<Loader2 className="h-4 w-4 animate-spin text-surface-500" />
 								) : null}
 								<Button
 									variant="ghost"
@@ -457,9 +457,9 @@ export function GlobalSearch({
 															key={recent}
 															type="button"
 															onClick={() => updateQuery(recent)}
-															className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-zinc-300 hover:bg-zinc-900/70"
+															className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-surface-300 hover:bg-surface-900/70"
 														>
-															<Clock3 className="h-4 w-4 text-zinc-600" />
+															<Clock3 className="h-4 w-4 text-surface-600" />
 															<span className="truncate">{recent}</span>
 														</button>
 													))}
@@ -468,17 +468,17 @@ export function GlobalSearch({
 										)}
 									</div>
 								) : isFetching && paletteItems.length === 0 ? (
-									<div className="flex min-h-48 items-center justify-center gap-2 text-sm font-medium text-zinc-500">
+									<div className="flex min-h-48 items-center justify-center gap-2 text-sm font-medium text-surface-500">
 										<Loader2 className="h-4 w-4 animate-spin" />
 										Searching workspace
 									</div>
 								) : paletteItems.length === 0 ? (
-									<div className="rounded-xl border border-dashed border-zinc-900 px-4 py-10 text-center">
-										<Search className="mx-auto mb-3 h-5 w-5 text-zinc-700" />
-										<p className="text-sm font-semibold text-zinc-300">
+									<div className="rounded-xl border border-dashed border-surface-900 px-4 py-10 text-center">
+										<Search className="mx-auto mb-3 h-5 w-5 text-surface-700" />
+										<p className="text-sm font-semibold text-surface-300">
 											No results found
 										</p>
-										<p className="mt-1 text-xs text-zinc-600">
+										<p className="mt-1 text-xs text-surface-600">
 											Try a task title, project name, teammate, or event type.
 										</p>
 									</div>
@@ -499,7 +499,7 @@ export function GlobalSearch({
 								)}
 							</div>
 
-							<div className="hidden items-center justify-between border-t border-zinc-900 px-4 py-2 text-[11px] font-medium text-zinc-600 sm:flex">
+							<div className="hidden items-center justify-between border-t border-surface-900 px-4 py-2 text-[11px] font-medium text-surface-600 sm:flex">
 								<span>Arrow keys to move</span>
 								<span className="inline-flex items-center gap-1">
 									<CornerDownLeft className="h-3 w-3" />
@@ -521,7 +521,7 @@ export function GlobalSearch({
 				onClick={() => setIsOpen(true)}
 				disabled={disabled || !workspaceId}
 				title="Command menu (Ctrl+K)"
-				className="text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
+				className="text-surface-400 transition-colors hover:bg-surface-900 hover:text-surface-100"
 			>
 				<Command className="h-4 w-4" />
 			</Button>

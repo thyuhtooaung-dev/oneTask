@@ -141,18 +141,16 @@ export class WorkspacesService {
       where: { id: workspaceId },
     });
     const inviterName = creator.user?.name || creator.user?.email || 'A member';
-
-    // The invite link would point to the client app route for accepting invitations
-    // Typically this would use an env variable for the frontend URL
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
     const inviteLink = `${clientUrl}/invite/${savedInvite.token}`;
-
-    await this.mailService.sendWorkspaceInviteEmail(
-      email,
-      workspace?.name || 'a workspace',
-      inviterName,
-      inviteLink,
-    );
+    this.mailService
+      .sendWorkspaceInviteEmail(
+        email,
+        workspace?.name || 'a workspace',
+        inviterName,
+        inviteLink,
+      )
+      .catch((e) => console.error('Background email failed:', e));
 
     return savedInvite;
   }

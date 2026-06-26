@@ -30,15 +30,15 @@ export function Dialog({
 		<div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-3 sm:items-center sm:p-4">
 			<div
 				className={cn(
-					"max-h-[calc(100dvh-1.5rem)] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-(--ot-shadow-panel) animate-scale-in sm:max-h-[calc(100dvh-2rem)]",
+					"max-h-[calc(100dvh-1.5rem)] w-full overflow-hidden rounded-2xl border border-surface-800 bg-surface-950 shadow-(--ot-shadow-panel) animate-scale-in sm:max-h-[calc(100dvh-2rem)]",
 					className || "max-w-md",
 				)}
 			>
-				<div className="flex items-start justify-between gap-4 border-b border-zinc-900 px-4 py-4 sm:px-5">
+				<div className="flex items-start justify-between gap-4 border-b border-surface-900 px-4 py-4 sm:px-5">
 					<div className="min-w-0">
-						<h2 className="text-sm font-semibold text-zinc-100">{title}</h2>
+						<h2 className="text-sm font-semibold text-surface-100">{title}</h2>
 						{description && (
-							<p className="mt-1 text-xs leading-5 text-zinc-500">
+							<p className="mt-1 text-xs leading-5 text-surface-500">
 								{description}
 							</p>
 						)}

@@ -43,20 +43,20 @@ export function WorkspaceEventExplorer({
 
 	return (
 		<div className="space-y-6 animate-fade-in">
-			<div className="flex flex-col gap-4 rounded-2xl border border-zinc-900 bg-zinc-950/45 p-4 md:p-5">
+			<div className="flex flex-col gap-4 rounded-2xl border border-surface-900 bg-surface-950/45 p-4 md:p-5">
 				<div>
 					<p className="ot-label">Event OS</p>
-					<h2 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-100">
+					<h2 className="mt-1 text-2xl font-semibold tracking-tight text-surface-100">
 						Event Explorer
 					</h2>
-					<p className="mt-1 text-sm leading-6 text-zinc-500">
+					<p className="mt-1 text-sm leading-6 text-surface-500">
 						Explore all activities and mutations in this workspace.
 					</p>
 				</div>
 
 				<div className="flex flex-col md:flex-row md:items-center gap-3 mt-4">
 					<div className="relative w-full md:max-w-xs shrink-0">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500" />
 						<input
 							type="text"
 							placeholder="Search events..."
@@ -67,7 +67,7 @@ export function WorkspaceEventExplorer({
 					</div>
 
 					<div className="flex flex-wrap items-center gap-2 w-auto xl:flex-nowrap">
-						<div className="hidden sm:flex items-center gap-1.5 px-2 text-xs font-semibold text-zinc-500 shrink-0">
+						<div className="hidden sm:flex items-center gap-1.5 px-2 text-xs font-semibold text-surface-500 shrink-0">
 							<Filter className="h-3.5 w-3.5" />
 							Filters:
 						</div>
@@ -78,13 +78,13 @@ export function WorkspaceEventExplorer({
 									type="button"
 									className="ot-input flex h-10 w-full sm:w-[140px] shrink-0 items-center justify-between gap-3 px-3 text-left text-sm font-medium"
 								>
-									<span className="truncate text-zinc-100">
+									<span className="truncate text-surface-100">
 										{typeFilter === ""
 											? "All Types"
 											: typeFilter.charAt(0).toUpperCase() +
 												typeFilter.slice(1)}
 									</span>
-									<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+									<ChevronDown className="h-4 w-4 shrink-0 text-surface-600" />
 								</button>
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content
@@ -121,7 +121,7 @@ export function WorkspaceEventExplorer({
 									type="button"
 									className="ot-input flex h-10 w-full sm:w-[160px] shrink-0 items-center justify-between gap-3 px-3 text-left text-sm font-medium"
 								>
-									<span className="truncate text-zinc-100">
+									<span className="truncate text-surface-100">
 										{actorFilter === ""
 											? "All Members"
 											: workspace?.members.find((m) => m.userId === actorFilter)
@@ -130,7 +130,7 @@ export function WorkspaceEventExplorer({
 													?.user.email ||
 												"Unknown"}
 									</span>
-									<ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+									<ChevronDown className="h-4 w-4 shrink-0 text-surface-600" />
 								</button>
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content
@@ -159,15 +159,15 @@ export function WorkspaceEventExplorer({
 				</div>
 			</div>
 
-			<div className="rounded-2xl border border-zinc-900 bg-zinc-950/45 p-5 lg:p-6">
+			<div className="rounded-2xl border border-surface-900 bg-surface-950/45 p-5 lg:p-6">
 				{isLoading ? (
-					<div className="flex items-center justify-center py-12 text-sm text-zinc-500 gap-2">
+					<div className="flex items-center justify-center py-12 text-sm text-surface-500 gap-2">
 						<Loader2 className="h-4 w-4 animate-spin" />
 						Loading events...
 					</div>
 				) : filteredActivities.length === 0 ? (
 					<div className="text-center py-12">
-						<p className="text-zinc-500 text-sm">
+						<p className="text-surface-500 text-sm">
 							No events found matching your filters.
 						</p>
 					</div>
